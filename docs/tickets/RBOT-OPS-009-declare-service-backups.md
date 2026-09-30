@@ -5,7 +5,7 @@ status: backlog
 scope: deployment, operations, personal-data
 authority: supporting
 priority: P1
-release: RELEASE-2026-09-1
+release: unassigned
 obligation: backups
 related: REQ-BACKUPS
 ---

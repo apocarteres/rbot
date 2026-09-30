@@ -31,7 +31,7 @@ authority: navigation
 | [Защитная эскалация тревожных сообщений](features/mvp/12-crisis-escalation.md) | P1 | Запланирована | Не назначен | backend, telegram, safety |
 | [Готовность к работе: хостинг в РФ, резервные копии, документы 152-ФЗ](features/mvp/13-production-readiness.md) | P1 | Запланирована | Не назначен | operations, personal-data, legal |
 | [Анкеты: шаблон, приём и раздел в кабинете](features/mvp/14-intake-forms.md) | P1 | Запланирована | Не назначен | backend, frontend, data, personal-data |
-| [Копии данных службы объявлены, уходят с хоста и проверяются](RBOT-OPS-009-declare-service-backups.md) | P1 | Запланирована | [RELEASE-2026-09-1](../releases/RELEASE-2026-09-1.md) | deployment, operations, personal-data |
+| [Копии данных службы объявлены, уходят с хоста и проверяются](RBOT-OPS-009-declare-service-backups.md) | P1 | Запланирована | Не назначен | deployment, operations, personal-data |
 | [Проверка рабочей среды после раската выпуска 2026.09.1](RBOT-OPS-013-verify-production-after-release-2026-09-1.md) | P1 | Запланирована | Не назначен | deployment, operations |
 | [Напоминания, закрытие сессий и очистка просроченного](features/mvp/10-reminders-and-session-closing.md) | P2 | Запланирована | Не назначен | backend, telegram |
 | [Вопросы психологу по домашнему заданию](features/mvp/11-homework-questions.md) | P2 | Запланирована | Не назначен | backend, frontend, telegram, personal-data |
