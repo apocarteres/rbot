@@ -6,55 +6,25 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.BeforeAll;
+import com.yanapaderina.rbot.IntegrationStores;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import jakarta.servlet.http.Cookie;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
-import org.flywaydb.core.Flyway;
 
 // MVP-01, REQ-AUTH-009, REQ-AUTH-016
 @SpringBootTest(properties = {
   "platform.auth.admin.email=admin@example.test",
-  "platform.auth.admin.password=admin-password-1",
-  "platform.auth.session.cookie-secure=false"
+  "platform.auth.admin.password=admin-password-1"
 })
 @AutoConfigureMockMvc
-@Testcontainers
-class AdminAccountsIT {
-
-  @Container
-  static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:16-alpine");
-
-  @Container
-  static final GenericContainer<?> REDIS = new GenericContainer<>(DockerImageName.parse("redis:7-alpine")).withExposedPorts(6379);
+class AdminAccountsIT extends IntegrationStores {
 
   @Autowired
   private MockMvc mvc;
-
-  @DynamicPropertySource
-  static void stores(DynamicPropertyRegistry registry) {
-    registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-    registry.add("spring.datasource.username", POSTGRES::getUsername);
-    registry.add("spring.datasource.password", POSTGRES::getPassword);
-    registry.add("spring.data.redis.host", REDIS::getHost);
-    registry.add("spring.data.redis.port", () -> REDIS.getMappedPort(6379));
-  }
-
-  @BeforeAll
-  static void migrate() {
-    Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword()).load().migrate();
-  }
 
   @Test
   void adminCreatesPsychologistWhoCannotManageAccounts() throws Exception {
@@ -88,6 +58,13 @@ class AdminAccountsIT {
         .content("{\"email\":\"guest@example.test\",\"password\":\"guest-password-1\"}"))
       .andExpect(status().isForbidden())
       .andExpect(jsonPath("$.code").value("entry-closed"));
+  }
+
+  @Test
+  void localSeedsAreAbsentOutsideLocalProfile() throws Exception {
+    mvc.perform(post("/api/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content("{\"email\":\"psychologist@rbot.localhost\",\"password\":\"local-psychologist-password\"}"))
+      .andExpect(status().isUnauthorized());
   }
 
   @Test

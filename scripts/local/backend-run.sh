@@ -16,4 +16,4 @@ set -a
 set +a
 ./mvnw -B -ntp -q -DskipTests package
 java -jar target/rbot-1.0.0.jar migrate
-exec java -jar target/rbot-1.0.0.jar
+SPRING_PROFILES_ACTIVE=local exec java -jar target/rbot-1.0.0.jar
