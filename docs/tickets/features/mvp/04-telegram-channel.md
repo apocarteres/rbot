@@ -7,7 +7,7 @@ authority: supporting
 priority: P1
 release: unassigned
 depends-on: MVP-03
-related: ADR-0001, ADR-0002
+related: ADR-0001, ADR-0002, RBOT-SEC-001
 ---
 
 # Канал Telegram: webhook, привязка, исходящие сообщения
@@ -18,7 +18,7 @@ related: ADR-0001, ADR-0002
 
 ## Подтверждение
 
-[ADR-0001](../../../decisions/ADR-0001-service-architecture.md): webhook и свой тонкий клиент Bot API. [ADR-0002](../../../decisions/ADR-0002-telegram-client-authentication.md): вариант А до выпуска порта ядра.
+[ADR-0001](../../../decisions/ADR-0001-service-architecture.md): webhook и свой тонкий клиент Bot API. [ADR-0002](../../../decisions/ADR-0002-telegram-client-authentication.md): порт внешней личности ядра, выпущен в `v13.5.0`.
 
 ## Последствия при сохранении текущего поведения
 
@@ -26,7 +26,7 @@ related: ADR-0001, ADR-0002
 
 ## Требуется
 
-1. Модуль `telegram`: точка `POST /tg/webhook` в отдельной цепочке безопасности. Проверка `X-Telegram-Bot-Api-Secret-Token` за постоянное время; ограничение частоты `platform-rate-limit`; отказ — `ProblemDetail`.
+1. Модуль `telegram`: точка `POST /api/tg/webhook` за портом ядра `RequestAuthenticator` (`REQ-AUTH-037`–`REQ-AUTH-040`). Порт сверяет `X-Telegram-Bot-Api-Secret-Token` за постоянное время и возвращает личность вида сервера мессенджера; отказ и предел частоты — ядра.
 2. Идемпотентность: `update_id` запоминается, повтор обновления не выполняет действие дважды.
 3. Разбор команд и `callback_query`. Сценарий `/start <token>` → согласие (MVP-03) → привязка. `/start` без токена → сценарий нового клиента: кнопка открытия Mini App (MVP-08).
 4. Главное меню действующего клиента: «Мои сессии», «Записаться», «Вопрос психологу», «Правила отмены». Кнопка меню чата открывает Mini App.

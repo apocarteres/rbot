@@ -76,6 +76,8 @@ related: ADR-0001, ADR-0005, MVP-03, MVP-04, MVP-08, RBOT-SEC-001
 
 Заявка отправлена 2026-09-30 — [apocarteres/platform#69](https://github.com/apocarteres/platform/issues/69), ход — в задаче [RBOT-SEC-001](../tickets/RBOT-SEC-001-telegram-client-outside-core-auth-chain.md). Идентификатор задачи ядра заранее не записывается (`REQ-NAMING-012`).
 
+Обновление 2026-09-30: порт выпущен в ядре `v13.5.0` (platform/CORE-ARC-022, `REQ-AUTH-037`–`REQ-AUTH-040`). Вариант А не нужен: каналы строятся сразу на `RequestAuthenticator`. Пути порта лежат под `/api/**` — webhook на `/api/tg/webhook`, Mini App на `/api/miniapp/**`. Роли клиентов — отдельным перечнем `platform.auth.external.roles`, без пересечения с `ADMIN` и `PSYCHOLOGIST`.
+
 ## Открытые вопросы
 
 **Вопросы:** открыты

@@ -8,7 +8,7 @@ PLATFORM_REPO="${RBOT_PLATFORM_REPO:-https://github.com/apocarteres/platform.git
 PLATFORM_DIR="${RBOT_PLATFORM_DIR:-$ROOT_DIR/.platform}"
 VERSION_FILE="$ROOT_DIR/.platform-version"
 ARCHIVE_CACHE_ROOT="${RBOT_PLATFORM_ARCHIVE_CACHE:-${HOME}/.cache/rbot-platform}"
-FRONTEND_PACKAGES=(auth http)
+FRONTEND_PACKAGES=(auth http app-update)
 ENSURE=0
 MAVEN_ONLY=0
 

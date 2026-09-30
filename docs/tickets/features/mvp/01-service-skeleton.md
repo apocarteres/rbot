@@ -68,4 +68,13 @@ related: ADR-0001
 - `mise run backend-test-integration` — 4 теста на PostgreSQL и Redis в Testcontainers: администратор создаёт психолога, психолог не видит учётных записей, занятая почта — `email-taken`, регистрация — `entry-closed`, гость — `401`.
 - Локальный стенд (`mise run backend-run`, `npm run start:admin`): вход администратора, создание учётной записи психолога в кабинете.
 
-Не сделано из «Требуется» и остаётся в задаче: модули Modulith и тест графа (пп. 2), `platform-notifications` и колокольчик (пп. 5, 6), смена своего пароля в кабинете (п. 6), подключение пакета правил в `AGENTS.md` с наборами `check`/`verify` ядра и хуком `pre-push` (п. 7). Манифест раската, журнал компонентов и проверки `conventions` при развёртывании, как у `fileio`, — в MVP-13.
+Не сделано из «Требуется» и остаётся в задаче: модули Modulith и тест графа (п. 2), `platform-notifications` и колокольчик (пп. 5, 6), смена своего пароля в кабинете (п. 6), хук `pre-push` и расписка `verify` ядра (п. 7). Манифест раската, журнал компонентов и проверки `conventions` при развёртывании, как у `fileio`, — в MVP-13.
+
+2026-09-30 — ядро `v13.5.0` и правила ядра:
+
+- `.platform-version`, `platform-service-parent` и пакеты npm — `13.5.0`.
+- `AGENTS.md` с блоком правил ядра (`conventions sync`) и разделом проекта; `CLAUDE.md` импортирует его.
+- `REQ-CLIENT-UPDATE`: служба подключает `platform-api-version`, `platform.api.min-supported-version=1`. Оба приложения объявляют `provideAppUpdate` и `appUpdateInterceptor` в своём `app.config.ts`; компоненты «вышла новая версия» и «страница устарела» — в `frontend/shared`, версия API клиента — `frontend/shared/api-version.ts`.
+- `REQ-QUALITY`: ESLint с конфигурацией пакета правил ядра, `mise run frontend-lint` входит в `check`.
+- Проверки: `conventions check` — «Правила соблюдены»; `mise run verify` — документация, правила, lint, 7 модульных и 4 интеграционных теста, сборка обоих приложений; вход в кабинет в браузере на локальном стенде — запросы уходят с `X-Api-Version`.
+- Обязательства ядра (`conventions check` показывает их как долг, проверку они не роняют) заводятся задачами при открытии первого выпуска (`REQ-ADOPTION-013`).

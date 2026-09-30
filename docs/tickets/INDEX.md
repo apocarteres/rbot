@@ -32,4 +32,4 @@ authority: navigation
 | [Готовность к работе: хостинг в РФ, резервные копии, документы 152-ФЗ](features/mvp/13-production-readiness.md) | P1 | Запланирована | Не назначен | operations, personal-data, legal |
 | [Напоминания, закрытие сессий и очистка просроченного](features/mvp/10-reminders-and-session-closing.md) | P2 | Запланирована | Не назначен | backend, telegram |
 | [Вопросы психологу по домашнему заданию](features/mvp/11-homework-questions.md) | P2 | Запланирована | Не назначен | backend, frontend, telegram, personal-data |
-| [Клиент из Telegram не проходит через цепочку безопасности ядра](RBOT-SEC-001-telegram-client-outside-core-auth-chain.md) | P2 | Заблокирована | Не назначен | security, backend, platform |
+| [Клиент из Telegram не проходит через цепочку безопасности ядра](RBOT-SEC-001-telegram-client-outside-core-auth-chain.md) | P2 | Запланирована | Не назначен | security, backend, platform |
