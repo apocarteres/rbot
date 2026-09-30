@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 27. Включены самостоятельные задачи и этапы планов функций.
+Всего: 28. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -34,6 +34,7 @@ authority: navigation
 | [Куски прежней сборки клиента переживают раскат](RBOT-OPS-008-adopt-static-archive.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, frontend |
 | [Полный прогон после смены версий компонентов ядром 13.2.1](RBOT-OPS-010-full-run-13-2-1.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, testing |
 | [Ядро 13.7.0](RBOT-OPS-012-core-13-7-0.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, build |
+| [Проверка рабочей среды после раската выпуска 2026.09.1](RBOT-OPS-013-verify-production-after-release-2026-09-1.md) | P1 | Выполнена | Не назначен | deployment, operations |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
 | [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
