@@ -1,7 +1,7 @@
 ---
 id: RBOT-QUAL-003
 type: ticket
-status: backlog
+status: done
 scope: quality, tooling
 authority: supporting
 priority: P1
@@ -35,3 +35,9 @@ related: REQ-QUALITY
 - `check` роняется, если бин, нужный одному из рантаймов, отсутствует в его контексте.
 - Проверка проводки не требует внешних служб и укладывается в секунды.
 - Набор `check` остаётся быстрым: минуты, а не десятки минут.
+
+## Ход работы
+
+- 2026-09-30: рантаймы — веб-служба и запуск `migrate`. `ApplicationWiringTest` поднимает контекст веб-службы без базы и Redis: источник данных, контейнер событий Spring Session и настройка уведомлений Redis подменены. `MigrateWiringTest` поднимает контекст `MigrationRun` без веба и проверяет, что прикладных бинов веб-службы в нём нет, а бин переходов есть.
+- Оба теста — в `backend-test`, набор `check`; вместе около 3 с.
+- Заведомый отказ: снятый `@Service` у `AccountAdministration` роняет `ApplicationWiringTest` с `NoSuchBeanDefinitionException`; правка возвращена.
