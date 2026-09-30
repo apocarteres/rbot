@@ -1,1 +1,12 @@
+/target/
+/.platform/
+/.idea/
 .DS_Store
+node_modules
+.angular
+frontend/dist
+out-tsc/
+.mvn/wrapper/maven-wrapper.jar
+/.env
+/deploy/*.env
+!/deploy/rbot.env.example

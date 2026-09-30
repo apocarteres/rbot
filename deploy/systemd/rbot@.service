@@ -1,0 +1,37 @@
+# MVP-01, REQ-DEPLOYMENT-011, REQ-DEPLOYMENT-025
+[Unit]
+Description=rbot instance %i
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+Requires=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=rbot
+Group=rbot
+EnvironmentFile=/etc/rbot/rbot.env
+EnvironmentFile=/opt/rbot/instances/%i.env
+Environment=RBOT_PORT=%i
+Environment=RBOT_ADDRESS=127.0.0.1
+ExecStart=/bin/sh -c 'exec "$RBOT_JAVA" $RBOT_JVM_ARGS -jar "$RBOT_JAR"'
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=90
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/rbot
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

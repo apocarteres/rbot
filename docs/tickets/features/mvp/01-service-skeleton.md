@@ -1,7 +1,7 @@
 ---
 id: MVP-01
 type: ticket
-status: backlog
+status: in_progress
 scope: backend, frontend, build
 authority: supporting
 priority: P1
@@ -47,3 +47,25 @@ related: ADR-0001
 
 1. **Префикс задач.** `ticketPrefix` для самостоятельных задач проекта. Предложение — `RCPT`.
    Ответ 2026-09-30: `RBOT`, по имени репозитория `apocarteres/rbot`. Объявлен в `.conventions.json`.
+
+## Ход работы
+
+2026-09-30 — первый рабочий срез по запросу владельца: минимальное приложение со входом по почте и паролю, развёрнутое на `admin.yanapaderina.com` (кабинет) и `bot.yanapaderina.com` (приложение клиента, пока заглушка). Хост — `fileio.ru`, общий с `fileio`.
+
+Сделано:
+
+- Служба `com.yanapaderina:rbot` на `platform-service-parent` 13.4.0: `platform-auth`, `platform-persistence`, `platform-time`, `platform-web-errors`, `platform-rate-limit`. Таблицы ядра — переходом `V1__platform_auth.sql`; миграции — отдельным запуском `java -jar rbot.jar migrate` (`REQ-DEPLOYMENT-007`) на конфигурации `com.yanapaderina.migration.MigrationRun` без сканирования компонентов: иначе контроллеры требуют бинов ядра, которых нет вне веб-контекста.
+- Роли `ADMIN` и `PSYCHOLOGIST`. Первый администратор создаётся ядром из `PLATFORM_AUTH_ADMIN_EMAIL` и `PLATFORM_AUTH_ADMIN_PASSWORD` (`REQ-AUTH-009`).
+- Почты нет (решение владельца 2026-09-30). `LoginOnlyEntry` открывает из точек входа ядра только `/api/auth/login`: регистрация, подтверждение и сброс по почте закрыты `entry-closed`. `NoLetters` не отправляет письма и пишет в журнал только вид письма, без адреса (`REQ-AUTH-013`).
+- `/api/admin/accounts`: список с поиском, создание с ролью, смена пароля, блокировка — только `ADMIN`. Пароль задаёт администратор, потому что сброса по почте нет.
+- Клиент: Angular 22, два приложения `admin` и `bot` в одном воркспейсе, общий вход в `frontend/shared`.
+- Развёртывание по образцу `fileio`: `mise run provision -- <почта администратора>` готовит хост (пользователь, каталоги, база, секреты, сертификаты), `mise run deploy` собирает коммит на хосте, делает копию базы, миграции, поднимает свободный экземпляр 8091 или 8092, переключает nginx и проверяет оба сайта снаружи.
+- Redis общий с `fileio` на хосте, база Redis 1 и пространство сессий `rbot:session`.
+
+Проверки:
+
+- `mise run backend-test` — модульный тест `LoginOnlyEntry`.
+- `mise run backend-test-integration` — 4 теста на PostgreSQL и Redis в Testcontainers: администратор создаёт психолога, психолог не видит учётных записей, занятая почта — `email-taken`, регистрация — `entry-closed`, гость — `401`.
+- Локальный стенд (`mise run backend-run`, `npm run start:admin`): вход администратора, создание учётной записи психолога в кабинете.
+
+Не сделано из «Требуется» и остаётся в задаче: модули Modulith и тест графа (пп. 2), `platform-notifications` и колокольчик (пп. 5, 6), смена своего пароля в кабинете (п. 6), подключение пакета правил в `AGENTS.md` с наборами `check`/`verify` ядра и хуком `pre-push` (п. 7). Манифест раската, журнал компонентов и проверки `conventions` при развёртывании, как у `fileio`, — в MVP-13.

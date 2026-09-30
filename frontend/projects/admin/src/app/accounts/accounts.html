@@ -1,0 +1,74 @@
+<h1>Учётные записи</h1>
+<p class="muted">Регистрации нет: учётные записи психолога и администраторов создаются здесь. Почта не подключена, поэтому пароль задаёт администратор.</p>
+
+@if (error()) {
+  <p class="error" role="alert">{{ error() }}</p>
+}
+@if (notice()) {
+  <p class="notice" role="status">{{ notice() }}</p>
+}
+
+<form class="card create" (ngSubmit)="create()">
+  <h2>Новая учётная запись</h2>
+  <div class="row">
+    <div class="field">
+      <label for="new-email">Почта</label>
+      <input id="new-email" name="email" type="email" autocomplete="off" required [(ngModel)]="email" />
+    </div>
+    <div class="field">
+      <label for="new-password">Пароль (от 10 символов)</label>
+      <input id="new-password" name="password" type="password" autocomplete="new-password" required minlength="10" [(ngModel)]="password" />
+    </div>
+    <div class="field">
+      <label for="new-role">Роль</label>
+      <select id="new-role" name="role" [(ngModel)]="role">
+        <option value="PSYCHOLOGIST">Психолог</option>
+        <option value="ADMIN">Администратор</option>
+      </select>
+    </div>
+  </div>
+  <button type="submit" [disabled]="busy()">Создать</button>
+</form>
+
+<form class="search" role="search" (ngSubmit)="load(0)">
+  <label class="visually-hidden" for="query">Поиск по почте</label>
+  <input id="query" name="query" type="search" placeholder="Поиск по почте" [(ngModel)]="query" />
+  <button type="submit" class="quiet" [disabled]="busy()">Найти</button>
+</form>
+
+@if (page(); as current) {
+  <div class="card list">
+    @for (account of current.items; track account.id) {
+      <article class="account">
+        <div class="who">
+          <strong>{{ account.email }}</strong>
+          <span class="muted">{{ roles(account) }}@if (account.blocked) { · <span class="blocked">заблокирована</span> }</span>
+          <span class="muted small">Создана {{ when(account.createdAt) }} · последний вход {{ when(account.lastLoginAt) }}</span>
+        </div>
+        <div class="actions">
+          <button type="button" class="quiet" (click)="askPassword(account)" [disabled]="busy()">Сменить пароль</button>
+          <button type="button" class="quiet" (click)="toggleBlock(account)" [disabled]="busy()">
+            {{ account.blocked ? 'Разблокировать' : 'Заблокировать' }}
+          </button>
+        </div>
+        @if (passwordFor() === account.id) {
+          <form class="password" (ngSubmit)="savePassword(account)">
+            <label class="visually-hidden" [for]="'pw-' + account.id">Новый пароль</label>
+            <input [id]="'pw-' + account.id" name="newPassword" type="password" autocomplete="new-password" placeholder="Новый пароль" required minlength="10" [(ngModel)]="newPassword" />
+            <button type="submit" [disabled]="busy()">Сохранить</button>
+            <button type="button" class="quiet" (click)="passwordFor.set(null)">Отмена</button>
+          </form>
+        }
+      </article>
+    } @empty {
+      <p class="muted">Ничего не найдено.</p>
+    }
+  </div>
+  @if (pages(current) > 1) {
+    <nav class="pager" aria-label="Страницы">
+      <button type="button" class="quiet" [disabled]="current.page === 0 || busy()" (click)="load(current.page - 1)">Назад</button>
+      <span class="muted">{{ current.page + 1 }} из {{ pages(current) }}</span>
+      <button type="button" class="quiet" [disabled]="current.page + 1 >= pages(current) || busy()" (click)="load(current.page + 1)">Дальше</button>
+    </nav>
+  }
+}

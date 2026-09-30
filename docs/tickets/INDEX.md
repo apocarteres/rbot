@@ -19,7 +19,7 @@ authority: navigation
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
 | [План MVP: регистратор психолога в Telegram](features/mvp/INDEX.md) | P1 | Запланирована | Не назначен | planning |
-| [Каркас службы и кабинета на ядре platform](features/mvp/01-service-skeleton.md) | P1 | Запланирована | Не назначен | backend, frontend, build |
+| [Каркас службы и кабинета на ядре platform](features/mvp/01-service-skeleton.md) | P1 | В работе | Не назначен | backend, frontend, build |
 | [Расписание психолога и свободные слоты](features/mvp/02-work-schedule.md) | P1 | Запланирована | Не назначен | backend, frontend, data |
 | [Карточки клиентов, приглашения и согласие](features/mvp/03-clients-and-consent.md) | P1 | Запланирована | Не назначен | backend, frontend, data, personal-data |
 | [Канал Telegram: webhook, привязка, исходящие сообщения](features/mvp/04-telegram-channel.md) | P1 | Запланирована | Не назначен | backend, security, telegram |

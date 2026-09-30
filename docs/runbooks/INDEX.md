@@ -8,4 +8,5 @@ authority: navigation
 
 # Эксплуатационные инструкции
 
-Инструкций пока нет. Первые появятся в этапах [MVP-01](../tickets/features/mvp/01-service-skeleton.md) (локальный запуск) и [MVP-13](../tickets/features/mvp/13-production-readiness.md) (развёртывание, регистрация webhook, резервные копии).
+- [Локальный запуск](local-run.md) — инструменты, ядро, сервер на PostgreSQL и Redis из Docker, кабинет и приложение.
+- [Рабочая среда](production.md) — подготовка хоста, первый вход администратора, раскат и откат.

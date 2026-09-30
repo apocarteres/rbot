@@ -1,4 +1,14 @@
 {
-  "sources": [],
+  "sources": [
+    "src",
+    "frontend/projects",
+    "frontend/shared",
+    "scripts"
+  ],
+  "exclude": [
+    "/.platform/",
+    "/frontend/.angular/",
+    "/frontend/dist/"
+  ],
   "ticketPrefix": "RBOT"
 }

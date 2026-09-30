@@ -1,0 +1,8 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "backend", "runtimeExecutable": "mise", "runtimeArgs": ["run", "backend-run"], "port": 8080 },
+    { "name": "admin", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "frontend", "run", "start:admin"], "port": 4200 },
+    { "name": "bot", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "frontend", "run", "start:bot"], "port": 4201 }
+  ]
+}

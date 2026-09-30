@@ -1,0 +1,84 @@
+# MVP-01
+[tools]
+java = "temurin-25.0.4+101.0.LTS"
+node = "24.21.0"
+npm = "11.19.0"
+
+[tasks.platform-install]
+description = "Получить ядро закреплённой версии и опубликовать локально"
+run = "scripts/platform/install.sh"
+
+[tasks.platform-ensure]
+description = "Убедиться, что артефакты ядра закреплённой версии на месте"
+run = "scripts/platform/install.sh --ensure"
+
+[tasks.docs-check]
+description = "Документация: метаданные, ссылки, сводки задач и выпусков"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh docs-check"
+
+[tasks.tickets-index]
+description = "Собрать сводку задач"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh tickets-index"
+
+[tasks.releases-index]
+description = "Собрать сводку выпусков"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh releases-index"
+
+[tasks.conventions-check]
+description = "Правила ядра: комментарии, часы, размеры файлов, секреты конфигурации"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh check"
+
+[tasks.backend-test]
+description = "Модульные тесты сервера"
+depends = ["platform-ensure"]
+run = "./mvnw -B -ntp test"
+
+[tasks.backend-test-integration]
+description = "Интеграционные тесты сервера: PostgreSQL и Redis в Testcontainers"
+depends = ["platform-ensure"]
+run = "scripts/ops/backend-test-integration.sh"
+
+[tasks.backend-build]
+description = "Собрать сервер без тестов"
+depends = ["platform-ensure"]
+run = "./mvnw -B -ntp -q -DskipTests package"
+
+[tasks.backend-run]
+description = "Запустить сервер локально на PostgreSQL и Redis из docker compose"
+depends = ["platform-ensure"]
+run = "scripts/local/backend-run.sh"
+
+[tasks.frontend-install]
+description = "Установить зависимости клиента"
+dir = "frontend"
+run = "npm ci --audit=false --fund=false"
+
+[tasks.frontend-build]
+description = "Собрать кабинет (admin) и приложение (bot)"
+dir = "frontend"
+run = "npm run build"
+
+[tasks.frontend-test]
+description = "Модульные тесты клиента"
+dir = "frontend"
+run = "npm test"
+
+[tasks.check]
+description = "Шлагбаум перед отправкой: документация, правила ядра, тесты обеих частей, сборка клиента"
+depends = ["docs-check", "conventions-check", "backend-test", "frontend-build"]
+
+[tasks.verify]
+description = "Всё, что проверяется локально"
+depends = ["check", "backend-test-integration", "backend-build"]
+
+[tasks.provision]
+description = "Подготовить хост: mise run provision -- root@host"
+run = "scripts/deploy/provision-remote.sh \"$@\""
+
+[tasks.deploy]
+description = "Развернуть коммит на рабочий хост: mise run deploy -- [--only backend,frontend,web]"
+run = "scripts/deploy/production.sh \"$@\""
