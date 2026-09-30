@@ -1,7 +1,7 @@
 ---
 id: RBOT-ARC-006
 type: ticket
-status: backlog
+status: done
 scope: frontend
 authority: supporting
 priority: P2
@@ -32,3 +32,7 @@ related: REQ-CLIENT-UPDATE
 ## Критерии приёмки
 
 - Правило defer-error в check замечаний не даёт.
+
+## Ход работы
+
+- 2026-09-30: блоков `@defer` в клиенте нет; правило `defer-error` в `check` замечаний не даёт. Отложенная загрузка идёт маршрутами (`loadComponent`), отказ её куска сверяет сборку сам маршрутизатор (`REQ-CLIENT-UPDATE-004`).
