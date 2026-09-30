@@ -1,4 +1,4 @@
-package com.yanapaderina.rbot.accounts;
+package com.yanapaderina.rbot.accounts.internal.web;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

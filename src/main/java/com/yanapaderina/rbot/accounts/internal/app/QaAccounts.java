@@ -1,4 +1,4 @@
-package com.yanapaderina.rbot.accounts;
+package com.yanapaderina.rbot.accounts.internal.app;
 
 import io.github.apocarteres.platform.auth.Accounts;
 import io.github.apocarteres.platform.auth.NoProfile;

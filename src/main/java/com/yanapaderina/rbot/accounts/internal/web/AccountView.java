@@ -1,4 +1,4 @@
-package com.yanapaderina.rbot.accounts;
+package com.yanapaderina.rbot.accounts.internal.web;
 
 import io.github.apocarteres.platform.auth.Account;
 import java.time.Instant;

@@ -1,4 +1,4 @@
-package com.yanapaderina.rbot.accounts;
+package com.yanapaderina.rbot.accounts.internal.app;
 
 import java.util.List;
 import java.util.Set;
