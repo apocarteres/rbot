@@ -1,7 +1,7 @@
 ---
 id: RBOT-ARC-002
 type: ticket
-status: backlog
+status: done
 scope: frontend
 authority: supporting
 priority: P1
@@ -36,3 +36,10 @@ related: REQ-CLIENT-MODAL
 - Правило modal-escape в check замечаний не даёт.
 - Сборка со строгой проверкой шаблонов отказывает окну без [apcrModalEscape] — проверено заведомым отказом один раз при принятии.
 - При двух открытых окнах Escape закрывает только верхнее.
+
+## Ход работы
+
+- 2026-09-30: признак окон — `modal.selector` = `[aria-modal]`, фонов — `modal.backdrop` = `.veil` в `.conventions.json`.
+- Модальное окно в клиенте одно — «Страница устарела» (`frontend/shared/update-required.ts`, компонент `required` механизма обновления). Оно объявлено `apcrModal` с `[apcrModalEscape]` = `ESCAPE_IGNORED`: окно не закрывается, пока страницу не обновят (`REQ-CLIENT-UPDATE-003`). Своего стека Escape нет.
+- Правило `modal-escape` в `check` замечаний не даёт. Заведомый отказ: без `[apcrModalEscape]` сборка отказывает `NG8008: Required input 'apcrModalEscape' from directive ApcrModal must be specified`; правка возвращена.
+- Двух окон одновременно в клиенте не бывает; верхнее окно выбирает `ModalStack` ядра.

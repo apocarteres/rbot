@@ -17,5 +17,9 @@
       "remind": 4,
       "require": 15
     }
+  },
+  "modal": {
+    "selector": "[aria-modal]",
+    "backdrop": ".veil"
   }
 }
