@@ -2,6 +2,3 @@
 databaseChangeLog:
   - include:
       file: classpath:platform/changelog/platform-auth.yaml
-  - includeAll:
-      path: db/changelog/project/
-      errorIfMissingOrEmpty: false
