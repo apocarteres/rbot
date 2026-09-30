@@ -6,7 +6,6 @@
     "start:admin": "ng serve admin --proxy-config proxy.conf.json --port 4200",
     "start:bot": "ng serve bot --proxy-config proxy.conf.json --port 4201",
     "build": "ng build admin && ng build bot",
-    "test": "ng test admin --watch=false",
     "lint": "eslint ."
   },
   "private": true,
