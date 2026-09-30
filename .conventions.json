@@ -21,5 +21,48 @@
   "modal": {
     "selector": "[aria-modal]",
     "backdrop": ".veil"
-  }
+  },
+  "deployment": {
+    "environments": [
+      "qa",
+      "production"
+    ],
+    "components": {
+      "backend": {
+        "artifact": "target/rbot-1.0.0.jar"
+      },
+      "frontend-admin": {
+        "artifact": "frontend/dist/admin/browser"
+      },
+      "frontend-bot": {
+        "artifact": "frontend/dist/bot/browser"
+      },
+      "web-headers": {
+        "artifact": "deploy/nginx/rbot-headers.conf",
+        "install": "/etc/nginx/snippets/rbot-headers.conf",
+        "verify": "scripts/deploy/parse-nginx.sh {} server"
+      },
+      "web-site": {
+        "artifact": "deploy/nginx/rbot.conf",
+        "install": "/etc/nginx/sites-available/rbot",
+        "verify": "scripts/deploy/parse-nginx.sh {}"
+      },
+      "unit-backend": {
+        "artifact": "deploy/systemd/rbot@.service",
+        "install": "/etc/systemd/system/rbot@.service",
+        "verify": "systemd-analyze verify {}"
+      },
+      "web-stand": {
+        "artifact": "docker/frontend-runtime/nginx.conf"
+      }
+    },
+    "withoutDowntime": {
+      "migrations": "src/main/resources/db/changelog/db.changelog-master.yaml",
+      "instances": [
+        "8091",
+        "8092"
+      ]
+    }
+  },
+  "commitRuleSince": "b8c22965ecf1741dd533b250c047f40b8239fb15"
 }
