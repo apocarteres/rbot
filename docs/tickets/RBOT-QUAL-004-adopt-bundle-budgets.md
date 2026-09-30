@@ -1,7 +1,7 @@
 ---
 id: RBOT-QUAL-004
 type: ticket
-status: backlog
+status: done
 scope: frontend, build
 authority: supporting
 priority: P2
@@ -33,3 +33,8 @@ related: REQ-BUILD
 
 - Правило bundle-budgets в check замечаний не даёт.
 - Сборка с заведомо превышенным порогом отказывает — проверено один раз при принятии.
+
+## Ход работы
+
+- 2026-09-30: у обоих приложений в `angular.json` бюджет начального пакета с `maximumError` (`admin` — 500 kB, `bot` — 400 kB) и стилей компонента 8 kB; порогов `maximumWarning` и `minimumWarning` нет. Правило `bundle-budgets` замечаний не даёт.
+- Заведомый отказ: порог `bot` 10 kB — сборка отказывает «bundle initial exceeded maximum budget. Budget 10.00 kB was not met by 305.48 kB»; порог возвращён.
