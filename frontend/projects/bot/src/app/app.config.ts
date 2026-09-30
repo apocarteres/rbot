@@ -3,20 +3,22 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { appUpdateInterceptor, provideAppUpdate } from '@apocarteres/app-update';
 import { authInterceptor, provideAuth } from '@apocarteres/auth';
-import { sanitisingInterceptor } from '@apocarteres/http';
+import { SESSION_EXPIRED, sanitisingInterceptor, sessionExpiredInterceptor } from '@apocarteres/http';
 import { API_VERSION } from '../../../../shared/api-version';
+import { sessionExpired } from '../../../../shared/session-expired';
 import { UpdateAvailable } from '../../../../shared/update-available';
 import { UpdateRequired } from '../../../../shared/update-required';
 import { routes } from './app.routes';
 
-// MVP-01, REQ-AUTH-015, REQ-CLIENT-UPDATE-001, REQ-CLIENT-UPDATE-006
+// MVP-01, RBOT-API-001, REQ-AUTH-015, REQ-API-002, REQ-CLIENT-UPDATE-001, REQ-CLIENT-UPDATE-006
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([sanitisingInterceptor, appUpdateInterceptor, authInterceptor])),
+    provideHttpClient(withInterceptors([sanitisingInterceptor, sessionExpiredInterceptor, appUpdateInterceptor, authInterceptor])),
     provideAppUpdate({ apiVersion: API_VERSION, available: UpdateAvailable, required: UpdateRequired }),
     provideAuth(),
+    { provide: SESSION_EXPIRED, useFactory: sessionExpired },
   ],
 };

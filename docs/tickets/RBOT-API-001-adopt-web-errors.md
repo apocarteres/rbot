@@ -1,7 +1,7 @@
 ---
 id: RBOT-API-001
 type: ticket
-status: backlog
+status: done
 scope: backend, api
 authority: supporting
 priority: P2
@@ -41,3 +41,11 @@ related: REQ-API
 - В проекте не осталось локального обработчика, отображающего общее исключение в статус.
 - Перечень кодов ошибок проекта сверен тестом со словарём клиента.
 - Обработка ошибок в клиенте переведена с `HttpErrorResponse` на `ApiFailure`: местами, где проверялся тип ответа HTTP, проверяется разобранный отказ.
+
+## Ход работы
+
+- 2026-09-30: служба отдаёт ошибки стартером `platform-web-errors` с первого дня (MVP-01): своих обработчиков исключений и типов тела ошибки нет. Коды проекта — `AccountRefused` (`roles-rejected`, `account-missing`, `self-change-refused`), остальное — коды ядра. Сообщений исключений `detail` не раскрывает: `ErrorMessages` по умолчанию.
+- Клиент: `sanitisingInterceptor` и `sessionExpiredInterceptor` из `@apocarteres/http` в `withInterceptors`; `SESSION_EXPIRED` — `frontend/shared/session-expired.ts` (на `authentication-required` ведёт на вход); разбор отказа — `ApiFailure` в `frontend/shared/failures.ts` вместо разбора `HttpErrorResponse`.
+- `ErrorCodesMatchClientTest`: каждый код `AccountRefused` и показываемые коды ядра есть в словаре клиента.
+- `AdminAccountsIT.failuresOfEveryStatusAreProblemDetails`: 401, 400, 404 отдаются как `application/problem+json` с полем `code`, 404 учётной записи — `account-missing`.
+- Собственных полей тела и заголовков ошибок у проекта нет, порты `ErrorExtensions` и `ErrorHeaders` не нужны.

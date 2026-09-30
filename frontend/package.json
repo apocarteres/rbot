@@ -18,9 +18,12 @@
     "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@apocarteres/action": "file:../.platform/target/local-packages/apocarteres-action-13.7.0.tgz",
     "@apocarteres/app-update": "file:../.platform/target/local-packages/apocarteres-app-update-13.7.0.tgz",
     "@apocarteres/auth": "file:../.platform/target/local-packages/apocarteres-auth-13.7.0.tgz",
     "@apocarteres/http": "file:../.platform/target/local-packages/apocarteres-http-13.7.0.tgz",
+    "@apocarteres/modal": "file:../.platform/target/local-packages/apocarteres-modal-13.7.0.tgz",
+    "@apocarteres/routing": "file:../.platform/target/local-packages/apocarteres-routing-13.7.0.tgz",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
