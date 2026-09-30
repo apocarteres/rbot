@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 25. Включены самостоятельные задачи и этапы планов функций.
+Всего: 27. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -32,6 +32,8 @@ authority: navigation
 | [Неизвестный адрес отвечает как неизвестный: порт клиента и 404 на сервере](RBOT-OPS-005-adopt-unknown-path.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, client |
 | [Написание входа в развёртывание: scripts/deploy.sh, разбор доводов ядром, среда production](RBOT-OPS-006-adopt-deploy-entry-spelling.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, build |
 | [Куски прежней сборки клиента переживают раскат](RBOT-OPS-008-adopt-static-archive.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, frontend |
+| [Полный прогон после смены версий компонентов ядром 13.2.1](RBOT-OPS-010-full-run-13-2-1.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, testing |
+| [Ядро 13.7.0](RBOT-OPS-012-core-13-7-0.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, build |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
 | [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |

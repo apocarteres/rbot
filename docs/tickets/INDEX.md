@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 20. Включены самостоятельные задачи и этапы планов функций.
+Всего: 18. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -32,8 +32,6 @@ authority: navigation
 | [Готовность к работе: хостинг в РФ, резервные копии, документы 152-ФЗ](features/mvp/13-production-readiness.md) | P1 | Запланирована | Не назначен | operations, personal-data, legal |
 | [Анкеты: шаблон, приём и раздел в кабинете](features/mvp/14-intake-forms.md) | P1 | Запланирована | Не назначен | backend, frontend, data, personal-data |
 | [Копии данных службы объявлены, уходят с хоста и проверяются](RBOT-OPS-009-declare-service-backups.md) | P1 | Запланирована | [RELEASE-2026-09-1](../releases/RELEASE-2026-09-1.md) | deployment, operations, personal-data |
-| [Полный прогон после смены версий компонентов ядром 13.2.1](RBOT-OPS-010-full-run-13-2-1.md) | P1 | Запланирована | [RELEASE-2026-09-1](../releases/RELEASE-2026-09-1.md) | dependencies, testing |
-| [Ядро 13.7.0](RBOT-OPS-012-core-13-7-0.md) | P1 | В работе | [RELEASE-2026-09-1](../releases/RELEASE-2026-09-1.md) | dependencies, build |
 | [Проверка рабочей среды после раската выпуска 2026.09.1](RBOT-OPS-013-verify-production-after-release-2026-09-1.md) | P1 | Запланирована | Не назначен | deployment, operations |
 | [Напоминания, закрытие сессий и очистка просроченного](features/mvp/10-reminders-and-session-closing.md) | P2 | Запланирована | Не назначен | backend, telegram |
 | [Вопросы психологу по домашнему заданию](features/mvp/11-homework-questions.md) | P2 | Запланирована | Не назначен | backend, frontend, telegram, personal-data |

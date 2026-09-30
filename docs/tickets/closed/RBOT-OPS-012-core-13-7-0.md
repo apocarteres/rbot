@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-012
 type: ticket
-status: in_progress
+status: done
 scope: dependencies, build
 authority: supporting
 priority: P1
@@ -37,3 +37,4 @@ related: REQ-ADOPTION, RBOT-OPS-011
 ## Ход работы
 
 - 2026-09-30: версия поднята, ядро собрано из тега локально, блок правил обновлён. Правило `migration-tool` называет Flyway в `pom.xml` — работа задачи RBOT-OPS-011. `verify` на `13.7.0` — после переезда на Liquibase.
+- 2026-10-01: `mise run verify` на `13.7.0` проходит; обязательства `13.7.0` разобраны задачами выпуска `2026.09.1`, `liquibase-migrations` исполнено RBOT-OPS-011.
