@@ -1,5 +1,5 @@
 {
-  "releaseCount": 0,
+  "releaseCount": 1,
   "seen": {
     "local-quality-gates": 0,
     "release-cycle": 0,
@@ -29,7 +29,112 @@
     "full-run-13-2-1": 0,
     "liquibase-migrations": 0
   },
-  "closed": {},
+  "closed": {
+    "local-quality-gates": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-QUAL-001"
+    },
+    "release-cycle": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-001"
+    },
+    "comment-ratchet-to-zero": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-QUAL-002"
+    },
+    "observed-receipt": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-002"
+    },
+    "java-25": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-003"
+    },
+    "wiring-check": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-QUAL-003"
+    },
+    "ticket-prefix": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-DOC-001"
+    },
+    "web-errors": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-API-001"
+    },
+    "commit-ticket-id": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-DOC-002"
+    },
+    "secret-cipher": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-SEC-002"
+    },
+    "java-modules": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-ARC-001"
+    },
+    "data-access": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-DATA-001"
+    },
+    "deployment-interface": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-004"
+    },
+    "unknown-path": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-005"
+    },
+    "deploy-entry-spelling": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-006"
+    },
+    "environment-configuration": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-007"
+    },
+    "modal-escape": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-ARC-002"
+    },
+    "modal-actions": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-ARC-003"
+    },
+    "modal-busy-backdrop": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-ARC-004"
+    },
+    "client-update": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-ARC-005"
+    },
+    "defer-error": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-ARC-006"
+    },
+    "bundle-budgets": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-QUAL-004"
+    },
+    "static-archive": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-008"
+    },
+    "core-auth": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-SEC-003"
+    },
+    "full-run-13-2-1": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-010"
+    },
+    "liquibase-migrations": {
+      "release": "RELEASE-2026-09-1",
+      "ticket": "RBOT-OPS-011"
+    }
+  },
   "deferred": {
     "backups": {
       "reason": "Данных клиентов в службе нет: база хранит только учётные записи сотрудников (администратор, психолог). Внешнее хранилище копий в РФ не выбрано владельцем 2026-10-01; копии до установки делает раскат (/var/backups/rbot, 7 дней). Обязательство исполняется до приёма данных клиентов (MVP-03, MVP-13).",
