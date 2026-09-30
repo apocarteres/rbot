@@ -1,7 +1,7 @@
 ---
 id: RBOT-ARC-004
 type: ticket
-status: backlog
+status: done
 scope: frontend
 authority: supporting
 priority: P1
@@ -36,3 +36,9 @@ related: REQ-CLIENT-MODAL
 - Правило modal-backdrop в check замечаний не даёт.
 - Во время вызова окно не закрывается ни Escape, ни фоном, ни «Отменой» — проверено один раз при принятии.
 - Заведомый отказ сервера показывается внутри окна, введённое сохраняется.
+
+## Ход работы
+
+- 2026-09-30: `modal.backdrop` = `.veil`; фон окна «Страница устарела» объявлен `[apcrModalBackdrop]` = `BACKDROP_IGNORED`, своего `(click)` на фоне нет; кнопка — `apcrLocal`. Правило `modal-backdrop` замечаний не даёт.
+- Заведомый отказ: свой `(click)` на фоне вместо `apcrModalBackdrop` правило называет («фон модального окна без apcrModalBackdrop»); правка возвращена.
+- Окна с удалённым вызовом пока нет, поэтому закрытие во время вызова и отказ внутри окна проверяются, когда оно появится.
