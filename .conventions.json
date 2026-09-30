@@ -10,5 +10,12 @@
     "/frontend/.angular/",
     "/frontend/dist/"
   ],
-  "ticketPrefix": "RBOT"
+  "ticketPrefix": "RBOT",
+  "release": {
+    "scheme": "date",
+    "openQuestions": {
+      "remind": 4,
+      "require": 15
+    }
+  }
 }
