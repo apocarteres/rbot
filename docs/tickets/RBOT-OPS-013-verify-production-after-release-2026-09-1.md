@@ -6,7 +6,7 @@ scope: deployment, operations
 authority: supporting
 priority: P1
 release: unassigned
-related: RBOT-OPS-004, RBOT-OPS-005, RBOT-OPS-007, RBOT-OPS-008, RBOT-OPS-011, REQ-TICKETS-021
+related: RBOT-OPS-004, RBOT-OPS-005, RBOT-OPS-007, RBOT-OPS-008, RBOT-OPS-011, REQ-TICKETS
 ---
 
 # Проверка рабочей среды после раската выпуска 2026.09.1

@@ -18,28 +18,28 @@ authority: navigation
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
-| [Настройка среды едет развёртыванием: составляющая, место, разбор и проверки поведения](../RBOT-OPS-007-adopt-environment-configuration.md) | P0 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, operations |
+| [Настройка среды едет развёртыванием: составляющая, место, разбор и проверки поведения](RBOT-OPS-007-adopt-environment-configuration.md) | P0 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, operations |
 | [Java-код разделён на модули, граф связей ациклический](RBOT-ARC-001-adopt-java-modules.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, java, architecture |
 | [Каждое модальное окно явно решает, что делать по Escape](RBOT-ARC-002-adopt-modal-escape.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
 | [Окно с удалённым действием закрывается после успеха, каждая кнопка окна объявляет своё действие](RBOT-ARC-003-adopt-modal-actions.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
 | [Окно не закрывается во время вызова, фон решает явно, отказ показывается в окне](RBOT-ARC-004-adopt-modal-busy-backdrop.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
-| [Клиент узнаёт о новой сборке и об устаревшем API механизмом ядра](../RBOT-ARC-005-adopt-client-update.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, backend |
+| [Клиент узнаёт о новой сборке и об устаревшем API механизмом ядра](RBOT-ARC-005-adopt-client-update.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, backend |
 | [Доступ к данным: без ORM, простой DAO, транзакция в прикладном слое](RBOT-DATA-001-adopt-data-access.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, java, persistence |
-| [Цикл выпуска закрывается одной командой и помечает проверенный коммит](../RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
-| [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](../RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
-| [Сборка потребителя идёт на Java 25, как и сборка ядра](../RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
-| [Развёртывание через интерфейс ядра: среда именем, составляющие объявлены, манифест и сверка развёрнутого](../RBOT-OPS-004-adopt-deployment-interface.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, build |
-| [Неизвестный адрес отвечает как неизвестный: порт клиента и 404 на сервере](../RBOT-OPS-005-adopt-unknown-path.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, client |
-| [Написание входа в развёртывание: scripts/deploy.sh, разбор доводов ядром, среда production](../RBOT-OPS-006-adopt-deploy-entry-spelling.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, build |
-| [Куски прежней сборки клиента переживают раскат](../RBOT-OPS-008-adopt-static-archive.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, frontend |
-| [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](../RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
+| [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
+| [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
+| [Сборка потребителя идёт на Java 25, как и сборка ядра](RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
+| [Развёртывание через интерфейс ядра: среда именем, составляющие объявлены, манифест и сверка развёрнутого](RBOT-OPS-004-adopt-deployment-interface.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, build |
+| [Неизвестный адрес отвечает как неизвестный: порт клиента и 404 на сервере](RBOT-OPS-005-adopt-unknown-path.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, client |
+| [Написание входа в развёртывание: scripts/deploy.sh, разбор доводов ядром, среда production](RBOT-OPS-006-adopt-deploy-entry-spelling.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, build |
+| [Куски прежней сборки клиента переживают раскат](RBOT-OPS-008-adopt-static-archive.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, frontend |
+| [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
-| [Своя аутентификация проекта заменена аутентификацией ядра](../RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
+| [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
 | [Ошибки API отдаются одним контрактом ProblemDetail](RBOT-API-001-adopt-web-errors.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, api |
 | [Каждый блок @defer объявляет @error](RBOT-ARC-006-adopt-defer-error.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
-| [Идентификаторы задач несут префикс проекта](../RBOT-DOC-001-adopt-ticket-prefix.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | process, documentation |
-| [Сообщение фиксации начинается с идентификатора задачи](../RBOT-DOC-002-adopt-commit-ticket-id.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | process, release |
-| [Переходы базы — Liquibase, таблицы ядра — журналами ядра](../RBOT-OPS-011-liquibase-migrations.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | persistence, deployment |
+| [Идентификаторы задач несут префикс проекта](RBOT-DOC-001-adopt-ticket-prefix.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | process, documentation |
+| [Сообщение фиксации начинается с идентификатора задачи](RBOT-DOC-002-adopt-commit-ticket-id.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | process, release |
+| [Переходы базы — Liquibase, таблицы ядра — журналами ядра](RBOT-OPS-011-liquibase-migrations.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | persistence, deployment |
 | [Размер сборки клиента держит проверка](RBOT-QUAL-004-adopt-bundle-budgets.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, build |
-| [Секреты шифруются средством платформы](../RBOT-SEC-002-adopt-secret-cipher.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, security |
-| [Ограничитель пояснительных комментариев сведён к нулю](../RBOT-QUAL-002-reduce-comment-ratchet.md) | P3 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, backend, frontend |
+| [Секреты шифруются средством платформы](RBOT-SEC-002-adopt-secret-cipher.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, security |
+| [Ограничитель пояснительных комментариев сведён к нулю](RBOT-QUAL-002-reduce-comment-ratchet.md) | P3 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, backend, frontend |
