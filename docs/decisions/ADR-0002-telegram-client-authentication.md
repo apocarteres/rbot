@@ -74,7 +74,7 @@ related: ADR-0001, ADR-0005, MVP-03, MVP-04, MVP-08, RBOT-SEC-001
 >
 > Предложение: порт, который по запросу возвращает личность проекта или отказ, и объявление, на каких путях он действует. CSRF для таких путей не требуется: подлинность несёт подпись запроса, а не cookie.
 
-Заявка отправлена 2026-09-30, ход — в задаче [RBOT-SEC-001](../tickets/RBOT-SEC-001-telegram-client-outside-core-auth-chain.md). Идентификатор задачи ядра заранее не записывается (`REQ-NAMING-012`).
+Заявка отправлена 2026-09-30 — [apocarteres/platform#69](https://github.com/apocarteres/platform/issues/69), ход — в задаче [RBOT-SEC-001](../tickets/RBOT-SEC-001-telegram-client-outside-core-auth-chain.md). Идентификатор задачи ядра заранее не записывается (`REQ-NAMING-012`).
 
 ## Открытые вопросы
 
