@@ -84,6 +84,10 @@ depends = ["check", "backend-test-integration", "backend-build"]
 description = "Подготовить хост: mise run provision -- root@host"
 run = "scripts/deploy/provision-remote.sh \"$@\""
 
+[tasks.deploy-qa]
+description = "Развернуть рабочее дерево на QA-стенд в Docker на mini"
+run = "scripts/deploy/qa.sh"
+
 [tasks.deploy]
 description = "Развернуть коммит на рабочий хост: mise run deploy -- [--only backend,frontend,web]"
 run = "scripts/deploy/production.sh \"$@\""

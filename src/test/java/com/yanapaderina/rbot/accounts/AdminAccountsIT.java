@@ -61,9 +61,9 @@ class AdminAccountsIT extends IntegrationStores {
   }
 
   @Test
-  void localSeedsAreAbsentOutsideLocalProfile() throws Exception {
+  void qaSeedsAreAbsentOutsideQaProfile() throws Exception {
     mvc.perform(post("/api/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
-        .content("{\"email\":\"psychologist@rbot.localhost\",\"password\":\"local-psychologist-password\"}"))
+        .content("{\"email\":\"psychologist@yanapaderina.test\",\"password\":\"qa-psychologist-password\"}"))
       .andExpect(status().isUnauthorized());
   }
 

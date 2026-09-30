@@ -16,25 +16,25 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-// MVP-01, RUN-LOCAL
+// MVP-01, RUN-QA
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("local")
-class LocalAccountsIT extends IntegrationStores {
+@ActiveProfiles("qa")
+class QaAccountsIT extends IntegrationStores {
 
   @Autowired
   private MockMvc mvc;
 
   @Test
   void adminSeedManagesAccounts() throws Exception {
-    mvc.perform(get("/api/admin/accounts").cookie(login("admin@rbot.localhost", "local-admin-password")))
+    mvc.perform(get("/api/admin/accounts").cookie(login("admin@yanapaderina.test", "qa-admin-password")))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.total").value(2));
   }
 
   @Test
   void psychologistSeedEntersCabinetOnly() throws Exception {
-    Cookie[] psychologist = login("psychologist@rbot.localhost", "local-psychologist-password");
+    Cookie[] psychologist = login("psychologist@yanapaderina.test", "qa-psychologist-password");
     mvc.perform(get("/api/auth/session").cookie(psychologist))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.account.roles[0]").value("PSYCHOLOGIST"));

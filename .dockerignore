@@ -1,0 +1,5 @@
+*
+!target/rbot-1.0.0.jar
+!frontend/dist/admin/browser/
+!frontend/dist/bot/browser/
+!docker/

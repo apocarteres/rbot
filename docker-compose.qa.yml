@@ -1,0 +1,76 @@
+# MVP-01, RUN-QA
+name: rbot-qa
+
+x-backend-env: &backend-env
+  RBOT_DB_URL: jdbc:postgresql://postgres:5432/rbot
+  RBOT_DB_USERNAME: rbot
+  RBOT_DB_PASSWORD: rbot
+  RBOT_REDIS_HOST: redis
+  RBOT_REDIS_PORT: "6379"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: rbot
+      POSTGRES_USER: rbot
+      POSTGRES_PASSWORD: rbot
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rbot -d rbot"]
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/backend-runtime/Dockerfile
+    command: ["migrate"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *backend-env
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend-runtime/Dockerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    environment:
+      <<: *backend-env
+      SPRING_PROFILES_ACTIVE: qa
+      RBOT_ADDRESS: 0.0.0.0
+      RBOT_PUBLIC_URL: http://qa.bot.yanapaderina.test:${RBOT_QA_PORT:-4206}
+      RBOT_SECURE_COOKIE: "false"
+      RBOT_INTERNAL_PROXIES: "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3}|172\\.(1[6-9]|2[0-9]|3[0-1])\\.\\d{1,3}\\.\\d{1,3}|127\\.0\\.0\\.1"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]
+      interval: 3s
+      start_period: 60s
+      retries: 20
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend-runtime/Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${RBOT_QA_PORT:-4206}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  postgres:

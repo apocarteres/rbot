@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-// MVP-01, RUN-LOCAL
-@ConfigurationProperties("rbot.local")
-record LocalAccountSeeds(List<Seed> accounts) {
+// MVP-01, RUN-QA
+@ConfigurationProperties("rbot.qa")
+record QaAccountSeeds(List<Seed> accounts) {
 
-  LocalAccountSeeds {
+  QaAccountSeeds {
     accounts = accounts == null ? List.of() : List.copyOf(accounts);
   }
 
