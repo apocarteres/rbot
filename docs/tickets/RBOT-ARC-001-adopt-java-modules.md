@@ -1,7 +1,7 @@
 ---
 id: RBOT-ARC-001
 type: ticket
-status: backlog
+status: done
 scope: backend, java, architecture
 authority: supporting
 priority: P1
@@ -38,3 +38,11 @@ Java-код проекта не разделён на модули с объяв
 - Проверка отказывает и на косвенном цикле, а не только на прямом: это закреплено отдельным случаем.
 - Проверка покрывает и вложенные уровни: подмодули внутри модуля проверяются отдельным случаем.
 - Перечень межмодульных зависимостей доступен чтением, без разбора импортов.
+
+## Ход работы
+
+- 2026-09-30: модули `access` (экспортирует `Roles`, реализация портов ядра — `access.internal`) и `accounts` (`accounts.internal.app`, `accounts.internal.web`); корень `com.yanapaderina.rbot`. Запуск `migrate` — отдельный корень `com.yanapaderina.migration` вне сканирования веб-службы.
+- Перечень межмодульных зависимостей — `MODULE_DEPENDENCIES` в `PlatformArchRulesTest`: `access` → ничего, `accounts` → `access`.
+- Проверки ядра `platform-arch-rules` в `PlatformArchRulesTest` (набор `backend-test`, входит в `check`): граф модулей и подмодулей ациклический, циклы не скрыты, модуль зависит только от своего перечня, `internal` чужого модуля не используется.
+- `ArchRulesProbeTest`: косвенный цикл a → b → c → a и цикл подмодулей x ↔ y на образцах в `architecture/fixture` роняют проверку.
+- Итог: `mise exec -- ./mvnw test` — 16 тестов, отказов нет.

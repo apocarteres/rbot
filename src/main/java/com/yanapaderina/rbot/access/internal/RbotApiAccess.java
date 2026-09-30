@@ -1,5 +1,6 @@
-package com.yanapaderina.rbot.access;
+package com.yanapaderina.rbot.access.internal;
 
+import com.yanapaderina.rbot.access.Roles;
 import io.github.apocarteres.platform.auth.ApiAccess;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;

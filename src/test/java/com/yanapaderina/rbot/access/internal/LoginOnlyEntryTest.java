@@ -1,4 +1,4 @@
-package com.yanapaderina.rbot.access;
+package com.yanapaderina.rbot.access.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

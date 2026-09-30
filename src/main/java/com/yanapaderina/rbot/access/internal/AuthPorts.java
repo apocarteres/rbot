@@ -1,4 +1,4 @@
-package com.yanapaderina.rbot.access;
+package com.yanapaderina.rbot.access.internal;
 
 import io.github.apocarteres.platform.auth.HumanCheck;
 import io.github.apocarteres.platform.auth.NoProfile;
