@@ -1,0 +1,7 @@
+# RBOT-OPS-011, REQ-DATA-ACCESS-007
+databaseChangeLog:
+  - include:
+      file: classpath:platform/changelog/platform-auth.yaml
+  - includeAll:
+      path: db/changelog/project/
+      errorIfMissingOrEmpty: false

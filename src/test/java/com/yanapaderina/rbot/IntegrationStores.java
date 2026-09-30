@@ -1,9 +1,10 @@
 package com.yanapaderina.rbot;
 
-import org.flywaydb.core.Flyway;
+import com.yanapaderina.migration.SchemaMigration;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,7 +32,7 @@ public abstract class IntegrationStores {
   }
 
   @BeforeAll
-  static void migrate() {
-    Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword()).load().migrate();
+  static void migrate() throws Exception {
+    new SchemaMigration(new DriverManagerDataSource(POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword())).migrate();
   }
 }
