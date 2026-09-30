@@ -1,7 +1,7 @@
 ---
 id: RBOT-QUAL-002
 type: ticket
-status: backlog
+status: done
 scope: quality, backend, frontend
 authority: supporting
 priority: P3
@@ -34,3 +34,7 @@ related: REQ-CODE-COMMENTS
 
 - Раздел `comments` ограничителя равен нулю.
 - Ни одно пояснение не потеряно: для каждого удалённого комментария есть либо документ, либо обоснование удаления в задаче.
+
+## Ход работы
+
+- 2026-09-30: пояснительных комментариев в коде нет с подключения правила (MVP-01): ограничитель `comments` пуст, `conventions check` — «Файлов под ограничителем: 0». Удалять и переносить нечего.

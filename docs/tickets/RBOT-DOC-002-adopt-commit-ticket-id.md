@@ -1,7 +1,7 @@
 ---
 id: RBOT-DOC-002
 type: ticket
-status: backlog
+status: done
 scope: process, release
 authority: supporting
 priority: P2
@@ -35,3 +35,7 @@ related: REQ-PROJECT-PROCESS
 - Закрытие выпуска проходит: в диапазоне нет коммитов без задачи и коммитов задач вне состава.
 - Снятая из состава задача роняет закрытие, пока её работа не отменена коммитом с меткой `!revert`.
 - Правило соблюдается и для коммитов самого цикла выпуска.
+
+## Ход работы
+
+- 2026-09-30: `commitRuleSince` — `b8c2296` (первый коммит после принятия правила); хук `commit-msg` (`mise run install-hooks`) отвергает сообщение без `RBOT-<ОБЛАСТЬ>-<NNN>` или `MVP-<NN>`, коммиты цикла выпуска несут `Release-cycle:`. `conventions commits` — «Все коммиты называют задачу». Хук проверен `scripts/ops/scripts-test.sh`.

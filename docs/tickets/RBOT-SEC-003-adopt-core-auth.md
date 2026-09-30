@@ -1,7 +1,7 @@
 ---
 id: RBOT-SEC-003
 type: ticket
-status: backlog
+status: done
 scope: backend, frontend, security
 authority: supporting
 priority: P1
@@ -39,3 +39,9 @@ related: REQ-AUTH
 - Вход, регистрация с подтверждением и сброс пароля проходят на стенде через точки /api/auth/*.
 - Пользователь, зарегистрированный до перехода, входит прежним паролем.
 - Индекс сессий в Redis не содержит почты.
+
+## Ход работы
+
+- 2026-09-30: аутентификация ядра с MVP-01: таблицы ядра (теперь журналом Liquibase, RBOT-OPS-011), роли `ADMIN`, `PSYCHOLOGIST`, порты `AuthLetters` (`NoLetters`), `HumanCheck.NOT_REQUIRED`, `RegistrationHook.NONE`, `ApiAccess`, `EntryAccess` (`LoginOnlyEntry`); клиент — `provideAuth()`, `authInterceptor`, `AuthSession`; экран администратора — через `Accounts`. Своей аутентификации до перехода не было, переносить некого.
+- Отклонение от критерия с причиной: регистрация с подтверждением и сброс пароля по почте закрыты решением владельца 2026-09-30 (почта не подключена, учётные записи заводит администратор): `/api/auth/register` отвечает `entry-closed` (тест `AdminAccountsIT`). Вход проверен на QA и в тестах; пароль задаёт администратор.
+- Индекс сессий Redis на QA: ключи `rbot:session:index:…PRINCIPAL_NAME_INDEX_NAME:<uuid>` — идентификатор учётной записи, ключей с почтой 0.

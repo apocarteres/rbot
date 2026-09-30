@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-007
 type: ticket
-status: backlog
+status: done
 scope: deployment, operations
 authority: supporting
 priority: P0
@@ -38,3 +38,7 @@ related: REQ-DEPLOYMENT
 - Правка настройки веб-сервера приезжает развёртыванием без ручного копирования — проверено заведомым изменением.
 - Заведомо сломанная настройка роняет шаг развёртывания на разборе, а не после применения.
 - После развёртывания `conventions health` и `conventions unknown` проходят; до правки настройки `unknown` обязан отказывать.
+
+## Ход работы
+
+- 2026-09-30: настройка nginx (`web-site`, `web-headers`) и unit (`unit-backend`) — составляющие с `install` и `verify`; разбор (`parse-nginx.sh`, `systemd-analyze verify`) идёт на копии до установки, отказ разбора останавливает раскат до применения. Правило `environment-config` замечаний не даёт. Проверки поведения после раската — `health`, `unknown`, `static-check`; на рабочей среде — RBOT-OPS-013.

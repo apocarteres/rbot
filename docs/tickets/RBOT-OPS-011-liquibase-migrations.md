@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-011
 type: ticket
-status: in_progress
+status: done
 scope: persistence, deployment
 authority: supporting
 priority: P2
@@ -44,3 +44,4 @@ related: REQ-DATA-ACCESS
 - Отклонение от `RUN-LIQUIBASE-ADOPTION` с причиной: базы проекта созданы Flyway по образцам ядра 13.4.0 и содержат `platform_account`, `platform_account_role`, `platform_account_token`, но не `platform_access_key` — схема совпадает с наборами 001–003 журнала ядра, а не со всем журналом. `changelogSync` целиком пометил бы применённой несуществующую таблицу. Поэтому `migrate` на базе с `flyway_schema_history` и без `databasechangelog` один раз помечает три набора командой `markNextChangesetRan`, сверяет, что помечены именно `platform-auth:001-account`, `002-role`, `003-token`, и дальше выполняет `update`: `004-access-key` применяется из журнала ядра, своей копии SQL у проекта нет.
 - Проверки: `SchemaMigrationIT` — чистая база получает четыре набора ядра; база Flyway принимается, учётная запись сохраняется, повторный запуск ничего не меняет. Локальная база стенда, созданная Flyway: после `migrate` в `databasechangelog` четыре набора ядра, обе учётные записи на месте, `platform_access_key` создана. `conventions check`: замечания `migration-tool` нет.
 - Осталось: принять базы QA и рабочей среды раскатом; на рабочей среде `liquibase status` не называет невыполненных наборов. Таблица `flyway_schema_history` удаляется отдельным набором после выпуска, когда откат на сборку с Flyway перестанет быть нужен.
+- 2026-09-30: QA: база, созданная Flyway, принята раскатом `scripts/deploy.sh --env qa` — в `databasechangelog` четыре набора ядра, обе учётные записи на месте. Рабочая среда принимается первым раскатом выпуска, проверка `liquibase status` — RBOT-OPS-013.

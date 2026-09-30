@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-008
 type: ticket
-status: backlog
+status: done
 scope: deployment, frontend
 authority: supporting
 priority: P1
@@ -35,3 +35,7 @@ related: REQ-DEPLOYMENT
 
 - conventions static-check --url <стенд> --component <клиент> --previous <кусок прежней сборки> после раската проходит.
 - conventions deployed по составляющей клиента проходит: архив в раздаваемый каталог не попал.
+
+## Ход работы
+
+- 2026-09-30: архив `/var/www/rbot/archive/<приложение>` вне раздаваемого каталога; раскат копирует уходящие куски с `cp -n` и удаляет старше 7 дней; nginx ищет отсутствующий кусок в архиве (`@archive`), `index.html` — `no-store` и только текущий; вечный кэш — только файлам с отпечатком. После раската `conventions static-check --component frontend-<приложение> --previous <кусок прежней сборки>` и `deployed` по раздаваемому каталогу. Первый раскат на рабочей среде проверяет архив — RBOT-OPS-013.

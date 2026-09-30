@@ -1,7 +1,7 @@
 ---
 id: RBOT-QUAL-001
 type: ticket
-status: backlog
+status: done
 scope: quality, build, tooling
 authority: supporting
 priority: P1
@@ -35,3 +35,10 @@ related: REQ-QUALITY
 - `check` и `verify` существуют и проходят.
 - Проверка, не входящая ни в один набор, в репозитории отсутствует.
 - Хук установлен и роняет отправку изменений при отказе `check`.
+
+## Ход работы
+
+- 2026-09-30: `check` — документация, правила ядра, модульные тесты сервера с правилами архитектуры и проводкой (`-Werror` компилятора — у ядра), ESLint с `--max-warnings=0`, сборка клиента с бюджетами, контрактные тесты скриптов. `verify` — `check`, интеграционные тесты на PostgreSQL и Redis, сборка сервера, `grype` по артефакту, `npm audit`, `trufflehog` по истории и дереву.
+- Хуки `pre-push` (`check` либо расписка) и `commit-msg` ставит `mise run install-hooks`.
+- Проверок вне наборов нет: пустой `npm test` клиента снят; `backend-run`, `deploy`, `release-*` — не проверки.
+- Итог прогона: `backend-audit` — «No vulnerabilities found», `frontend-audit` — «found 0 vulnerabilities», `secrets-scan` — 0 найденных секретов.

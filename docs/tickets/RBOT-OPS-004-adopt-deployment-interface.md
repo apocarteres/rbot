@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-004
 type: ticket
-status: backlog
+status: done
 scope: deployment, build
 authority: supporting
 priority: P1
@@ -38,3 +38,7 @@ related: REQ-DEPLOYMENT
 - `.conventions.json` содержит раздел `deployment` со средами и составляющими; `conventions components` печатает их, а скрипт развёртывания берёт перечень оттуда.
 - Манифест сборки пишется `conventions manifest`; развёртывание непомеченного коммита отказывает без названной причины.
 - После установки выполняются `conventions deployed` и `conventions health`; остановленный сервис роняет шаг — проверено заведомым отказом один раз при принятии.
+
+## Ход работы
+
+- 2026-09-30: единственный вход — `scripts/deploy.sh --env <среда>`; среды и составляющие — раздел `deployment` в `.conventions.json` (сервер, два клиента, настройка nginx, unit systemd, nginx стенда); скрипты берут перечень `conventions components --full`; манифест — `conventions manifest` в `/opt/rbot/releases/<коммит>/manifest.json` с журналом `/opt/rbot/journal.log`; сверка — `conventions deployed` по установленным файлам; состояние — `conventions health` к самому экземпляру на `127.0.0.1:<порт>`. QA: `scripts/deploy.sh --env qa` — health UP, unknown на обоих сайтах. Проверки рабочей среды после раската — RBOT-OPS-013.

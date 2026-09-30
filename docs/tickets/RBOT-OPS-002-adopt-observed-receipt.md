@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-002
 type: ticket
-status: backlog
+status: done
 scope: quality, build, release
 authority: supporting
 priority: P1
@@ -33,3 +33,8 @@ related: REQ-RELEASE
 
 - `verify` проходит и оставляет расписку с полем `run`: наблюдённая команда и её код возврата.
 - Отказ набора не оставляет расписки, а закрытие выпуска отвергает расписку без признака прогона.
+
+## Ход работы
+
+- 2026-09-30: `verify` — один шаг: `conventions receipt --checks check,verify -- mise run verify-body`; отдельного вызова расписки после прогона нет.
+- Заведомый отказ: `conventions receipt --checks verify -- false` — «Набор не пройден: код возврата 1. Расписка не записана», код 1.

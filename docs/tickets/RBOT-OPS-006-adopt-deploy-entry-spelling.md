@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-006
 type: ticket
-status: backlog
+status: done
 scope: deployment, build
 authority: supporting
 priority: P1
@@ -39,3 +39,7 @@ related: REQ-DEPLOYMENT
 - `.conventions.json` объявляет рабочую среду как `production`; `conventions components --environments` её печатает.
 - Правило `deploy-entry` в `check` замечаний не даёт.
 - `conventions deploy-args --usage` печатает форму вызова со всеми ключами проекта и пояснениями к ним.
+
+## Ход работы
+
+- 2026-09-30: вход `scripts/deploy.sh`, доводы разбирает `conventions deploy-args`; среды `qa` и `production`. `scripts/ops/scripts-test.sh` (набор `check`): вызов без `--env`, с позиционной средой и со средой `prod` отказывают; `conventions components --environments` печатает `qa,production`. `deploy-args --usage` — «scripts/deploy.sh --env <среда> [--only …] [--untagged-reason …]». Ключей предметной области у проекта нет.

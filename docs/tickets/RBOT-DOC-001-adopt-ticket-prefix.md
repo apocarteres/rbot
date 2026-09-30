@@ -1,7 +1,7 @@
 ---
 id: RBOT-DOC-001
 type: ticket
-status: backlog
+status: done
 scope: process, documentation
 authority: supporting
 priority: P2
@@ -37,3 +37,7 @@ related: REQ-NAMING
 - Ни один идентификатор задачи проекта не совпадает с идентификатором задачи ядра.
 - В документах не осталось ссылок вида `<ОБЛАСТЬ>-<NNN>` без префикса.
 - Ни один идентификатор чужого проекта не получил префикса этого проекта.
+
+## Ход работы
+
+- 2026-09-30: `ticketPrefix` = `RBOT` с 2026-09-30 (MVP-01), задачи проекта — `RBOT-<ОБЛАСТЬ>-<NNN>`, этапы плана — `MVP-<NN>`. Задачи ядра названы отделённо: `platform/CORE-ARC-022`. `conventions check` и `docs-check` проходят.

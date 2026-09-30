@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-003
 type: ticket
-status: backlog
+status: done
 scope: build, tooling
 authority: supporting
 priority: P1
@@ -34,3 +34,7 @@ related: REQ-BUILD
 
 - Наборы `check` и `verify` проходят на закреплённой Java 25.
 - Версия в конфигурации менеджера окружения и цель компиляции в манифестах совпадают.
+
+## Ход работы
+
+- 2026-09-30: сборка на Java 25 с MVP-01: `mise.toml` — `temurin-25.0.4+101.0.LTS`, цель компиляции задаёт `platform-service-parent` ядра (25), образ QA — `eclipse-temurin:25-jre`, рабочая среда — JDK из `mise` в `/opt/rbot/jdk`. `check` и `verify` проходят на Java 25.

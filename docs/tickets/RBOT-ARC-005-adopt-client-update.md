@@ -1,7 +1,7 @@
 ---
 id: RBOT-ARC-005
 type: ticket
-status: backlog
+status: done
 scope: frontend, backend
 authority: supporting
 priority: P1
@@ -36,3 +36,9 @@ related: REQ-CLIENT-UPDATE
 - Правило client-update в check замечаний не даёт.
 - Вкладка, открытая до раската, после раската показывает компонент available — проверено один раз при принятии.
 - Запрос с версией ниже минимальной получает 426 с кодом client-outdated, клиент показывает required.
+
+## Ход работы
+
+- 2026-09-30: механизм с MVP-01: `provideAppUpdate` с компонентами `UpdateAvailable` и `UpdateRequired`, `appUpdateInterceptor`, `platform-api-version` с `platform.api.min-supported-version=1`; своего опроса сборки нет. Правило `client-update` замечаний не даёт.
+- QA, вкладка до раската: старая сборка `main-FSDMSN4X.js`, после раската сервер отдаёт `main-F3WQF2MQ.js`, вкладка показала «Вышла новая версия». Панель браузера была скрыта, поэтому возврат на вкладку подан событием `visibilitychange` с `document.hidden = false`.
+- QA, устаревший API: `PLATFORM_API_MIN_SUPPORTED_VERSION=2` на время проверки — запрос с `X-Api-Version: 1` получил 426 `client-outdated`, новая сборка показала «Страница устарела»; окно не закрылось ни Escape, ни щелчком по фону. Настройка возвращена, запрос версии 1 — 200.

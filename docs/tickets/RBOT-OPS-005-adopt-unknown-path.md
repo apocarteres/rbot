@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-005
 type: ticket
-status: in_progress
+status: done
 scope: deployment, client
 authority: supporting
 priority: P1
@@ -42,3 +42,4 @@ related: REQ-DEPLOYMENT
 ## Ход работы
 
 - 2026-09-30: клиент — маршруты обоих приложений собираются `withUnknownPath` с `NotFound` (`frontend/shared/not-found.ts`), свой маршрут `**` снят. Осталось: раскладка веб-сервера отвечает 404 на адрес с расширением без файла, и `conventions unknown` после развёртывания — вместе с RBOT-OPS-004 и RBOT-OPS-007.
+- 2026-09-30: раскладка веб-сервера: адрес с расширением без файла — 404, API — `^~ /api/`. QA: `/some/typo` показывает «Страница не найдена», `/missing.js` — 404, `/api/v1.2/thing` — 401 от API, не 404 по расширению; `conventions unknown` проходит на обоих сайтах. Заведомый отказ на QA 2026-10-01: без правила «адрес с расширением → 404» в nginx стенда `conventions unknown` отказал и назвал `/backups/nonexistent-….tar.gz` и `/nonexistent-….js.map` — «ответ 200, тип text/html»; правило возвращено, `unknown` проходит. Рабочая среда на прежней сборке `unknown` проходила и до этой задачи: правило по расширению там стояло с MVP-01, не хватало только порта клиента. Рабочая среда — RBOT-OPS-013.
