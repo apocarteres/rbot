@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# RBOT-DOC-002, REQ-PROJECT-PROCESS-023
+
+message_file="$1"
+subject="$(sed -n '1p' "$message_file")"
+
+if printf '%s' "$subject" | grep -qE '^(fixup!|squash!|Merge |Revert )'; then
+  exit 0
+fi
+if grep -qE '^Release-cycle:[[:space:]]*\S' "$message_file"; then
+  exit 0
+fi
+if printf '%s' "$subject" | grep -qE '^(RBOT-(ARC|API|DATA|FEAT|SEC|PERF|QUAL|TEST|OPS|DOC)-[0-9]{3}|MVP-[0-9]{2})( !revert)? '; then
+  exit 0
+fi
+
+printf '[commit-msg] Сообщение не называет задачу: RBOT-<ОБЛАСТЬ>-<NNN> или MVP-<NN> <что сделано>.\n' >&2
+printf '[commit-msg] Коммит цикла выпуска несёт в теле строку Release-cycle: <идентификатор выпуска>.\n' >&2
+exit 1

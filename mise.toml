@@ -1,8 +1,10 @@
-# MVP-01
+# MVP-01, RBOT-QUAL-001, RBOT-OPS-001, RBOT-OPS-002, RBOT-OPS-003
 [tools]
 java = "temurin-25.0.4+101.0.LTS"
 node = "24.21.0"
 npm = "11.19.0"
+trufflehog = "3.97.4"
+grype = "0.118.0"
 
 [tasks.platform-install]
 description = "Получить ядро закреплённой версии и опубликовать локально"
@@ -28,24 +30,36 @@ depends = ["platform-ensure"]
 run = "scripts/platform/conventions.sh releases-index"
 
 [tasks.conventions-check]
-description = "Правила ядра: комментарии, часы, размеры файлов, секреты конфигурации"
+description = "Правила ядра: комментарии, часы, размеры файлов, секреты конфигурации, модальные окна, развёртывание"
 depends = ["platform-ensure"]
 run = "scripts/platform/conventions.sh check"
 
+[tasks.conventions-obligations]
+description = "Состояние обязательств ядра"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh obligations"
+
 [tasks.backend-test]
-description = "Модульные тесты сервера"
+description = "Модульные тесты сервера, правила архитектуры и проверка проводки; предупреждения компилятора — отказ"
 depends = ["platform-ensure"]
 run = "./mvnw -B -ntp test"
 
 [tasks.backend-test-integration]
 description = "Интеграционные тесты сервера: PostgreSQL и Redis в Testcontainers"
 depends = ["platform-ensure"]
+wait_for = ["backend-test"]
 run = "scripts/ops/backend-test-integration.sh"
 
 [tasks.backend-build]
 description = "Собрать сервер без тестов"
 depends = ["platform-ensure"]
+wait_for = ["backend-test", "backend-test-integration"]
 run = "./mvnw -B -ntp -q -DskipTests package"
+
+[tasks.backend-audit]
+description = "Аудит зависимостей сервера по собранному артефакту"
+depends = ["backend-build"]
+run = "scripts/ops/backend-audit.sh"
 
 [tasks.backend-run]
 description = "Запустить сервер локально на PostgreSQL и Redis из docker compose"
@@ -57,37 +71,77 @@ description = "Установить зависимости клиента"
 dir = "frontend"
 run = "npm ci --audit=false --fund=false"
 
+[tasks.frontend-lint]
+description = "Статический разбор клиента: ESLint с типовым разбором, предупреждения — отказ"
+dir = "frontend"
+run = "npx eslint . --max-warnings=0"
+
 [tasks.frontend-build]
 description = "Собрать кабинет (admin) и приложение (bot)"
 dir = "frontend"
 run = "npm run build"
 
-[tasks.frontend-lint]
-description = "Статический разбор клиента: ESLint с типовым разбором"
+[tasks.frontend-audit]
+description = "Аудит рабочих зависимостей клиента"
 dir = "frontend"
-run = "npm run lint"
+run = "npm audit --omit=dev --audit-level=high"
 
-[tasks.frontend-test]
-description = "Модульные тесты клиента"
-dir = "frontend"
-run = "npm test"
+[tasks.scripts-test]
+description = "Контрактные тесты скриптов: синтаксис, вход развёртывания, commit-msg"
+depends = ["platform-ensure"]
+run = "scripts/ops/scripts-test.sh"
+
+[tasks.secrets-scan]
+description = "Сканирование секретов по истории репозитория и рабочему дереву"
+run = "scripts/ops/secrets-scan.sh"
+
+[tasks.install-hooks]
+description = "Поставить хуки pre-push и commit-msg"
+run = "scripts/git-hooks/install.sh"
 
 [tasks.check]
-description = "Шлагбаум перед отправкой: документация, правила ядра, тесты обеих частей, сборка клиента"
-depends = ["docs-check", "conventions-check", "backend-test", "frontend-lint", "frontend-build"]
+description = "Шлагбаум перед отправкой: документация, правила ядра, разбор и модульные тесты обеих частей, сборка клиента"
+depends = ["docs-check", "conventions-check", "backend-test", "frontend-lint", "frontend-build", "scripts-test"]
 
 [tasks.verify]
-description = "Всё, что проверяется локально"
-depends = ["check", "backend-test-integration", "backend-build"]
+description = "Всё, что проверяется локально; расписку пишет наблюдавший прогон"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh receipt --checks check,verify -- mise run verify-body"
+
+[tasks.verify-body]
+description = "Тело набора verify: проверки без расписки"
+depends = ["check", "backend-test-integration", "backend-build", "backend-audit", "frontend-audit", "secrets-scan"]
+
+[tasks.release]
+description = "Закрыть выпуск: полная проверка и тег на проверенном коммите"
+depends = ["platform-ensure"]
+run = ["mise run verify", "scripts/platform/conventions.sh release close"]
+
+[tasks.release-finish]
+description = "Отметить завершающий шаг выпуска"
+depends = ["platform-ensure"]
+usage = '''
+arg "<note>" help="Чем выполнен завершающий шаг"
+'''
+run = "scripts/platform/conventions.sh release finish --note \"$usage_note\""
+
+[tasks.release-open]
+description = "Открыть следующий выпуск с перечнем задач"
+depends = ["platform-ensure"]
+usage = '''
+arg "[tickets]" help="Задачи в состав, через запятую"
+'''
+run = "scripts/platform/conventions.sh release open --tickets \"$usage_tickets\""
+
+[tasks.release-status]
+description = "Состояние открытого выпуска"
+depends = ["platform-ensure"]
+run = "scripts/platform/conventions.sh release status"
 
 [tasks.provision]
-description = "Подготовить хост: mise run provision -- root@host"
+description = "Подготовить рабочий хост: mise run provision -- <почта администратора>"
 run = "scripts/deploy/provision-remote.sh \"$@\""
 
-[tasks.deploy-qa]
-description = "Развернуть рабочее дерево на QA-стенд в Docker на mini"
-run = "scripts/deploy/qa.sh"
-
 [tasks.deploy]
-description = "Развернуть коммит на рабочий хост: mise run deploy -- [--only backend,frontend,web]"
-run = "scripts/deploy/production.sh \"$@\""
+description = "Развернуть: mise run deploy -- --env qa|production [--only a,b] [--untagged-reason \"<причина>\"]"
+run = "scripts/deploy.sh \"$@\""
