@@ -5,7 +5,7 @@ status: done
 scope: frontend, deployment, security
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-6
 related: RBOT-OPS-005, RUN-QA
 ---
 
