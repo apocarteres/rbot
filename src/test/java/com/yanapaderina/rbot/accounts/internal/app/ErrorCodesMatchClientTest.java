@@ -36,6 +36,12 @@ class ErrorCodesMatchClientTest {
     assertThat(clientCodes()).containsAll(server);
   }
 
+  @Test
+  @DisplayName("Коды отказов разбора запроса есть в словаре клиента")
+  void requestCodesHaveClientText() throws IOException {
+    assertThat(clientCodes()).contains("request-unreadable", "parameter-rejected");
+  }
+
   private static Stream<ErrorCode> declared(Class<?> owner) {
     return Arrays.stream(owner.getDeclaredFields())
       .filter(field -> Modifier.isStatic(field.getModifiers()) && field.getType() == ErrorCode.class)

@@ -13,8 +13,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 // RBOT-OPS-011, REQ-DATA-ACCESS-008
 class SchemaMigrationIT {
 
-  private static final List<String> CORE = List.of("platform-auth:001-account", "platform-auth:002-role", "platform-auth:003-token",
-    "platform-auth:004-access-key");
+  private static final List<String> APPLIED = List.of("platform-auth:001-account", "platform-auth:002-role", "platform-auth:003-token",
+    "platform-auth:004-access-key", "rbot:001-schedule");
 
   @Test
   void freshDatabaseGetsCoreChangelog() throws Exception {
@@ -22,7 +22,7 @@ class SchemaMigrationIT {
       postgres.start();
       DriverManagerDataSource source = source(postgres);
       new SchemaMigration(source).migrate();
-      assertThat(applied(source)).isEqualTo(CORE);
+      assertThat(applied(source)).isEqualTo(APPLIED);
     }
   }
 
@@ -40,7 +40,7 @@ class SchemaMigrationIT {
       new SchemaMigration(source).migrate();
       new SchemaMigration(source).migrate();
 
-      assertThat(applied(source)).isEqualTo(CORE);
+      assertThat(applied(source)).isEqualTo(APPLIED);
       assertThat(jdbc.queryForObject("SELECT count(*) FROM platform_account", Integer.class)).isEqualTo(1);
       assertThat(jdbc.queryForObject("SELECT to_regclass('public.platform_access_key') IS NOT NULL", Boolean.class)).isTrue();
     }

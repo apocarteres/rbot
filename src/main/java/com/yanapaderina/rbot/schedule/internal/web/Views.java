@@ -37,7 +37,7 @@ final class Views {
     }
   }
 
-  record Settings(@NotNull String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, Integer bufferMinutes,
+  record Settings(String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, Integer bufferMinutes,
     boolean complete) {
 
     static Settings of(PracticeSettings settings) {
@@ -45,13 +45,17 @@ final class Views {
         minutes(settings.step()), minutes(settings.buffer()), settings.complete());
     }
 
+    private static Integer minutes(Optional<Duration> value) {
+      return value.map(duration -> Math.toIntExact(duration.toMinutes())).orElse(null);
+    }
+  }
+
+  record SettingsRequest(@NotNull String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes,
+    Integer bufferMinutes) {
+
     PracticeSettings domain(ZoneId zoneId) {
       return new PracticeSettings(zoneId, duration(leadMinutes), Optional.ofNullable(horizonDays), duration(slotStepMinutes),
         duration(bufferMinutes));
-    }
-
-    private static Integer minutes(Optional<Duration> value) {
-      return value.map(duration -> Math.toIntExact(duration.toMinutes())).orElse(null);
     }
 
     private static Optional<Duration> duration(Integer minutes) {

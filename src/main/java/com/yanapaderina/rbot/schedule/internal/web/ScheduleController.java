@@ -43,7 +43,7 @@ class ScheduleController {
   }
 
   @PutMapping("/settings")
-  Views.Settings changeSettings(@Valid @RequestBody Views.Settings request) {
+  Views.Settings changeSettings(@Valid @RequestBody Views.SettingsRequest request) {
     return Views.Settings.of(schedule.changeSettings(request.domain(zone(request.zone()))));
   }
 

@@ -19,6 +19,8 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'settings-incomplete': 'Заполните параметры записи в настройках.',
   'session-type-rejected': 'Проверьте название, длительность и цену.',
   'session-type-missing': 'Тип сессии не найден.',
+  'request-unreadable': 'Запрос не разобран. Обновите страницу и попробуйте снова.',
+  'parameter-rejected': 'Неверный параметр запроса.',
   'authentication-required': 'Сессия закончилась. Войдите снова.',
   'rate-limited': 'Слишком много попыток. Подождите и попробуйте снова.',
   'rate-limit-unavailable': 'Служба временно недоступна. Попробуйте позже.',

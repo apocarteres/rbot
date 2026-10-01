@@ -6,6 +6,6 @@ databaseChangeLog:
       labels: additive
       changes:
         - sqlFile:
-            path: 001-schedule.sql
+            path: ../sql/001-schedule.sql
             relativeToChangelogFile: true
             splitStatements: true
