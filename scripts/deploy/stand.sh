@@ -25,6 +25,7 @@ for component in "${wanted[@]}"; do
   case "$component" in
     backend)
       log "сборка сервера"
+      rm -rf "$ROOT_DIR/target/classes" "$ROOT_DIR"/target/rbot-*.jar
       (cd "$ROOT_DIR" && mise run backend-build)
       services+=(migrate backend)
       ;;
