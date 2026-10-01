@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-014
 type: ticket
-status: in_progress
+status: done
 scope: dependencies, build, persistence
 authority: supporting
 priority: P1
@@ -33,3 +33,7 @@ related: REQ-ADOPTION, RBOT-OPS-011
 
 - `mise run verify` проходит на `14.0.0`.
 - Веб-служба не выполняет переходов при старте, `migrate` выполняет.
+
+## Ход работы
+
+- 2026-10-01: `.platform-version` и `platform-service-parent` — `14.0.0`, пакеты npm пересобраны, блок правил `AGENTS.md` — `v14.0.0`; своя зависимость `spring-boot-starter-liquibase` снята — стартер приходит с `platform-persistence`. `spring.liquibase.enabled=false` у веб-службы оставлен, переходы выполняет `migrate` (`MigrateWiringTest`, `SchemaMigrationIT`). Модульные и интеграционные тесты, `conventions check` проходят на `14.0.0`.

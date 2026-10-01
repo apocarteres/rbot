@@ -14,11 +14,12 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 28. Включены самостоятельные задачи и этапы планов функций.
+Всего: 32. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
 | [Настройка среды едет развёртыванием: составляющая, место, разбор и проверки поведения](RBOT-OPS-007-adopt-environment-configuration.md) | P0 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, operations |
+| [Расписание психолога и свободные слоты](../features/mvp/02-work-schedule.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | backend, frontend, data |
 | [Java-код разделён на модули, граф связей ациклический](RBOT-ARC-001-adopt-java-modules.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, java, architecture |
 | [Каждое модальное окно явно решает, что делать по Escape](RBOT-ARC-002-adopt-modal-escape.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
 | [Окно с удалённым действием закрывается после успеха, каждая кнопка окна объявляет своё действие](RBOT-ARC-003-adopt-modal-actions.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
@@ -32,9 +33,12 @@ authority: navigation
 | [Неизвестный адрес отвечает как неизвестный: порт клиента и 404 на сервере](RBOT-OPS-005-adopt-unknown-path.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, client |
 | [Написание входа в развёртывание: scripts/deploy.sh, разбор доводов ядром, среда production](RBOT-OPS-006-adopt-deploy-entry-spelling.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, build |
 | [Куски прежней сборки клиента переживают раскат](RBOT-OPS-008-adopt-static-archive.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, frontend |
+| [Копии данных службы объявлены, уходят с хоста и проверяются](RBOT-OPS-009-declare-service-backups.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | deployment, operations, personal-data |
 | [Полный прогон после смены версий компонентов ядром 13.2.1](RBOT-OPS-010-full-run-13-2-1.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, testing |
 | [Ядро 13.7.0](RBOT-OPS-012-core-13-7-0.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, build |
 | [Проверка рабочей среды после раската выпуска 2026.09.1](RBOT-OPS-013-verify-production-after-release-2026-09-1.md) | P1 | Выполнена | Не назначен | deployment, operations |
+| [Ядро 14.0.0](RBOT-OPS-014-core-14-0-0.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | dependencies, build, persistence |
+| [Сборочный контейнер: наборы и интеграционные тесты в Docker](RBOT-OPS-015-build-runner.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | tooling, testing |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
 | [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
