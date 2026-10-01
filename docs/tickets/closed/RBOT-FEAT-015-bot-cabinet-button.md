@@ -5,7 +5,7 @@ status: done
 scope: telegram
 authority: supporting
 priority: P2
-release: unassigned
+release: RELEASE-2026-10-9
 related: RBOT-FEAT-009
 ---
 
