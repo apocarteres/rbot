@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# MVP-01
+# MVP-01, RBOT-OPS-015
 
 rbot_docker_host() {
   if [ -n "${DOCKER_HOST:-}" ]; then
@@ -8,6 +8,10 @@ rbot_docker_host() {
     return 0
   fi
   local endpoint socket
+  if [ -S /var/run/docker.sock ] && ! command -v docker > /dev/null 2>&1; then
+    printf 'unix:///var/run/docker.sock\n'
+    return 0
+  fi
   endpoint="$(docker context inspect --format '{{.Endpoints.docker.Host}}' 2> /dev/null || true)"
   if [[ "$endpoint" == unix://* || "$endpoint" == tcp://* ]] && docker -H "$endpoint" version > /dev/null 2>&1; then
     printf '%s\n' "$endpoint"
@@ -28,7 +32,7 @@ rbot_testcontainers_env() {
   local host
   host="$(rbot_docker_host)" || return 1
   export DOCKER_HOST="$host"
-  if docker -H "$host" info --format '{{json .SecurityOptions}}' 2> /dev/null | grep -q rootless; then
+  if command -v docker > /dev/null 2>&1 && docker -H "$host" info --format '{{json .SecurityOptions}}' 2> /dev/null | grep -q rootless; then
     export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE="${TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE:-/run/user/$(id -u)/docker.sock}"
     export TESTCONTAINERS_HOST_OVERRIDE="${TESTCONTAINERS_HOST_OVERRIDE:-127.0.0.1}"
   fi

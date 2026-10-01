@@ -1,4 +1,4 @@
-# MVP-01, RBOT-QUAL-001, RBOT-OPS-001, RBOT-OPS-002, RBOT-OPS-003
+# MVP-01, RBOT-QUAL-001, RBOT-OPS-001, RBOT-OPS-002, RBOT-OPS-003, RBOT-OPS-015
 [tools]
 java = "temurin-25.0.4+101.0.LTS"
 node = "24.21.0"
@@ -142,6 +142,18 @@ run = "scripts/platform/conventions.sh release status"
 description = "Подготовить рабочий хост: mise run provision -- <почта администратора>"
 run = "scripts/deploy/provision-remote.sh \"$@\""
 
+[tasks.provision-backup-store]
+description = "Подготовить хранилище копий на bones и ключ копий на рабочем хосте"
+run = "scripts/deploy/provision-backup-store.sh"
+
 [tasks.deploy]
 description = "Развернуть: mise run deploy -- --env qa|production [--only a,b] [--untagged-reason \"<причина>\"]"
 run = "scripts/deploy.sh \"$@\""
+
+[tasks.build-runner-prepare]
+description = "Подготовить сборочный контейнер на демоне текущего контекста Docker"
+run = "scripts/build-runner/prepare.sh"
+
+[tasks.build-runner-run]
+description = "Прогнать задачу в сборочном контейнере: mise run build-runner-run -- check [--worktree | --commit REF]"
+run = "scripts/build-runner/run.sh \"$@\""
