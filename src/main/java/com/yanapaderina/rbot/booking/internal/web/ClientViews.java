@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, REQ-CODE-DESIGN-005
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, REQ-CODE-DESIGN-005
 final class ClientViews {
 
   private ClientViews() {
@@ -54,5 +54,8 @@ final class ClientViews {
   }
 
   record BookRequest(@NotNull UUID typeId, @NotNull Instant start) {
+  }
+
+  record MoveRequest(@NotNull Instant start) {
   }
 }

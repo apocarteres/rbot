@@ -1,7 +1,7 @@
 ---
 id: MVP-05
 type: ticket
-status: backlog
+status: in_progress
 scope: backend, frontend, data
 authority: supporting
 priority: P1
@@ -49,3 +49,7 @@ questions: resolved
    Ответ 2026-10-01: сразу `BOOKED`. До политики отмен (MVP-06) клиент отменяет сам без штрафа не позже минимального срока записи.
 2. **Регулярные сессии** — [ADR-0003](../../../decisions/ADR-0003-own-calendar-and-booking.md), вопрос 2. Если серии нужны, они выносятся в отдельный этап после MVP-05.
    Ответ 2026-10-01: серий нет (ADR-0003, вопрос 2).
+
+## Ход работы
+
+- 2026-10-01: запись и отмена клиентом — [RBOT-FEAT-002](../../closed/RBOT-FEAT-002-client-booking-wizard.md); раздел «Записи», запись психологом, перенос, отмена психологом и неявка — [RBOT-FEAT-005](../../RBOT-FEAT-005-cabinet-sessions-and-reschedule.md). Остаются события после фиксации и колокольчик (вместе с MVP-01).

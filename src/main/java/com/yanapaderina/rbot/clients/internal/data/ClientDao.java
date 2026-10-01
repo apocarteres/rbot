@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-03, RBOT-FEAT-002, REQ-DATA-ACCESS-002
+// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, REQ-DATA-ACCESS-002
 @Repository
 public class ClientDao {
 
@@ -23,6 +23,10 @@ public class ClientDao {
 
   public Optional<UUID> findByAccount(UUID accountId) {
     return jdbc.sql(sql.get("find-by-account")).param("accountId", accountId).query(UUID.class).optional();
+  }
+
+  public Optional<UUID> accountOf(UUID id) {
+    return jdbc.sql(sql.get("account-of")).param("id", id).query(UUID.class).optional();
   }
 
   public boolean insertForAccount(UUID id, UUID accountId, Instant at) {

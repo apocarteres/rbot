@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-// MVP-01, MVP-02, MVP-14
+// MVP-01, MVP-02, MVP-14, RBOT-FEAT-005
 @Component({
   selector: 'app-home',
   imports: [RouterLink],
@@ -15,6 +15,10 @@ import { RouterLink } from '@angular/router';
     <h1>Добро пожаловать</h1>
     <p class="muted">Остальные разделы появятся по плану MVP.</p>
     <div class="grid">
+      <a class="card ready" routerLink="/sessions">
+        <h2>Записи</h2>
+        <p class="muted">Записи клиентов по неделям, запись клиента, перенос, отмена и неявка.</p>
+      </a>
       <a class="card ready" routerLink="/schedule">
         <h2>Расписание</h2>
         <p class="muted">Рабочие дни и часы, отпуск, типы сессий, предпросмотр записи.</p>
@@ -33,7 +37,6 @@ export class Home {
   protected readonly sections = [
     { title: 'Анкеты', text: 'Анкеты новых клиентов.' },
     { title: 'Клиенты', text: 'Карточки клиентов и приглашения в бот.' },
-    { title: 'Записи', text: 'Календарь сессий, переносы и отмены.' },
     { title: 'Правила отмены', text: 'Политика отмен и штрафы.' },
   ];
 }

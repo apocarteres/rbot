@@ -14,13 +14,14 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-05, RBOT-FEAT-002, ADR-0003, REQ-DATA-ACCESS-002, REQ-PERSISTENCE-013
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-DATA-ACCESS-002, REQ-PERSISTENCE-013
 @Repository
 public class SessionDao {
 
   private static final RowMapper<SessionRow> SESSION = (rs, n) -> new SessionRow(rs.getObject("id", UUID.class),
     rs.getObject("client_id", UUID.class), rs.getObject("type_id", UUID.class), instant(rs, "starts_at"), instant(rs, "ends_at"),
-    rs.getString("status"), rs.getBigDecimal("price_snapshot"));
+    rs.getString("status"), rs.getBigDecimal("price_snapshot"), rs.getObject("cancelled_by", UUID.class),
+    rs.getObject("rescheduled_to", UUID.class));
 
   private static final RowMapper<OccupiedRow> OCCUPIED = (rs, n) -> new OccupiedRow(instant(rs, "starts"), instant(rs, "ends"));
 
@@ -43,8 +44,17 @@ public class SessionDao {
     return jdbc.sql(sql.get("find")).param("id", id).param("clientId", client).query(SESSION).optional();
   }
 
+  public Optional<SessionRow> find(UUID id) {
+    return jdbc.sql(sql.get("find-any")).param("id", id).query(SESSION).optional();
+  }
+
   public List<SessionRow> upcoming(UUID client, Instant now) {
     return jdbc.sql(sql.get("upcoming")).param("clientId", client).param("now", StoredInstant.offsetOf(now)).query(SESSION).list();
+  }
+
+  public List<SessionRow> between(Instant from, Instant to) {
+    return jdbc.sql(sql.get("between")).param("from", StoredInstant.offsetOf(from)).param("to", StoredInstant.offsetOf(to))
+      .query(SESSION).list();
   }
 
   public List<OccupiedRow> occupied(Instant from, Instant to) {
@@ -52,9 +62,17 @@ public class SessionDao {
       .query(OCCUPIED).list();
   }
 
-  public boolean cancel(UUID id, UUID client, UUID by, Instant at) {
-    return jdbc.sql(sql.get("cancel")).param("id", id).param("clientId", client).param("by", by)
+  public boolean close(UUID id, String status, UUID by, Instant at) {
+    return jdbc.sql(sql.get("close")).param("id", id).param("status", status).param("by", by)
       .param("at", StoredInstant.offsetOf(at)).update() == 1;
+  }
+
+  public boolean linkReschedule(UUID id, UUID to) {
+    return jdbc.sql(sql.get("link-reschedule")).param("id", id).param("to", to).update() == 1;
+  }
+
+  public boolean markNoShow(UUID id, Instant now) {
+    return jdbc.sql(sql.get("mark-no-show")).param("id", id).param("now", StoredInstant.offsetOf(now)).update() == 1;
   }
 
   private static Instant instant(ResultSet rs, String column) throws SQLException {

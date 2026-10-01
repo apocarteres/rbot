@@ -11,6 +11,7 @@ import com.yanapaderina.rbot.schedule.internal.data.SessionTypeDao;
 import com.yanapaderina.rbot.schedule.internal.data.WorkIntervalDao;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-02, RBOT-FEAT-002, ADR-0003, REQ-CODE-DESIGN-003
+// MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-CODE-DESIGN-003
 @Service
 public class SlotPreview implements Availability {
 
@@ -38,6 +39,12 @@ public class SlotPreview implements Availability {
     this.types = types;
     this.busy = busy;
     this.clock = clock;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public ZoneId zone() {
+    return ScheduleRows.settings(settings.find()).zone();
   }
 
   @Override

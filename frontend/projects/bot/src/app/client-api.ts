@@ -37,7 +37,7 @@ export interface ClientSession {
   readonly price: number;
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005
 @Injectable({ providedIn: 'root' })
 export class ClientApi {
   private readonly http = inject(HttpClient);
@@ -57,6 +57,10 @@ export class ClientApi {
 
   book(typeId: string, start: string): Promise<ClientSession> {
     return firstValueFrom(this.http.post<ClientSession>(`${this.base}/sessions`, { typeId, start }));
+  }
+
+  reschedule(id: string, start: string): Promise<ClientSession> {
+    return firstValueFrom(this.http.post<ClientSession>(`${this.base}/sessions/${id}/reschedule`, { start }));
   }
 
   cancel(id: string): Promise<ClientSession> {

@@ -1,3 +1,3 @@
-SELECT id, client_id, type_id, starts_at, ends_at, status, price_snapshot
+SELECT id, client_id, type_id, starts_at, ends_at, status, price_snapshot, cancelled_by, rescheduled_to
 FROM session
 WHERE id = :id AND client_id = :clientId

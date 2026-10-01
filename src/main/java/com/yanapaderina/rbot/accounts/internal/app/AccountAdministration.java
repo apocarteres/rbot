@@ -12,12 +12,12 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-01, RBOT-DATA-001, REQ-AUTH-009, REQ-DATA-ACCESS-003
+// MVP-01, RBOT-DATA-001, RBOT-FEAT-005, REQ-AUTH-009, REQ-DATA-ACCESS-003
 @Service
 public class AccountAdministration {
 
   public static final int PAGE_SIZE = 20;
-  static final Set<String> GRANTABLE = Set.of(Roles.ADMIN, Roles.PSYCHOLOGIST);
+  static final Set<String> GRANTABLE = Set.of(Roles.ADMIN, Roles.PSYCHOLOGIST, Roles.CLIENT);
 
   private final Accounts accounts;
 
@@ -37,7 +37,7 @@ public class AccountAdministration {
 
   @Transactional
   public Account create(String email, String password, Set<String> roles) {
-    if (roles.isEmpty() || !GRANTABLE.containsAll(roles)) {
+    if (roles.isEmpty() || !GRANTABLE.containsAll(roles) || (roles.contains(Roles.CLIENT) && roles.size() > 1)) {
       throw new AccountRefused(AccountRefused.ROLES, "Роли вне перечня " + GRANTABLE);
     }
     if (accounts.findByEmail(email).isPresent()) {

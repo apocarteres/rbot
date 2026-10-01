@@ -7,7 +7,7 @@ import { ClientApi, ClientSession } from '../client-api';
 import { DEFAULT_ZONE, details, when, zoneNote } from '../format';
 import { CancelDialog } from './cancel-dialog';
 
-// MVP-01, MVP-05, MVP-08, RBOT-FEAT-002
+// MVP-01, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005
 @Component({
   selector: 'app-home',
   imports: [RouterLink, CancelDialog, FailureDialog],
@@ -17,6 +17,8 @@ import { CancelDialog } from './cancel-dialog';
     .session { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
     .session:first-of-type { border-top: 0; }
     .what { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .actions { display: flex; align-items: center; gap: 12px; flex: none; }
+    .quiet-link { font-size: 0.95rem; }
     .book { display: block; text-align: center; margin: 16px 0; }
     .small { font-size: 0.85rem; }
     footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; font-size: 0.9rem; }
@@ -32,7 +34,10 @@ import { CancelDialog } from './cancel-dialog';
               <strong>{{ period(one) }}</strong>
               <span class="muted small">{{ one.title }} · {{ details(one) }}</span>
             </div>
-            <button type="button" class="quiet" [attr.aria-label]="'Отменить: ' + period(one)" (click)="cancelling.set(one)">Отменить</button>
+            <span class="actions">
+              <a class="quiet-link" routerLink="/book" [queryParams]="{ move: one.id }" [attr.aria-label]="'Перенести: ' + period(one)">Перенести</a>
+              <button type="button" class="quiet" [attr.aria-label]="'Отменить: ' + period(one)" (click)="cancelling.set(one)">Отменить</button>
+            </span>
           </div>
         } @empty {
           @if (loaded()) {

@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-03, RBOT-FEAT-002, ADR-0005, REQ-DATA-ACCESS-003
+// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0005, REQ-DATA-ACCESS-003
 @Service
 class ClientRegistry implements Clients {
 
@@ -31,5 +31,11 @@ class ClientRegistry implements Clients {
   public UUID enrolAccount(UUID accountId) {
     clients.insertForAccount(UUID.randomUUID(), accountId, clock.instant());
     return clients.findByAccount(accountId).orElseThrow();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<UUID> accountOf(UUID clientId) {
+    return clients.accountOf(clientId);
   }
 }

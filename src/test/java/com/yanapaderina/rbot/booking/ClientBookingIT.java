@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-002, ADR-0003
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=booking-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -66,7 +66,7 @@ class ClientBookingIT extends IntegrationStores {
 
   @BeforeEach
   void practice() throws Exception {
-    for (String email : List.of("first@example.test", "second@example.test", "third@example.test")) {
+    for (String email : List.of("first@example.test", "second@example.test", "third@example.test", "fourth@example.test")) {
       if (accounts.findByEmail(email).isEmpty()) {
         accounts.create(email, PASSWORD, Set.of("CLIENT"), true, new NoProfile());
       }
@@ -166,6 +166,27 @@ class ClientBookingIT extends IntegrationStores {
     } finally {
       pool.shutdownNow();
     }
+  }
+
+  @Test
+  void clientReschedulesOwnSession() throws Exception {
+    Cookie[] fourth = login("fourth@example.test", PASSWORD);
+    LocalDate day = today().plusDays(4);
+    String booked = write(post("/api/client/sessions"), fourth, "{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + at(day, "10:00") + "\"}", 201)
+      .andReturn().getResponse().getContentAsString();
+    String id = JsonPath.read(booked, "$.id");
+
+    write(post("/api/client/sessions/" + id + "/reschedule"), fourth, "{\"start\":\"" + at(day, "10:30") + "\"}", 409)
+      .andExpect(jsonPath("$.code").value("slot-taken"));
+    write(post("/api/client/sessions/" + id + "/reschedule"), fourth, "{\"start\":\"" + at(day, "12:00") + "\"}", 200)
+      .andExpect(jsonPath("$.status").value("BOOKED"))
+      .andExpect(jsonPath("$.start").value(at(day, "12:00").toString()));
+    mvc.perform(get("/api/client/sessions").cookie(fourth))
+      .andExpect(jsonPath("$.length()").value(1))
+      .andExpect(jsonPath("$[0].start").value(at(day, "12:00").toString()));
+    slots(fourth, day).andExpect(jsonPath("$.length()").value(2)).andExpect(jsonPath("$[0].start").value(at(day, "10:00").toString()));
+    write(post("/api/client/sessions/" + id + "/reschedule"), fourth, "{\"start\":\"" + at(day, "11:00") + "\"}", 409)
+      .andExpect(jsonPath("$.code").value("session-not-active"));
   }
 
   @Test

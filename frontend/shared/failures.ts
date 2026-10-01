@@ -1,6 +1,6 @@
 import { ApiFailure } from '@apocarteres/http';
 
-// RBOT-API-001, MVP-02, RBOT-FEAT-002, REQ-API-003
+// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, REQ-API-003
 export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'credentials-rejected': 'Неверная почта или пароль.',
   'account-blocked': 'Учётная запись заблокирована. Обратитесь к администратору.',
@@ -26,6 +26,10 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'session-missing': 'Запись не найдена.',
   'session-not-active': 'Эта запись уже отменена или прошла.',
   'cancel-too-late': 'Отменить уже нельзя: до начала меньше минимального срока. Напишите психологу.',
+  'session-not-started': 'Неявку можно отметить только после начала сессии.',
+  'session-start-past': 'Выберите время в будущем.',
+  'client-missing': 'Клиент не найден.',
+  'sessions-range-rejected': 'Неверный диапазон дат.',
   'request-unreadable': 'Запрос не разобран. Обновите страницу и попробуйте снова.',
   'parameter-rejected': 'Неверный параметр запроса.',
   'authentication-required': 'Сессия закончилась. Войдите снова.',

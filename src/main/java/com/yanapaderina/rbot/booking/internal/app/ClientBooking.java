@@ -20,19 +20,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-002, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ClientBooking {
 
   private final Availability availability;
   private final Clients clients;
   private final SessionDao sessions;
+  private final SessionLedger ledger;
   private final Clock clock;
 
-  ClientBooking(Availability availability, Clients clients, SessionDao sessions, Clock clock) {
+  ClientBooking(Availability availability, Clients clients, SessionDao sessions, SessionLedger ledger, Clock clock) {
     this.availability = availability;
     this.clients = clients;
     this.sessions = sessions;
+    this.ledger = ledger;
     this.clock = clock;
   }
 
@@ -60,36 +62,42 @@ public class ClientBooking {
   public ClientSession book(UUID accountId, UUID typeId, Instant start) {
     BookingTerms terms = open();
     SessionType type = offered(typeId);
-    LocalDate day = start.atZone(terms.zone()).toLocalDate();
-    if (availability.free(typeId, day, day).stream().noneMatch(slot -> slot.start().equals(start))) {
-      throw new BookingRefused(BookingRefused.SLOT_TAKEN, "Время " + start + " не свободно");
-    }
-    UUID client = clients.enrolAccount(accountId);
-    Instant end = start.plus(type.duration());
-    SessionRow row = new SessionRow(UUID.randomUUID(), client, typeId, start, end, SessionStatus.BOOKED.name(), type.price());
-    if (!sessions.insert(row, end.plus(terms.buffer()), accountId, clock.instant())) {
-      throw new BookingRefused(BookingRefused.SLOT_TAKEN, "Время " + start + " заняли");
-    }
-    return session(row, Map.of(typeId, type));
+    requireFree(terms, typeId, start);
+    return session(ledger.book(clients.enrolAccount(accountId), type, start, terms.buffer(), accountId), Map.of(typeId, type));
+  }
+
+  @Transactional
+  public ClientSession reschedule(UUID accountId, UUID sessionId, Instant start) {
+    BookingTerms terms = open();
+    SessionRow row = changeable(accountId, sessionId, terms.lead());
+    SessionType type = offered(row.type());
+    requireFree(terms, type.id(), start);
+    return session(ledger.reschedule(row, type, start, terms.buffer(), accountId), Map.of(type.id(), type));
   }
 
   @Transactional
   public ClientSession cancel(UUID accountId, UUID sessionId) {
+    SessionRow row = changeable(accountId, sessionId, availability.terms().map(BookingTerms::lead).orElse(Duration.ZERO));
+    return session(ledger.close(row, SessionStatus.CANCELLED, accountId), types());
+  }
+
+  private SessionRow changeable(UUID accountId, UUID sessionId, Duration lead) {
     UUID client = clients.ofAccount(accountId).orElseThrow(ClientBooking::missing);
     SessionRow row = sessions.find(sessionId, client).orElseThrow(ClientBooking::missing);
     if (!SessionStatus.BOOKED.name().equals(row.status())) {
       throw new BookingRefused(BookingRefused.SESSION_INACTIVE, "Сессия не назначена");
     }
-    Duration lead = availability.terms().map(BookingTerms::lead).orElse(Duration.ZERO);
-    Instant now = clock.instant();
-    if (!CancelDeadline.allows(row.start(), now, lead)) {
+    if (!CancelDeadline.allows(row.start(), clock.instant(), lead)) {
       throw new BookingRefused(BookingRefused.TOO_LATE, "До начала меньше " + lead.toMinutes() + " мин");
     }
-    if (!sessions.cancel(sessionId, client, accountId, now)) {
-      throw new BookingRefused(BookingRefused.SESSION_INACTIVE, "Сессия не назначена");
+    return row;
+  }
+
+  private void requireFree(BookingTerms terms, UUID typeId, Instant start) {
+    LocalDate day = start.atZone(terms.zone()).toLocalDate();
+    if (availability.free(typeId, day, day).stream().noneMatch(slot -> slot.start().equals(start))) {
+      throw new BookingRefused(BookingRefused.SLOT_TAKEN, "Время " + start + " не свободно");
     }
-    return session(new SessionRow(row.id(), row.client(), row.type(), row.start(), row.end(), SessionStatus.CANCELLED.name(),
-      row.price()), types());
   }
 
   private BookingTerms open() {

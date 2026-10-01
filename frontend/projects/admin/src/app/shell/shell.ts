@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthSession } from '@apocarteres/auth';
 
-// MVP-01
+// MVP-01, RBOT-FEAT-005
 @Component({
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
@@ -24,6 +24,7 @@ import { AuthSession } from '@apocarteres/auth';
       <span class="brand">Кабинет психолога</span>
       <nav aria-label="Разделы">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Главная</a>
+        <a routerLink="/sessions" routerLinkActive="active">Записи</a>
         <a routerLink="/schedule" routerLinkActive="active">Расписание</a>
         @if (session.has('ADMIN')) {
           <a routerLink="/accounts" routerLinkActive="active">Учётные записи</a>

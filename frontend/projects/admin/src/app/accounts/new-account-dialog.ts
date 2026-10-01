@@ -6,7 +6,7 @@ import { focusFirstField } from '../../../../../shared/dialog-focus';
 import { failureMessage } from '../../../../../shared/failures';
 import { AccountsApi, AccountView } from './accounts-api';
 
-// MVP-01, RBOT-ARC-002, RBOT-ARC-003, RBOT-ARC-004, REQ-AUTH-009, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
+// MVP-01, RBOT-FEAT-005, RBOT-ARC-002, RBOT-ARC-003, RBOT-ARC-004, REQ-AUTH-009, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
 @Component({
   selector: 'app-new-account-dialog',
   imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop],
@@ -22,6 +22,7 @@ import { AccountsApi, AccountView } from './accounts-api';
           <select id="new-role" name="role" [(ngModel)]="role">
             <option value="PSYCHOLOGIST">Психолог</option>
             <option value="ADMIN">Администратор</option>
+            <option value="CLIENT">Клиент</option>
           </select>
         </div>
         @if (failure()) {

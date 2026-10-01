@@ -1,0 +1,11 @@
+# MVP-05, RBOT-FEAT-005, ADR-0003, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:005-session-reschedule
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/005-session-reschedule.sql
+            relativeToChangelogFile: true
+            splitStatements: true

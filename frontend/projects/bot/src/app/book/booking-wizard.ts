@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
@@ -10,13 +10,14 @@ import { DEFAULT_ZONE, details, shortDay, when, zoneNote } from '../format';
 type Step = 'type' | 'day' | 'time' | 'confirm' | 'done';
 
 const STEPS: readonly Step[] = ['type', 'day', 'time', 'confirm'];
+const MOVE_STEPS: readonly Step[] = ['day', 'time', 'confirm'];
 
 interface SlotDay {
   readonly date: string;
   readonly slots: readonly Slot[];
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, ADR-0003, REQ-CODE-DESIGN-007
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-booking-wizard',
   imports: [RouterLink, FailureDialog],
@@ -39,14 +40,14 @@ interface SlotDay {
   template: `
     @if (step() !== 'done') {
       <div class="top">
-        @if (step() === 'type') {
+        @if (step() === steps()[0]) {
           <a class="quiet" routerLink="/">На главную</a>
         } @else {
           <button type="button" class="quiet back" aria-label="Назад" (click)="back()">←</button>
         }
-        <span class="muted small">Шаг {{ number() }} из {{ steps.length }}</span>
+        <span class="muted small">Шаг {{ number() }} из {{ steps().length }}</span>
       </div>
-      <div class="progress" aria-hidden="true"><span [style.width.%]="number() * 100 / steps.length"></span></div>
+      <div class="progress" aria-hidden="true"><span [style.width.%]="number() * 100 / steps().length"></span></div>
     }
     @if (offer(); as current) {
       @if (!current.open || current.types.length === 0) {
@@ -69,7 +70,8 @@ interface SlotDay {
             </div>
           }
           @case ('day') {
-            <h1>Выберите день</h1>
+            <h1>{{ moving() ? 'Перенести на день' : 'Выберите день' }}</h1>
+            @if (moving(); as old) { <p class="muted small">Сейчас: {{ old.title }}, {{ when(old) }}</p> }
             <div class="chips">
               @for (one of days(); track one.date) {
                 <button type="button" class="chip" [attr.aria-pressed]="day() === one.date" (click)="chooseDay(one.date)">{{ short(one.date) }}</button>
@@ -88,20 +90,21 @@ interface SlotDay {
             <p class="muted small">{{ note() }}</p>
           }
           @case ('confirm') {
-            <h1>Проверьте запись</h1>
+            <h1>{{ moving() ? 'Проверьте перенос' : 'Проверьте запись' }}</h1>
             @if (type(); as chosen) {
               <section class="card">
                 <p><strong>{{ chosen.title }}</strong></p>
                 <p>{{ period() }}</p>
                 <p class="muted small">{{ details(chosen) }}, оплата психологу</p>
                 <p class="muted small">{{ note() }}. {{ cancelNote() }}</p>
-                <button type="button" class="wide" [disabled]="attempt.busy()" (click)="book()">Записаться</button>
+                @if (moving(); as old) { <p class="muted small">Вместо: {{ when(old) }}</p> }
+                <button type="button" class="wide" [disabled]="attempt.busy()" (click)="book()">{{ moving() ? 'Перенести' : 'Записаться' }}</button>
               </section>
             }
           }
           @case ('done') {
             <section class="card done">
-              <h1>Вы записаны</h1>
+              <h1>{{ moving() ? 'Запись перенесена' : 'Вы записаны' }}</h1>
               <p>{{ booked()?.title }}<br /><span class="muted">{{ period() }}</span></p>
               <a class="button" routerLink="/">На главную</a>
             </section>
@@ -118,9 +121,9 @@ export class BookingWizard implements OnInit {
   private readonly api = inject(ClientApi);
   private readonly clock = inject(AppClock);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly attempt = new Attempt();
-  protected readonly steps = STEPS;
   protected readonly step = signal<Step>('type');
   protected readonly offer = signal<Offer | null>(null);
   protected readonly type = signal<OfferedType | null>(null);
@@ -128,9 +131,11 @@ export class BookingWizard implements OnInit {
   protected readonly day = signal<string | null>(null);
   protected readonly slot = signal<Slot | null>(null);
   protected readonly booked = signal<ClientSession | null>(null);
+  protected readonly moving = signal<ClientSession | null>(null);
+  protected readonly steps = computed(() => (this.moving() ? MOVE_STEPS : STEPS));
 
   protected readonly zone = computed(() => this.offer()?.zone ?? DEFAULT_ZONE);
-  protected readonly number = computed(() => STEPS.indexOf(this.step()) + 1);
+  protected readonly number = computed(() => this.steps().indexOf(this.step()) + 1);
   protected readonly note = computed(() => zoneNote(this.zone()));
   protected readonly days = computed<readonly SlotDay[]>(() => {
     const grouped = new Map<string, Slot[]>();
@@ -147,7 +152,19 @@ export class BookingWizard implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.attempt.run(async () => this.offer.set(await this.api.offer()));
+    const move = this.route.snapshot.queryParamMap.get('move');
+    void this.attempt.run(async () => {
+      const [offer, sessions] = await Promise.all([this.api.offer(), move ? this.api.sessions() : Promise.resolve([])]);
+      this.offer.set(offer);
+      const old = sessions.find((one) => one.id === move);
+      const type = offer.types.find((one) => one.id === old?.typeId);
+      if (old && type) {
+        this.moving.set(old);
+        this.type.set(type);
+        await this.loadSlots();
+        this.step.set('day');
+      }
+    });
   }
 
   protected details(type: OfferedType): string {
@@ -192,9 +209,10 @@ export class BookingWizard implements OnInit {
   }
 
   protected back(): void {
-    const at = STEPS.indexOf(this.step());
+    const steps = this.steps();
+    const at = steps.indexOf(this.step());
     if (at > 0) {
-      this.step.set(STEPS[at - 1]);
+      this.step.set(steps[at - 1]);
     } else {
       void this.router.navigateByUrl('/');
     }
@@ -206,7 +224,10 @@ export class BookingWizard implements OnInit {
     if (!type || !slot) {
       return;
     }
-    if (await this.attempt.run(async () => this.booked.set(await this.api.book(type.id, slot.start)))) {
+    const old = this.moving();
+    const done = await this.attempt.run(async () =>
+      this.booked.set(await (old ? this.api.reschedule(old.id, slot.start) : this.api.book(type.id, slot.start))));
+    if (done) {
       this.step.set('done');
       return;
     }
@@ -215,6 +236,10 @@ export class BookingWizard implements OnInit {
       this.slot.set(null);
       this.step.set(this.times().length > 0 ? 'time' : 'day');
     }
+  }
+
+  protected when(session: ClientSession): string {
+    return when(session.start, session.end, this.zone());
   }
 
   private async loadSlots(): Promise<void> {

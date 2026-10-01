@@ -16,7 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-// MVP-01, REQ-AUTH-009, REQ-AUTH-016
+// MVP-01, RBOT-FEAT-005, REQ-AUTH-009, REQ-AUTH-016
 @SpringBootTest(properties = {
   "platform.auth.admin.email=admin@example.test",
   "platform.auth.admin.password=admin-password-1"
@@ -42,6 +42,19 @@ class AdminAccountsIT extends IntegrationStores {
 
     Cookie[] psychologist = login("yana@example.test", "yana-password-1");
     mvc.perform(get("/api/admin/accounts").cookie(psychologist)).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void clientRoleIsGrantedAloneOnly() throws Exception {
+    Cookie[] admin = login("admin@example.test", "admin-password-1");
+    mvc.perform(post("/api/admin/accounts").cookie(admin).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content("{\"email\":\"mixed@example.test\",\"password\":\"mixed-password-1\",\"roles\":[\"CLIENT\",\"ADMIN\"]}"))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.code").value("roles-rejected"));
+    mvc.perform(post("/api/admin/accounts").cookie(admin).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content("{\"email\":\"client@example.test\",\"password\":\"client-password-1\",\"roles\":[\"CLIENT\"]}"))
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.roles[0]").value("CLIENT"));
   }
 
   @Test
