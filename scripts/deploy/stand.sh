@@ -50,11 +50,21 @@ read -r -a services <<< "$(printf '%s\n' "${services[@]}" | sort -u | tr '\n' ' 
 log "демон: $DOCKER_CONTEXT, проект $RBOT_STAND_PROJECT"
 (cd "$ROOT_DIR" && docker compose -p "$RBOT_STAND_PROJECT" -f docker-compose.qa.yml up -d --build --wait postgres redis "${services[@]}")
 
+reachable() {
+  local tries="$1"
+  for _ in $(seq 1 "$tries"); do
+    curl -fsS -o /dev/null --max-time 5 "$RBOT_STAND_ADMIN/" 2> /dev/null && return 0
+    sleep 5
+  done
+  return 1
+}
+
 log "ожидание проброса порта $RBOT_STAND_PORT"
-for _ in $(seq 1 24); do
-  curl -fsS -o /dev/null --max-time 5 "$RBOT_STAND_ADMIN/" 2> /dev/null && break
-  sleep 5
-done
+if ! reachable 12; then
+  log "порт не проброшен: Lima на mini теряет проброс при пересоздании контейнера, перезапуск клиента"
+  docker restart "$RBOT_STAND_PROJECT-frontend-1" > /dev/null
+  reachable 18 || log "порт $RBOT_STAND_PORT так и не ответил"
+fi
 log "проверки"
 "$conventions" health --url "$RBOT_STAND_ADMIN/actuator/health"
 for site in "$RBOT_STAND_ADMIN" "$RBOT_STAND_BOT"; do
