@@ -36,7 +36,7 @@ authority: navigation
 | [Копии данных службы объявлены, уходят с хоста и проверяются](RBOT-OPS-009-declare-service-backups.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | deployment, operations, personal-data |
 | [Полный прогон после смены версий компонентов ядром 13.2.1](RBOT-OPS-010-full-run-13-2-1.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, testing |
 | [Ядро 13.7.0](RBOT-OPS-012-core-13-7-0.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | dependencies, build |
-| [Проверка рабочей среды после раската выпуска 2026.09.1](RBOT-OPS-013-verify-production-after-release-2026-09-1.md) | P1 | Выполнена | Не назначен | deployment, operations |
+| [Проверка рабочей среды после раската выпуска 2026.09.1](RBOT-OPS-013-verify-production-after-release-2026-09-1.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | deployment, operations |
 | [Ядро 14.0.0](RBOT-OPS-014-core-14-0-0.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | dependencies, build, persistence |
 | [Сборочный контейнер: наборы и интеграционные тесты в Docker](RBOT-OPS-015-build-runner.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | tooling, testing |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
