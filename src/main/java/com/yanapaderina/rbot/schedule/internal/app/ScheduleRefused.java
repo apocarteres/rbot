@@ -4,12 +4,13 @@ import io.github.apocarteres.platform.web.errors.CodedFailure;
 import io.github.apocarteres.platform.web.errors.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-// MVP-02, RBOT-FEAT-004, REQ-API-011
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, REQ-API-011
 public final class ScheduleRefused extends RuntimeException implements CodedFailure {
 
   private static final long serialVersionUID = 1L;
 
   public static final ErrorCode INTERVAL = ErrorCode.of("interval-rejected", HttpStatus.BAD_REQUEST);
+  public static final ErrorCode INTERVAL_TYPES_REQUIRED = ErrorCode.of("interval-types-required", HttpStatus.BAD_REQUEST);
   public static final ErrorCode INTERVAL_TYPE = ErrorCode.of("interval-type-unknown", HttpStatus.BAD_REQUEST);
   public static final ErrorCode OVERLAP = ErrorCode.of("intervals-overlap", HttpStatus.BAD_REQUEST);
   public static final ErrorCode RANGE = ErrorCode.of("range-rejected", HttpStatus.BAD_REQUEST);

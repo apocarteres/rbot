@@ -13,6 +13,7 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'account-missing': 'Учётная запись не найдена.',
   'self-change-refused': 'Свою учётную запись заблокировать нельзя.',
   'interval-rejected': 'Начало промежутка должно быть раньше конца.',
+  'interval-types-required': 'Выберите хотя бы один тип сессии для каждого промежутка.',
   'interval-type-unknown': 'Тип сессии в промежутке не найден. Обновите страницу.',
   'intervals-overlap': 'Промежутки пересекаются.',
   'range-rejected': 'Неверный диапазон дат.',

@@ -4,7 +4,7 @@ import java.time.LocalTime;
 import java.util.Set;
 import java.util.UUID;
 
-// MVP-02, RBOT-FEAT-004, ADR-0003
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, ADR-0003
 public record DayInterval(LocalTime start, LocalTime end, Set<UUID> types) {
 
   public DayInterval {
@@ -23,6 +23,6 @@ public record DayInterval(LocalTime start, LocalTime end, Set<UUID> types) {
   }
 
   boolean serves(UUID type) {
-    return types.isEmpty() || types.contains(type);
+    return types.contains(type);
   }
 }

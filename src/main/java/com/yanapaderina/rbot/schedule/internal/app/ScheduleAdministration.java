@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-02, RBOT-FEAT-004, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ScheduleAdministration {
 
@@ -116,6 +116,9 @@ public class ScheduleAdministration {
   }
 
   private List<DayInterval> known(List<DayInterval> hours) {
+    if (hours.stream().anyMatch(hour -> hour.types().isEmpty())) {
+      throw new ScheduleRefused(ScheduleRefused.INTERVAL_TYPES_REQUIRED, "У промежутка не выбран тип сессии");
+    }
     Set<UUID> existing = types.list().stream().map(SessionTypeRow::id).collect(Collectors.toSet());
     if (hours.stream().anyMatch(hour -> !existing.containsAll(hour.types()))) {
       throw new ScheduleRefused(ScheduleRefused.INTERVAL_TYPE, "Тип сессии промежутка не найден");

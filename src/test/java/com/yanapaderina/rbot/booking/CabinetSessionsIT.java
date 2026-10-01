@@ -63,7 +63,7 @@ class CabinetSessionsIT extends IntegrationStores {
     write(put("/api/cabinet/schedule/settings"), psychologist,
       "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"bufferMinutes\":0}", 200);
     for (int weekday = 1; weekday <= 7; weekday++) {
-      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\"}]}", 200);
+      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + THERAPY + "\"]}]}", 200);
     }
   }
 

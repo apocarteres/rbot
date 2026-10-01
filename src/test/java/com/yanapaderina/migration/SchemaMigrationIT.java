@@ -14,7 +14,8 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 class SchemaMigrationIT {
 
   private static final List<String> APPLIED = List.of("platform-auth:001-account", "platform-auth:002-role", "platform-auth:003-token",
-    "platform-auth:004-access-key", "rbot:001-schedule", "rbot:002-clients", "rbot:003-booking", "rbot:004-interval-types", "rbot:005-session-reschedule");
+    "platform-auth:004-access-key", "rbot:001-schedule", "rbot:002-clients", "rbot:003-booking", "rbot:004-interval-types", "rbot:005-session-reschedule",
+    "rbot:006-interval-types-required");
 
   @Test
   void freshDatabaseGetsCoreChangelog() throws Exception {

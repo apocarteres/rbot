@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { SessionType } from './schedule-api';
 
-// MVP-02, RBOT-FEAT-004
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008
 @Component({
   selector: 'app-interval-types',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,7 +21,7 @@ import { SessionType } from './schedule-api';
 })
 export class IntervalTypes {
   readonly types = input.required<readonly SessionType[]>();
-  readonly legend = input('Для типов: если ничего не отмечено — для всех');
+  readonly legend = input('Типы сессий — хотя бы один');
   readonly selected = model<readonly string[]>([]);
 
   protected toggle(id: string): void {

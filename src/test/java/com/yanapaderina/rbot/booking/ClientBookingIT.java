@@ -74,7 +74,7 @@ class ClientBookingIT extends IntegrationStores {
     Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
     settings(psychologist, 0);
     for (int weekday = 1; weekday <= 7; weekday++) {
-      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\"}]}", 200);
+      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + THERAPY + "\"]}]}", 200);
     }
     write(put("/api/cabinet/schedule/types/" + THERAPY), psychologist,
       "{\"title\":\"Психотерапия очно\",\"durationMinutes\":60,\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"firstVisit\":false,\"active\":true}",

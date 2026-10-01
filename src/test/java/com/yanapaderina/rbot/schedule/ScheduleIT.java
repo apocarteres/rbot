@@ -21,7 +21,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-// MVP-02, RBOT-FEAT-004, ADR-0003
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -59,7 +59,10 @@ class ScheduleIT extends IntegrationStores {
     write(put("/api/cabinet/schedule/week/1"), session,
       "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\"},{\"start\":\"11:00\",\"end\":\"13:00\"}]}", 400)
       .andExpect(jsonPath("$.code").value("intervals-overlap"));
-    write(put("/api/cabinet/schedule/week/1"), session, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\"}]}");
+    write(put("/api/cabinet/schedule/week/1"), session, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\"}]}", 400)
+      .andExpect(jsonPath("$.code").value("interval-types-required"));
+    write(put("/api/cabinet/schedule/week/1"), session,
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + CONSULTATION + "\"]}]}");
 
     mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", CONSULTATION)
         .param("from", monday.toString()).param("to", monday.toString()))

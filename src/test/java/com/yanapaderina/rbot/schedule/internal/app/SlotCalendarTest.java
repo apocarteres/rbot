@@ -18,7 +18,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-// MVP-02, RBOT-FEAT-004, ADR-0003
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, ADR-0003
 class SlotCalendarTest {
 
   private static final ZoneId MOSCOW = ZoneId.of("Europe/Moscow");
@@ -33,7 +33,7 @@ class SlotCalendarTest {
   }
 
   private static WeekTemplate mondays(String start, String end) {
-    return new WeekTemplate(Map.of(DayOfWeek.MONDAY, List.of(new DayInterval(LocalTime.parse(start), LocalTime.parse(end)))));
+    return new WeekTemplate(Map.of(DayOfWeek.MONDAY, List.of(new DayInterval(LocalTime.parse(start), LocalTime.parse(end), Set.of(THERAPY)))));
   }
 
   private static List<Instant> starts(List<TimeRange> slots) {
@@ -79,7 +79,7 @@ class SlotCalendarTest {
     Map<LocalDate, ScheduleDay> days = Map.of(
       MONDAY, new ScheduleDay(MONDAY, true, "отпуск", List.of()),
       MONDAY.plusWeeks(1), new ScheduleDay(MONDAY.plusWeeks(1), false, null,
-        List.of(new DayInterval(LocalTime.parse("15:00"), LocalTime.parse("16:00")))));
+        List.of(new DayInterval(LocalTime.parse("15:00"), LocalTime.parse("16:00"), Set.of(THERAPY)))));
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ZERO, 30, HOUR, Duration.ZERO), mondays("10:00", "11:00"), days,
       List.of()).free(MONDAY, MONDAY.plusWeeks(1), THERAPY, HOUR, SUNDAY_NOON);
     assertThat(starts(slots)).containsExactly(Instant.parse("2026-10-12T12:00:00Z"));
@@ -112,10 +112,10 @@ class SlotCalendarTest {
   }
 
   @Test
-  @DisplayName("Промежуток с перечнем типов даёт слоты только этим типам, промежуток без перечня — всем")
+  @DisplayName("Промежуток даёт слоты только типам своего перечня")
   void intervalServesListedTypes() {
     WeekTemplate week = new WeekTemplate(Map.of(DayOfWeek.MONDAY, List.of(
-      new DayInterval(LocalTime.parse("10:00"), LocalTime.parse("11:00")),
+      new DayInterval(LocalTime.parse("10:00"), LocalTime.parse("11:00"), Set.of(THERAPY, SUPERVISION)),
       new DayInterval(LocalTime.parse("12:00"), LocalTime.parse("13:00"), Set.of(SUPERVISION)))));
     SlotCalendar calendar = new SlotCalendar(settings(Duration.ZERO, 30, HOUR, Duration.ZERO), week, Map.of(), List.of());
     assertThat(starts(calendar.free(MONDAY, MONDAY, THERAPY, HOUR, SUNDAY_NOON)))
