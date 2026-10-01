@@ -19,8 +19,9 @@ interface Day {
     .day { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 8px; border-bottom: 1px solid var(--line); }
     .day:last-of-type { border-bottom: 0; }
     .name { width: 110px; font-weight: 600; }
+    .day button { margin-left: auto; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
-    .chip { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .chip { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
     .off { color: var(--muted); flex: 1; }
     @media (max-width: 520px) { .name { width: 100%; } }
   `,
