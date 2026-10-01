@@ -36,5 +36,5 @@ if [ "${RBOT_TELEGRAM_POLLING:-true}" = "true" ]; then
 else
   call setWebhook "{\"url\":\"$app/api/tg/webhook\",\"secret_token\":\"$RBOT_TELEGRAM_WEBHOOK_SECRET\",\"allowed_updates\":[\"message\",\"callback_query\"]}"
 fi
-call setChatMenuButton "{\"menu_button\":{\"type\":\"web_app\",\"text\":\"Записи\",\"web_app\":{\"url\":\"$app\"}}}"
-call setMyCommands '{"commands":[{"command":"start","description":"Открыть запись"}]}'
+call setChatMenuButton "{\"menu_button\":{\"type\":\"web_app\",\"text\":\"Личный кабинет\",\"web_app\":{\"url\":\"$app\"}}}"
+call setMyCommands '{"commands":[{"command":"start","description":"Личный кабинет"}]}'
