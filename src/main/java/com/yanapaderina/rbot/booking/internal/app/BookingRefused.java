@@ -4,7 +4,7 @@ import io.github.apocarteres.platform.web.errors.CodedFailure;
 import io.github.apocarteres.platform.web.errors.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, REQ-API-011
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, REQ-API-011
 public final class BookingRefused extends RuntimeException implements CodedFailure {
 
   private static final long serialVersionUID = 1L;
@@ -18,6 +18,7 @@ public final class BookingRefused extends RuntimeException implements CodedFailu
   public static final ErrorCode NOT_STARTED = ErrorCode.of("session-not-started", HttpStatus.CONFLICT);
   public static final ErrorCode START_PAST = ErrorCode.of("session-start-past", HttpStatus.BAD_REQUEST);
   public static final ErrorCode CLIENT_MISSING = ErrorCode.of("client-missing", HttpStatus.NOT_FOUND);
+  public static final ErrorCode NOT_LINKED = ErrorCode.of("client-not-linked", HttpStatus.FORBIDDEN);
   public static final ErrorCode RANGE = ErrorCode.of("sessions-range-rejected", HttpStatus.BAD_REQUEST);
 
   private final transient ErrorCode code;

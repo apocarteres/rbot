@@ -1,0 +1,11 @@
+# MVP-04, RBOT-FEAT-009, ADR-0002, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:008-telegram-updates
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/008-telegram-updates.sql
+            relativeToChangelogFile: true
+            splitStatements: true

@@ -20,7 +20,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-005, ADR-0003
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=cabinet-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -77,7 +76,7 @@ class CabinetSessionsIT extends IntegrationStores {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$[?(@.email == '" + CLIENT + "')]").exists());
     String booked = book(psychologist, client, at(day, "20:00"), 201)
-      .andExpect(jsonPath("$.clientEmail").value(CLIENT))
+      .andExpect(jsonPath("$.clientName").value(CLIENT))
       .andExpect(jsonPath("$.status").value("BOOKED"))
       .andReturn().getResponse().getContentAsString();
     String id = JsonPath.read(booked, "$.id");
@@ -128,9 +127,10 @@ class CabinetSessionsIT extends IntegrationStores {
       .andExpect(jsonPath("$.code").value("sessions-range-rejected"));
   }
 
-  private String clientId() {
-    UUID id = accounts.findByEmail(CLIENT).orElseThrow().id();
-    return id.toString();
+  private String clientId() throws Exception {
+    String clients = mvc.perform(get("/api/cabinet/clients").cookie(psychologist())).andReturn().getResponse().getContentAsString();
+    java.util.List<String> ids = JsonPath.read(clients, "$[?(@.email == '" + CLIENT + "')].id");
+    return ids.getFirst();
   }
 
   private LocalDate today() {

@@ -11,14 +11,15 @@ import { SystemClock } from '../../../../shared/system-clock';
 import { UpdateAvailable } from '../../../../shared/update-available';
 import { UpdateRequired } from '../../../../shared/update-required';
 import { routes } from './app.routes';
+import { telegramInitDataInterceptor } from './telegram';
 
-// MVP-01, RBOT-FEAT-002, RBOT-API-001, REQ-AUTH-015, REQ-API-002, REQ-CLIENT-UPDATE-001, REQ-CLIENT-UPDATE-006
+// MVP-01, RBOT-FEAT-002, RBOT-FEAT-009, RBOT-API-001, REQ-AUTH-015, REQ-API-002, REQ-CLIENT-UPDATE-001, REQ-CLIENT-UPDATE-006
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([sanitisingInterceptor, sessionExpiredInterceptor, appUpdateInterceptor, authInterceptor])),
+    provideHttpClient(withInterceptors([sanitisingInterceptor, sessionExpiredInterceptor, appUpdateInterceptor, telegramInitDataInterceptor, authInterceptor])),
     provideAppUpdate({ apiVersion: API_VERSION, available: UpdateAvailable, required: UpdateRequired }),
     provideAuth(),
     { provide: SESSION_EXPIRED, useFactory: sessionExpired },

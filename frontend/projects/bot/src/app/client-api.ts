@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { insideTelegram } from './telegram';
 
 export type SessionFormat = 'IN_PERSON' | 'ONLINE';
 
@@ -37,11 +38,11 @@ export interface ClientSession {
   readonly price: number;
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009
 @Injectable({ providedIn: 'root' })
 export class ClientApi {
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/client';
+  private readonly base = insideTelegram() ? '/api/miniapp' : '/api/client';
 
   offer(): Promise<Offer> {
     return firstValueFrom(this.http.get<Offer>(`${this.base}/offer`));

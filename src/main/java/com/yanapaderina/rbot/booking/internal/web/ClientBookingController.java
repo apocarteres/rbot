@@ -1,6 +1,7 @@
 package com.yanapaderina.rbot.booking.internal.web;
 
 import com.yanapaderina.rbot.booking.internal.app.ClientBooking;
+import com.yanapaderina.rbot.clients.Clients;
 import io.github.apocarteres.platform.auth.CurrentAccount;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -17,15 +18,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003
 @RestController
 @RequestMapping("/api/client")
 class ClientBookingController {
 
   private final ClientBooking booking;
+  private final Clients clients;
 
-  ClientBookingController(ClientBooking booking) {
+  ClientBookingController(ClientBooking booking, Clients clients) {
     this.booking = booking;
+    this.clients = clients;
   }
 
   @GetMapping("/offer")
@@ -60,7 +63,7 @@ class ClientBookingController {
     return ClientViews.Session.of(booking.cancel(account(), id));
   }
 
-  private static UUID account() {
-    return CurrentAccount.id().orElseThrow();
+  private UUID account() {
+    return clients.enrolAccount(CurrentAccount.id().orElseThrow());
   }
 }

@@ -3,6 +3,7 @@ package com.yanapaderina.rbot.accounts.internal.app;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.yanapaderina.rbot.booking.internal.app.BookingRefused;
+import com.yanapaderina.rbot.clients.ClientRefused;
 import com.yanapaderina.rbot.schedule.internal.app.ScheduleRefused;
 import io.github.apocarteres.platform.auth.AuthRefused;
 import io.github.apocarteres.platform.web.errors.ErrorCode;
@@ -31,7 +32,7 @@ class ErrorCodesMatchClientTest {
   @Test
   @DisplayName("Каждый код ошибки службы и показываемый код ядра есть в словаре текстов клиента")
   void everyServerCodeHasClientText() throws IOException {
-    Set<String> server = Stream.of(declared(AccountRefused.class), declared(ScheduleRefused.class), declared(BookingRefused.class), CORE_CODES_SHOWN.stream()).flatMap(codes -> codes)
+    Set<String> server = Stream.of(declared(AccountRefused.class), declared(ScheduleRefused.class), declared(BookingRefused.class), declared(ClientRefused.class), CORE_CODES_SHOWN.stream()).flatMap(codes -> codes)
       .map(ErrorCode::value)
       .collect(Collectors.toSet());
     assertThat(clientCodes()).containsAll(server);

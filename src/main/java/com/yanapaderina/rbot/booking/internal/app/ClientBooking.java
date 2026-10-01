@@ -2,7 +2,6 @@ package com.yanapaderina.rbot.booking.internal.app;
 
 import com.yanapaderina.rbot.booking.internal.data.SessionDao;
 import com.yanapaderina.rbot.booking.internal.data.SessionRow;
-import com.yanapaderina.rbot.clients.Clients;
 import com.yanapaderina.rbot.schedule.Availability;
 import com.yanapaderina.rbot.schedule.BookingTerms;
 import com.yanapaderina.rbot.schedule.SessionType;
@@ -20,19 +19,17 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ClientBooking {
 
   private final Availability availability;
-  private final Clients clients;
   private final SessionDao sessions;
   private final SessionLedger ledger;
   private final Clock clock;
 
-  ClientBooking(Availability availability, Clients clients, SessionDao sessions, SessionLedger ledger, Clock clock) {
+  ClientBooking(Availability availability, SessionDao sessions, SessionLedger ledger, Clock clock) {
     this.availability = availability;
-    this.clients = clients;
     this.sessions = sessions;
     this.ledger = ledger;
     this.clock = clock;
@@ -51,38 +48,35 @@ public class ClientBooking {
   }
 
   @Transactional(readOnly = true)
-  public List<ClientSession> upcoming(UUID accountId) {
+  public List<ClientSession> upcoming(UUID client) {
     Map<UUID, SessionType> types = types();
-    return clients.ofAccount(accountId)
-      .map(client -> sessions.upcoming(client, clock.instant()).stream().map(row -> session(row, types)).toList())
-      .orElse(List.of());
+    return sessions.upcoming(client, clock.instant()).stream().map(row -> session(row, types)).toList();
   }
 
   @Transactional
-  public ClientSession book(UUID accountId, UUID typeId, Instant start) {
+  public ClientSession book(UUID client, UUID typeId, Instant start) {
     BookingTerms terms = open();
     SessionType type = offered(typeId);
     requireFree(terms, typeId, start);
-    return session(ledger.book(clients.enrolAccount(accountId), type, start, terms.buffer(), accountId), Map.of(typeId, type));
+    return session(ledger.book(client, type, start, terms.buffer(), client), Map.of(typeId, type));
   }
 
   @Transactional
-  public ClientSession reschedule(UUID accountId, UUID sessionId, Instant start) {
+  public ClientSession reschedule(UUID client, UUID sessionId, Instant start) {
     BookingTerms terms = open();
-    SessionRow row = changeable(accountId, sessionId, terms.lead());
+    SessionRow row = changeable(client, sessionId, terms.lead());
     SessionType type = offered(row.type());
     requireFree(terms, type.id(), start);
-    return session(ledger.reschedule(row, type, start, terms.buffer(), accountId), Map.of(type.id(), type));
+    return session(ledger.reschedule(row, type, start, terms.buffer(), client), Map.of(type.id(), type));
   }
 
   @Transactional
-  public ClientSession cancel(UUID accountId, UUID sessionId) {
-    SessionRow row = changeable(accountId, sessionId, availability.terms().map(BookingTerms::lead).orElse(Duration.ZERO));
-    return session(ledger.close(row, SessionStatus.CANCELLED, accountId), types());
+  public ClientSession cancel(UUID client, UUID sessionId) {
+    SessionRow row = changeable(client, sessionId, availability.terms().map(BookingTerms::lead).orElse(Duration.ZERO));
+    return session(ledger.close(row, SessionStatus.CANCELLED, client), types());
   }
 
-  private SessionRow changeable(UUID accountId, UUID sessionId, Duration lead) {
-    UUID client = clients.ofAccount(accountId).orElseThrow(ClientBooking::missing);
+  private SessionRow changeable(UUID client, UUID sessionId, Duration lead) {
     SessionRow row = sessions.find(sessionId, client).orElseThrow(ClientBooking::missing);
     if (!SessionStatus.BOOKED.name().equals(row.status())) {
       throw new BookingRefused(BookingRefused.SESSION_INACTIVE, "Сессия не назначена");

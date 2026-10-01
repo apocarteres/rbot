@@ -1,0 +1,11 @@
+# MVP-03, RBOT-FEAT-009, ADR-0002, ADR-0005, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:007-client-invites
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/007-client-invites.sql
+            relativeToChangelogFile: true
+            splitStatements: true

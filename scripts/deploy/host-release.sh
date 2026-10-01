@@ -3,7 +3,7 @@ set -euo pipefail
 
 # MVP-01, RBOT-OPS-004, RBOT-OPS-007, RBOT-OPS-008, RBOT-OPS-011, REQ-DEPLOYMENT-002, REQ-DEPLOYMENT-004, REQ-DEPLOYMENT-005,
 # REQ-DEPLOYMENT-006, REQ-DEPLOYMENT-007, REQ-DEPLOYMENT-011, REQ-DEPLOYMENT-016, REQ-DEPLOYMENT-018, REQ-DEPLOYMENT-020,
-# REQ-DEPLOYMENT-022, REQ-DEPLOYMENT-024, REQ-DEPLOYMENT-025, REQ-DEPLOYMENT-029, RBOT-OPS-009, REQ-BACKUPS-005, REQ-BACKUPS-006
+# REQ-DEPLOYMENT-022, REQ-DEPLOYMENT-024, REQ-DEPLOYMENT-025, REQ-DEPLOYMENT-029, RBOT-OPS-009, REQ-BACKUPS-005, REQ-BACKUPS-006, RBOT-FEAT-009
 
 commit="${1:?нужен коммит}"
 only="${2:-}"
@@ -176,6 +176,9 @@ for app in admin bot; do
     "${check[@]}"
   fi
 done
+log "Telegram: туннель и webhook"
+systemctl restart rbot-telegram-tunnel.service > /dev/null 2>&1 || true
+"$ROOT_DIR/scripts/ops/telegram-setup.sh" || log "ОТКАЗ регистрации webhook Telegram: раскат установлен, бот без webhook"
 log "копии данных"
 if ! conventions backups --check; then
   log "ОТКАЗ проверки копий: раскат установлен, копии нужно чинить (REQ-BACKUPS-006)"

@@ -1,24 +1,34 @@
 package com.yanapaderina.rbot.clients.internal.data;
 
+import com.yanapaderina.rbot.clients.ClientCard;
 import io.github.apocarteres.platform.persistence.SqlCatalog;
 import io.github.apocarteres.platform.persistence.SqlStatements;
 import io.github.apocarteres.platform.persistence.StoredInstant;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, REQ-DATA-ACCESS-002
+// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, REQ-DATA-ACCESS-002
 @Repository
 public class ClientDao {
 
+  private static final RowMapper<ClientCard> CARD = (rs, n) -> new ClientCard(rs.getObject("id", UUID.class),
+    Optional.ofNullable(rs.getString("label")), Optional.ofNullable(rs.getObject("account_id", UUID.class)), rs.getBoolean("telegram"),
+    rs.getString("status"), Optional.ofNullable(rs.getObject("invite_expires_at", OffsetDateTime.class)).map(OffsetDateTime::toInstant));
+
   private final JdbcClient jdbc;
   private final SqlCatalog sql;
+  private final SqlCatalog consents;
 
   ClientDao(JdbcClient jdbc, SqlStatements statements) {
     this.jdbc = jdbc;
     this.sql = statements.catalog("client");
+    this.consents = statements.catalog("consent");
   }
 
   public Optional<UUID> findByAccount(UUID accountId) {
@@ -29,8 +39,38 @@ public class ClientDao {
     return jdbc.sql(sql.get("account-of")).param("id", id).query(UUID.class).optional();
   }
 
+  public Optional<UUID> findByTelegram(long telegramUserId) {
+    return jdbc.sql(sql.get("find-by-telegram")).param("telegramUserId", telegramUserId).query(UUID.class).optional();
+  }
+
+  public Optional<Long> telegramOf(UUID id) {
+    return jdbc.sql(sql.get("telegram-of")).param("id", id).query(Long.class).optional();
+  }
+
+  public List<ClientCard> list() {
+    return jdbc.sql(sql.get("list")).query(CARD).list();
+  }
+
+  public Optional<ClientCard> find(UUID id) {
+    return jdbc.sql(sql.get("find")).param("id", id).query(CARD).optional();
+  }
+
   public boolean insertForAccount(UUID id, UUID accountId, Instant at) {
     return jdbc.sql(sql.get("insert-for-account")).param("id", id).param("accountId", accountId)
       .param("createdAt", StoredInstant.offsetOf(at)).update() == 1;
+  }
+
+  public boolean insertProspect(UUID id, String label, Instant at) {
+    return jdbc.sql(sql.get("insert-prospect")).param("id", id).param("label", label).param("createdAt", StoredInstant.offsetOf(at))
+      .update() == 1;
+  }
+
+  public boolean linkTelegram(UUID id, long telegramUserId) {
+    return jdbc.sql(sql.get("link-telegram")).param("id", id).param("telegramUserId", telegramUserId).update() == 1;
+  }
+
+  public boolean insertConsent(UUID id, UUID clientId, int version, String channel, Instant at) {
+    return jdbc.sql(consents.get("insert")).param("id", id).param("clientId", clientId).param("version", version)
+      .param("channel", channel).param("acceptedAt", StoredInstant.offsetOf(at)).update() == 1;
   }
 }

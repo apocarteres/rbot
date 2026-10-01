@@ -14,17 +14,12 @@ export interface CabinetSession {
   readonly end: string;
   readonly status: SessionStatus;
   readonly price: number;
-  readonly clientEmail: string | null;
+  readonly clientName: string | null;
   readonly cancelledByClient: boolean;
   readonly rescheduled: boolean;
 }
 
-export interface ClientAccount {
-  readonly id: string;
-  readonly email: string;
-}
-
-// MVP-05, RBOT-FEAT-005
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009
 @Injectable({ providedIn: 'root' })
 export class SessionsApi {
   private readonly http = inject(HttpClient);
@@ -32,10 +27,6 @@ export class SessionsApi {
 
   between(from: string, to: string): Promise<readonly CabinetSession[]> {
     return firstValueFrom(this.http.get<readonly CabinetSession[]>(`${this.base}/sessions`, { params: { from, to } }));
-  }
-
-  clients(): Promise<readonly ClientAccount[]> {
-    return firstValueFrom(this.http.get<readonly ClientAccount[]>(`${this.base}/clients`));
   }
 
   book(clientId: string, typeId: string, start: string): Promise<CabinetSession> {

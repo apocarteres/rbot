@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-// MVP-01, MVP-02, MVP-14, RBOT-FEAT-005
+// MVP-01, MVP-02, MVP-14, RBOT-FEAT-005, RBOT-FEAT-009
 @Component({
   selector: 'app-home',
   imports: [RouterLink],
@@ -18,6 +18,10 @@ import { RouterLink } from '@angular/router';
       <a class="card ready" routerLink="/sessions">
         <h2>Записи</h2>
         <p class="muted">Записи клиентов по неделям, запись клиента, перенос, отмена и неявка.</p>
+      </a>
+      <a class="card ready" routerLink="/clients">
+        <h2>Клиенты</h2>
+        <p class="muted">Приглашения в бот Telegram и список клиентов.</p>
       </a>
       <a class="card ready" routerLink="/schedule">
         <h2>Расписание</h2>
@@ -36,7 +40,6 @@ import { RouterLink } from '@angular/router';
 export class Home {
   protected readonly sections = [
     { title: 'Анкеты', text: 'Анкеты новых клиентов.' },
-    { title: 'Клиенты', text: 'Карточки клиентов и приглашения в бот.' },
     { title: 'Правила отмены', text: 'Политика отмен и штрафы.' },
   ];
 }

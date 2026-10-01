@@ -5,9 +5,10 @@ import { Attempt } from '../../../../../shared/attempt';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ClientApi, ClientSession } from '../client-api';
 import { DEFAULT_ZONE, details, when, zoneNote } from '../format';
+import { insideTelegram } from '../telegram';
 import { CancelDialog } from './cancel-dialog';
 
-// MVP-01, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005
+// MVP-01, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009
 @Component({
   selector: 'app-home',
   imports: [RouterLink, CancelDialog, FailureDialog],
@@ -54,10 +55,12 @@ import { CancelDialog } from './cancel-dialog';
         <p>Это приложение для клиентов. Кабинет психолога открывается на admin.yanapaderina.com.</p>
       </section>
     }
-    <footer>
-      <span class="muted">{{ auth.account()?.email }}</span>
-      <button type="button" class="quiet" (click)="logout()">Выйти</button>
-    </footer>
+    @if (!telegram) {
+      <footer>
+        <span class="muted">{{ auth.account()?.email }}</span>
+        <button type="button" class="quiet" (click)="logout()">Выйти</button>
+      </footer>
+    }
     @if (cancelling(); as one) {
       <app-cancel-dialog [session]="one" [zone]="zone()" (closed)="cancelling.set(null)" (cancelled)="cancelled()" />
     }
@@ -75,7 +78,8 @@ export class Home implements OnInit {
   protected readonly sessions = signal<readonly ClientSession[]>([]);
   protected readonly loaded = signal(false);
   protected readonly cancelling = signal<ClientSession | null>(null);
-  protected readonly client = computed(() => this.auth.account()?.roles.includes('CLIENT') ?? false);
+  protected readonly telegram = insideTelegram();
+  protected readonly client = computed(() => this.telegram || (this.auth.account()?.roles.includes('CLIENT') ?? false));
   protected readonly zone = signal(DEFAULT_ZONE);
   protected readonly note = computed(() => zoneNote(this.zone()));
 

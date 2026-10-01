@@ -2,7 +2,6 @@ package com.yanapaderina.rbot.booking.internal.web;
 
 import com.yanapaderina.rbot.booking.internal.app.CabinetBooking;
 import com.yanapaderina.rbot.booking.internal.app.CabinetSession;
-import com.yanapaderina.rbot.booking.internal.app.ClientAccount;
 import com.yanapaderina.rbot.booking.internal.app.SessionStatus;
 import com.yanapaderina.rbot.schedule.SessionFormat;
 import io.github.apocarteres.platform.auth.CurrentAccount;
@@ -24,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-05, RBOT-FEAT-005, ADR-0003, REQ-CODE-DESIGN-005
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-CODE-DESIGN-005
 @RestController
 @RequestMapping("/api/cabinet")
 class CabinetSessionsController {
@@ -39,11 +38,6 @@ class CabinetSessionsController {
   List<Session> sessions(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
     return booking.between(from, to).stream().map(Session::of).toList();
-  }
-
-  @GetMapping("/clients")
-  List<ClientAccount> clients() {
-    return booking.clientAccounts();
   }
 
   @PostMapping("/sessions")
@@ -72,12 +66,12 @@ class CabinetSessionsController {
   }
 
   record Session(UUID id, UUID typeId, String title, SessionFormat format, Instant start, Instant end, SessionStatus status,
-    BigDecimal price, String clientEmail, boolean cancelledByClient, boolean rescheduled) {
+    BigDecimal price, String clientName, boolean cancelledByClient, boolean rescheduled) {
 
     static Session of(CabinetSession session) {
       return new Session(session.id(), session.type() == null ? null : session.type().id(),
         session.type() == null ? null : session.type().title(), session.type() == null ? null : session.type().format(),
-        session.start(), session.end(), session.status(), session.price(), session.clientEmail(), session.cancelledByClient(),
+        session.start(), session.end(), session.status(), session.price(), session.clientName(), session.cancelledByClient(),
         session.rescheduled());
     }
   }

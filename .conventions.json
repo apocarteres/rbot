@@ -65,6 +65,12 @@
         "install": "/etc/systemd/system/rbot-backup.timer",
         "verify": "systemd-analyze verify {}",
         "enable": true
+      },
+      "unit-telegram-tunnel": {
+        "artifact": "deploy/systemd/rbot-telegram-tunnel.service",
+        "install": "/etc/systemd/system/rbot-telegram-tunnel.service",
+        "verify": "systemd-analyze verify {}",
+        "enable": true
       }
     },
     "withoutDowntime": {

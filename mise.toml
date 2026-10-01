@@ -146,6 +146,10 @@ run = "scripts/deploy/provision-remote.sh \"$@\""
 description = "Подготовить хранилище копий на bones и ключ копий на рабочем хосте"
 run = "scripts/deploy/provision-backup-store.sh"
 
+[tasks.provision-telegram-proxy]
+description = "Подготовить прокси Telegram на metrics и туннель к нему с рабочего хоста"
+run = "scripts/deploy/provision-telegram-proxy.sh"
+
 [tasks.deploy]
 description = "Развернуть: mise run deploy -- --env qa|production [--only a,b] [--untagged-reason \"<причина>\"]"
 run = "scripts/deploy.sh \"$@\""

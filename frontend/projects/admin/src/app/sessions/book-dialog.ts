@@ -6,11 +6,12 @@ import { clock, instantAt, isoDate } from '../../../../../shared/dates';
 import { focusFirstField } from '../../../../../shared/dialog-focus';
 import { failureMessage } from '../../../../../shared/failures';
 import { ScheduleApi, SessionType, Slot } from '../schedule/schedule-api';
-import { CabinetSession, ClientAccount, SessionsApi } from './sessions-api';
+import { ClientView } from '../clients/clients-api';
+import { CabinetSession, SessionsApi } from './sessions-api';
 
 const NO_TIME = new Error('время не выбрано');
 
-// MVP-05, RBOT-FEAT-005, ADR-0003, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
 @Component({
   selector: 'app-book-dialog',
   imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop],
@@ -30,13 +31,13 @@ const NO_TIME = new Error('время не выбрано');
         (submit)="$event.preventDefault()">
         <h2 id="book-title">{{ session() ? 'Перенести запись' : 'Записать клиента' }}</h2>
         @if (session(); as moving) {
-          <p class="muted">{{ moving.clientEmail }} · {{ moving.title }}</p>
+          <p class="muted">{{ moving.clientName }} · {{ moving.title }}</p>
         } @else {
           <div class="field"><label for="book-client">Клиент</label>
             <select id="book-client" name="client" required [(ngModel)]="client">
-              @for (one of clients(); track one.id) { <option [value]="one.id">{{ one.email }}</option> }
+              @for (one of clients(); track one.id) { <option [value]="one.id">{{ one.name }}</option> }
             </select>
-            @if (clients().length === 0) { <span class="muted small">Клиентов нет: заведите учётную запись с ролью «Клиент».</span> }
+            @if (clients().length === 0) { <span class="muted small">Клиентов нет: пригласите клиента в разделе «Клиенты».</span> }
           </div>
           <div class="field"><label for="book-type">Тип сессии</label>
             <select id="book-type" name="type" required [ngModel]="type()" (ngModelChange)="type.set($event)">
@@ -76,7 +77,7 @@ const NO_TIME = new Error('время не выбрано');
 })
 export class BookDialog implements OnInit {
   readonly session = input<CabinetSession | null>(null);
-  readonly clients = input<readonly ClientAccount[]>([]);
+  readonly clients = input<readonly ClientView[]>([]);
   readonly types = input<readonly SessionType[]>([]);
   readonly zone = input.required<string>();
   readonly initialDate = input.required<string>();

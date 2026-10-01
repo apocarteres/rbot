@@ -6,7 +6,8 @@ import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ScheduleApi, SessionType } from '../schedule/schedule-api';
 import { BookDialog } from './book-dialog';
 import { ConfirmDialog } from './confirm-dialog';
-import { CabinetSession, ClientAccount, SessionsApi } from './sessions-api';
+import { ClientsApi, ClientView } from '../clients/clients-api';
+import { CabinetSession, SessionsApi } from './sessions-api';
 
 const RUBLES = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 2, minimumFractionDigits: 0 });
 
@@ -24,7 +25,7 @@ interface Confirming {
 
 type Editing = { readonly session: CabinetSession | null } | null;
 
-// MVP-05, RBOT-FEAT-005, ADR-0003, REQ-CODE-DESIGN-007
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-sessions',
   imports: [BookDialog, ConfirmDialog, FailureDialog],
@@ -60,7 +61,7 @@ type Editing = { readonly session: CabinetSession | null } | null;
         @for (one of day.sessions; track one.id) {
           <div class="row" [class.closed]="one.status !== 'BOOKED'">
             <span class="time">{{ period(one) }}</span>
-            <span class="who"><strong>{{ one.clientEmail ?? 'клиент без учётной записи' }}</strong>
+            <span class="who"><strong>{{ one.clientName ?? 'клиент' }}</strong>
               <span class="muted"> · {{ one.title }} · {{ price(one) }}</span></span>
             @if (state(one); as label) { <span class="state">{{ label }}</span> }
             <span class="actions">
@@ -94,13 +95,14 @@ type Editing = { readonly session: CabinetSession | null } | null;
 export class SessionsPage implements OnInit {
   private readonly api = inject(SessionsApi);
   private readonly schedule = inject(ScheduleApi);
+  private readonly people = inject(ClientsApi);
   private readonly clock = inject(AppClock);
 
   protected readonly attempt = new Attempt();
   protected readonly zone = signal('Europe/Moscow');
   protected readonly monday = signal('');
   protected readonly sessions = signal<readonly CabinetSession[]>([]);
-  protected readonly clients = signal<readonly ClientAccount[]>([]);
+  protected readonly clients = signal<readonly ClientView[]>([]);
   protected readonly types = signal<readonly SessionType[]>([]);
   protected readonly loaded = signal(false);
   protected readonly editing = signal<Editing>(null);
@@ -123,7 +125,7 @@ export class SessionsPage implements OnInit {
 
   ngOnInit(): void {
     void this.attempt.run(async () => {
-      const [settings, types, clients] = await Promise.all([this.schedule.settings(), this.schedule.types(), this.api.clients()]);
+      const [settings, types, clients] = await Promise.all([this.schedule.settings(), this.schedule.types(), this.people.list()]);
       this.zone.set(settings.zone);
       this.types.set(types);
       this.clients.set(clients);
@@ -169,7 +171,7 @@ export class SessionsPage implements OnInit {
   protected cancel(session: CabinetSession): void {
     this.confirming.set({
       heading: 'Отменить запись?',
-      text: `${session.clientEmail ?? ''} · ${this.title(isoDate(Date.parse(session.start), this.zone()))}, ${this.period(session)}. Штрафа нет.`,
+      text: `${session.clientName ?? ''} · ${this.title(isoDate(Date.parse(session.start), this.zone()))}, ${this.period(session)}. Штрафа нет.`,
       confirm: 'Отменить запись',
       action: () => this.api.cancel(session.id),
     });
@@ -178,7 +180,7 @@ export class SessionsPage implements OnInit {
   protected noShow(session: CabinetSession): void {
     this.confirming.set({
       heading: 'Отметить неявку?',
-      text: `${session.clientEmail ?? ''} · ${this.period(session)}.`,
+      text: `${session.clientName ?? ''} · ${this.period(session)}.`,
       confirm: 'Отметить неявку',
       action: () => this.api.noShow(session.id),
     });

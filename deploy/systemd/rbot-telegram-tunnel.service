@@ -1,0 +1,22 @@
+# MVP-04, RBOT-FEAT-009, ADR-0001
+[Unit]
+Description=rbot: туннель к прокси Telegram на metrics
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/rbot/telegram_proxy_ed25519
+
+[Service]
+Type=simple
+User=rbot
+Group=rbot
+EnvironmentFile=/etc/rbot/rbot.env
+ExecStart=/usr/bin/ssh -N -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/rbot/telegram_proxy_known_hosts -i /etc/rbot/telegram_proxy_ed25519 -L 127.0.0.1:18888:127.0.0.1:18888 ${RBOT_TELEGRAM_PROXY_TARGET}
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

@@ -12,6 +12,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.yanapaderina.rbot.IntegrationStores;
 import com.yanapaderina.rbot.booking.internal.app.BookingRefused;
 import com.yanapaderina.rbot.booking.internal.app.ClientBooking;
+import com.yanapaderina.rbot.clients.Clients;
 import io.github.apocarteres.platform.auth.Accounts;
 import io.github.apocarteres.platform.auth.NoProfile;
 import jakarta.servlet.http.Cookie;
@@ -63,6 +64,9 @@ class ClientBookingIT extends IntegrationStores {
 
   @Autowired
   private ClientBooking booking;
+
+  @Autowired
+  private Clients clients;
 
   @BeforeEach
   void practice() throws Exception {
@@ -142,7 +146,7 @@ class ClientBookingIT extends IntegrationStores {
 
   @Test
   void tenSimultaneousBookingsOfOneSlotGiveOneSession() throws Exception {
-    UUID account = accounts.findByEmail("third@example.test").orElseThrow().id();
+    UUID account = clients.enrolAccount(accounts.findByEmail("third@example.test").orElseThrow().id());
     Instant start = at(today().plusDays(3), "12:00");
     ExecutorService pool = Executors.newFixedThreadPool(10);
     try {
