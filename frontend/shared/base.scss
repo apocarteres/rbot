@@ -87,4 +87,4 @@ a { color: var(--accent); }
 .warning { color: var(--danger); background: color-mix(in srgb, var(--danger) 8%, transparent); border-radius: 8px; padding: 8px 12px; }
 .notice { color: var(--accent); }
 h3 { font-size: 1rem; margin: 0 0 12px; }
-.grid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.grid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: end; }

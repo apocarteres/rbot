@@ -27,7 +27,7 @@ const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yek
           </select>
         </div>
         <div class="field">
-          <label for="lead">Записаться не позже чем за, ч</label>
+          <label for="lead">Минимум до сессии, ч</label>
           <input id="lead" name="lead" type="number" min="0" max="168" [(ngModel)]="leadHours" />
         </div>
         <div class="field">
