@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-005
 type: ticket
-status: in_progress
+status: done
 scope: backend, frontend, data
 authority: supporting
 priority: P1
@@ -45,3 +45,5 @@ related: MVP-05, RBOT-FEAT-002, ADR-0003
 - 2026-10-01: набор `rbot:005-session-reschedule` (`additive`): `session.rescheduled_to`, индекс по началу. `SessionLedger` — запись, перенос (сначала закрыть прежнюю, затем вставить новую, затем связать) и закрытие; `CabinetBooking` и точки `/api/cabinet/sessions`, `/api/cabinet/clients`; `ClientBooking.reschedule` и `/api/client/sessions/{id}/reschedule`. Порт `Availability.zone()`, `Clients.accountOf`.
 - Кабинет: раздел «Записи» (`sessions/`), окна `BookDialog` (запись и перенос) и `ConfirmDialog` (отмена, неявка). Приложение клиента: «Перенести» открывает мастер с шага «день».
 - Проверки: `CabinetSessionsIT` (3 случая), `ClientBookingIT.clientReschedulesOwnSession`, `AdminAccountsIT.clientRoleIsGrantedAloneOnly`; всего интеграционных — 25.
+- QA кабинета (`admin@yanapaderina.test`): неделя 5–11 окт. показывает отмену клиента «отменил клиент»; «Записать клиента» → `client@yanapaderina.test`, «Психотерапия очно», 5 окт., «Другое время» 18:00 с предупреждением → запись 18:00–19:00; «Перенести» на свободные 11:00 → прежняя «перенесена», новая назначена. В окне дата по умолчанию — первый день открытой недели, подпись свободного времени — над сеткой.
+- QA приложения клиента, 375 px: «Перенести» открывает мастер «Перенести на день» с текущей записью; вт, 6 окт., 14:00 → «Запись перенесена», на главной одна запись на 14:00. Кнопки строки на узком экране переносятся под текст.

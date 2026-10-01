@@ -14,10 +14,10 @@ import { CancelDialog } from './cancel-dialog';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     :host { display: block; max-width: 480px; margin: 0 auto; padding: 24px 16px; }
-    .session { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+    .session { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; padding: 12px 0; border-top: 1px solid var(--line); }
     .session:first-of-type { border-top: 0; }
-    .what { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .actions { display: flex; align-items: center; gap: 12px; flex: none; }
+    .what { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 220px; }
+    .actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
     .quiet-link { font-size: 0.95rem; }
     .book { display: block; text-align: center; margin: 16px 0; }
     .small { font-size: 0.85rem; }

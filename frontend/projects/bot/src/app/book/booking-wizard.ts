@@ -148,7 +148,7 @@ export class BookingWizard implements OnInit {
   protected readonly times = computed(() => this.days().find((one) => one.date === this.day())?.slots ?? []);
   protected readonly cancelNote = computed(() => {
     const lead = this.offer()?.leadMinutes ?? 0;
-    return lead > 0 ? `Отменить можно не позже чем за ${hours(lead)} до начала` : 'Отменить можно до начала';
+    return lead > 0 ? `Перенести или отменить можно не позже чем за ${hours(lead)} до начала` : 'Перенести или отменить можно до начала';
   });
 
   ngOnInit(): void {

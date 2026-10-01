@@ -79,7 +79,7 @@ type Editing = { readonly session: CabinetSession | null } | null;
       }
     </section>
     @if (editing(); as open) {
-      <app-book-dialog [session]="open.session" [clients]="clients()" [types]="types()" [zone]="zone()" [initialDate]="today()"
+      <app-book-dialog [session]="open.session" [clients]="clients()" [types]="types()" [zone]="zone()" [initialDate]="firstDay()"
         (closed)="editing.set(null)" (saved)="changed()" />
     }
     @if (confirming(); as open) {
@@ -107,6 +107,7 @@ export class SessionsPage implements OnInit {
   protected readonly confirming = signal<Confirming | null>(null);
 
   protected readonly today = computed(() => isoDate(this.clock.instant(), this.zone()));
+  protected readonly firstDay = computed(() => (this.monday() > this.today() ? this.monday() : this.today()));
   protected readonly range = computed(() => {
     const monday = this.monday();
     return monday ? `${short(monday)} — ${short(plusDays(monday, 6))}` : '';

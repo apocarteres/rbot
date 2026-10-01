@@ -52,4 +52,4 @@ questions: resolved
 
 ## Ход работы
 
-- 2026-10-01: запись и отмена клиентом — [RBOT-FEAT-002](../../closed/RBOT-FEAT-002-client-booking-wizard.md); раздел «Записи», запись психологом, перенос, отмена психологом и неявка — [RBOT-FEAT-005](../../RBOT-FEAT-005-cabinet-sessions-and-reschedule.md). Остаются события после фиксации и колокольчик (вместе с MVP-01).
+- 2026-10-01: запись и отмена клиентом — [RBOT-FEAT-002](../../closed/RBOT-FEAT-002-client-booking-wizard.md); раздел «Записи», запись психологом, перенос, отмена психологом и неявка — [RBOT-FEAT-005](../../closed/RBOT-FEAT-005-cabinet-sessions-and-reschedule.md). Остаются события после фиксации и колокольчик (вместе с MVP-01).

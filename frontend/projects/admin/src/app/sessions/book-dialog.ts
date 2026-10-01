@@ -22,6 +22,7 @@ const NO_TIME = new Error('время не выбрано');
     .other { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
     .other input[type='time'] { width: 120px; }
     .small { font-size: 0.85rem; }
+    .label { margin-bottom: 6px; }
   `,
   template: `
     <div class="veil" [apcrModalBackdrop]="close">
@@ -46,14 +47,16 @@ const NO_TIME = new Error('время не выбрано');
         <div class="field"><label for="book-date">Дата</label>
           <input id="book-date" name="date" type="date" required [ngModel]="date()" (ngModelChange)="date.set($event)" />
         </div>
-        <span class="muted small">Свободное время</span>
-        <div class="times">
-          @for (one of slots(); track one.start) {
-            <button type="button" class="time" apcrLocal [attr.aria-pressed]="!other() && slot()?.start === one.start" (click)="pick(one)">{{ label(one) }}</button>
-          } @empty {
-            <span class="muted small">Свободного времени в этот день нет.</span>
-          }
-        </div>
+        <p class="muted small label">Свободное время</p>
+        @if (slots().length > 0) {
+          <div class="times">
+            @for (one of slots(); track one.start) {
+              <button type="button" class="time" apcrLocal [attr.aria-pressed]="!other() && slot()?.start === one.start" (click)="pick(one)">{{ label(one) }}</button>
+            }
+          </div>
+        } @else {
+          <p class="muted small">В этот день свободного времени нет.</p>
+        }
         <label class="other"><input type="checkbox" name="other" [ngModel]="other()" (ngModelChange)="other.set($event)" />Другое время, вне расписания
           @if (other()) { <input type="time" name="time" aria-label="Время начала" [(ngModel)]="time" /> }
         </label>
