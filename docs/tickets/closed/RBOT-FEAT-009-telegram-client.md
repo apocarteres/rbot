@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-009
 type: ticket
-status: in_progress
+status: done
 scope: backend, frontend, data, telegram, security, personal-data
 authority: supporting
 priority: P1
@@ -40,7 +40,7 @@ related: MVP-03, MVP-04, MVP-08, ADR-0001, ADR-0002, ADR-0005
 
 - `InitDataTest`: подпись токеном даёт пользователя; чужой токен, правка поля, устаревшая дата отвергаются.
 - `TelegramIT`: webhook без секрета — 401; приглашение → `/start` → согласие → привязка; повторное согласие по той же ссылке — отказ; Mini App с подписью — запись, с чужой подписью — 401, непривязанный — 403; отмена психологом уведомляет клиента; токен приглашения в базе не хранится.
-- Рабочая среда: владелец получает ссылку в кабинете, привязывает Telegram, записывается в Mini App; психолог видит запись в «Записях».
+- Проверка на рабочей среде после раската — [RBOT-OPS-017](../RBOT-OPS-017-verify-telegram-on-production.md).
 
 ## Ход работы
 
@@ -48,3 +48,4 @@ related: MVP-03, MVP-04, MVP-08, ADR-0001, ADR-0002, ADR-0005
 - Кабинет: раздел «Клиенты», окно `InviteDialog`; выбор клиента в окне записи — по подписи. Приложение клиента: режим Telegram по `tgWebAppData` из адреса, без библиотеки Telegram.
 - Инфраструктура: `scripts/deploy/provision-telegram-proxy.sh`, `deploy/systemd/rbot-telegram-tunnel.service`, `scripts/ops/telegram-setup.sh` в раскате.
 - 152-ФЗ: сообщения бота проходят через сервер в Финляндии и Telegram; черновик согласия это называет. Текст согласия — до ответа юриста.
+- 2026-10-01: прокси на `metrics` поднят: `tinyproxy` слушает только `127.0.0.1:18888`, `api.telegram.org` — 302, `example.com` — отказ; ключ `rbot-tunnel` — `restrict,port-forwarding,permitopen="127.0.0.1:18888"`. Интеграционных тестов 28, все проходят; QA: «Клиенты» и вход по почте работают, Telegram на стенде не настроен.
