@@ -36,7 +36,7 @@ for component in "${wanted[@]}"; do
     web-stand)
       services+=(frontend)
       ;;
-    web-site|web-headers|unit-backend)
+    web-site|web-headers|unit-backend|unit-backup|timer-backup)
       ;;
     *)
       printf 'составляющей %s у стенда нет: backend, frontend-admin, frontend-bot, web-stand\n' "$component" >&2
