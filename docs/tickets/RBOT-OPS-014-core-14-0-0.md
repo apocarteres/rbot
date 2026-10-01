@@ -5,7 +5,7 @@ status: in_progress
 scope: dependencies, build, persistence
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-1
 related: REQ-ADOPTION, RBOT-OPS-011
 ---
 

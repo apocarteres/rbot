@@ -5,7 +5,7 @@ status: backlog
 scope: backend, frontend, data
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-1
 depends-on: MVP-01
 related: ADR-0003
 questions: resolved
