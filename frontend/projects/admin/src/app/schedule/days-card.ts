@@ -4,7 +4,7 @@ import { Attempt } from '../../../../../shared/attempt';
 import { dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ClosedDaysDialog } from './closed-days-dialog';
-import { intervalLabel } from './interval-label';
+import { IntervalChip } from './interval-chip';
 import { Day, ScheduleApi, SessionType } from './schedule-api';
 import { SpecialDayDialog } from './special-day-dialog';
 
@@ -13,7 +13,7 @@ const AHEAD_DAYS = 180;
 // MVP-02, RBOT-FEAT-003, RBOT-FEAT-004
 @Component({
   selector: 'app-days-card',
-  imports: [ClosedDaysDialog, SpecialDayDialog, FailureDialog],
+  imports: [ClosedDaysDialog, SpecialDayDialog, FailureDialog, IntervalChip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -32,7 +32,9 @@ const AHEAD_DAYS = 180;
         @for (day of days(); track day.date) {
           <div class="item">
             <span><strong>{{ title(day.date) }}</strong>
-              @if (day.closed) { · <span class="closed">не работает</span> } @else { · {{ hours(day) }} }
+              @if (day.closed) { · <span class="closed">не работает</span> } @else {
+                @for (interval of day.intervals; track $index) { <app-interval-chip [interval]="interval" [types]="types()" /> }
+              }
               @if (day.note) { <span class="muted"> · {{ day.note }}</span> }
             </span>
             <button type="button" class="quiet" (click)="clear(day)" [disabled]="attempt.busy()">Вернуть обычные часы</button>
@@ -70,10 +72,6 @@ export class DaysCard implements OnInit {
 
   protected title(date: string): string {
     return dayTitle(date);
-  }
-
-  protected hours(day: Day): string {
-    return day.intervals.map((one) => intervalLabel(one, this.types())).join('; ');
   }
 
   protected async changed(): Promise<void> {

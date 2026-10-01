@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, OnInit, output, signal } from '@angular/core';
 import { WEEKDAYS } from '../../../../../shared/dates';
-import { intervalLabel } from './interval-label';
+import { IntervalChip } from './interval-chip';
 import { Interval, SessionType, Weekday } from './schedule-api';
 import { WeekDayDialog } from './week-day-dialog';
 
@@ -13,7 +13,7 @@ interface Day {
 // MVP-02, RBOT-FEAT-004
 @Component({
   selector: 'app-week-card',
-  imports: [WeekDayDialog],
+  imports: [WeekDayDialog, IntervalChip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .day { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 8px; border-bottom: 1px solid var(--line); }
@@ -21,7 +21,6 @@ interface Day {
     .name { width: 110px; font-weight: 600; }
     .day button { margin-left: auto; }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
-    .chip { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
     .off { color: var(--muted); flex: 1; }
     @media (max-width: 520px) { .name { width: 100%; } }
   `,
@@ -33,7 +32,7 @@ interface Day {
         @if (day.intervals.length) {
           <span class="chips">
             @for (interval of day.intervals; track $index) {
-              <span class="chip">{{ label(interval) }}</span>
+              <app-interval-chip [interval]="interval" [types]="types()" />
             }
           </span>
         } @else {
@@ -58,10 +57,6 @@ export class WeekCard implements OnInit {
 
   ngOnInit(): void {
     this.days.set(this.week().map((day) => ({ weekday: day.weekday, title: WEEKDAYS[day.weekday - 1], intervals: day.intervals })));
-  }
-
-  protected label(interval: Interval): string {
-    return intervalLabel(interval, this.types());
   }
 
   protected applied(day: Day, intervals: readonly Interval[]): void {
