@@ -1,6 +1,5 @@
 .notice { color: var(--accent); }
-.create { margin: 24px 0; }
-.row { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.create { margin: 16px 0 24px; }
 .search { display: flex; gap: 8px; margin-bottom: 16px; }
 .search input { flex: 1; }
 .list { padding: 0 24px; }
@@ -13,7 +12,5 @@
 .small { font-size: 0.85rem; }
 .blocked { color: var(--danger); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.password { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
-.password input { flex: 1; min-width: 180px; }
 .pager { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

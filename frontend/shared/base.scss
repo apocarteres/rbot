@@ -88,3 +88,11 @@ a { color: var(--accent); }
 .notice { color: var(--accent); }
 h3 { font-size: 1rem; margin: 0 0 12px; }
 .grid { display: grid; gap: 0 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: end; }
+
+.veil { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: rgb(0 0 0 / 0.4); overflow-y: auto; }
+.dialog { width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+.dialog h2 { margin-bottom: 16px; }
+.dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.dialog-grid { display: grid; gap: 0 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dialog-grid .wide { grid-column: 1 / -1; }
+@media (max-width: 520px) { .dialog-grid { grid-template-columns: minmax(0, 1fr); } }

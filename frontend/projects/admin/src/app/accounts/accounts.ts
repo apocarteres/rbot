@@ -1,14 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NewAccountDialog } from './new-account-dialog';
+import { PasswordDialog } from './password-dialog';
 import { failureMessage } from '../../../../../shared/failures';
 import { AccountPage, AccountsApi, AccountView } from './accounts-api';
 
 const ROLE_TITLES: Readonly<Record<string, string>> = { ADMIN: 'администратор', PSYCHOLOGIST: 'психолог' };
 
-// MVP-01, REQ-AUTH-009, REQ-CODE-DESIGN-007
+// MVP-01, MVP-02, REQ-AUTH-009, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-accounts',
-  imports: [FormsModule],
+  imports: [FormsModule, NewAccountDialog, PasswordDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './accounts.scss',
   templateUrl: './accounts.html',
@@ -20,13 +22,10 @@ export class AccountsPage implements OnInit {
   protected readonly error = signal('');
   protected readonly notice = signal('');
   protected readonly busy = signal(false);
-  protected readonly passwordFor = signal<string | null>(null);
+  protected readonly passwordFor = signal<AccountView | null>(null);
+  protected readonly creating = signal(false);
 
   protected query = '';
-  protected email = '';
-  protected password = '';
-  protected role = 'PSYCHOLOGIST';
-  protected newPassword = '';
 
   private readonly dates = new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -50,28 +49,17 @@ export class AccountsPage implements OnInit {
     await this.run(async () => this.page.set(await this.api.list(this.query, page)));
   }
 
-  protected async create(): Promise<void> {
+  protected async created(account: AccountView): Promise<void> {
+    this.creating.set(false);
     await this.run(async () => {
-      const created = await this.api.create(this.email, this.password, [this.role]);
-      this.notice.set(`Учётная запись ${created.email} создана.`);
-      this.email = '';
-      this.password = '';
       this.page.set(await this.api.list(this.query, 0));
+      this.notice.set(`Учётная запись ${account.email} создана.`);
     });
   }
 
-  protected askPassword(account: AccountView): void {
-    this.newPassword = '';
-    this.passwordFor.set(account.id);
-  }
-
-  protected async savePassword(account: AccountView): Promise<void> {
-    await this.run(async () => {
-      await this.api.setPassword(account.id, this.newPassword);
-      this.newPassword = '';
-      this.passwordFor.set(null);
-      this.notice.set(`Пароль для ${account.email} изменён.`);
-    });
+  protected passwordChanged(account: AccountView): void {
+    this.passwordFor.set(null);
+    this.notice.set(`Пароль для ${account.email} изменён.`);
   }
 
   protected async toggleBlock(account: AccountView): Promise<void> {

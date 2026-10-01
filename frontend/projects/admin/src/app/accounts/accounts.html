@@ -8,27 +8,7 @@
   <p class="notice" role="status">{{ notice() }}</p>
 }
 
-<form class="card create" (ngSubmit)="create()">
-  <h2>Новая учётная запись</h2>
-  <div class="row">
-    <div class="field">
-      <label for="new-email">Почта</label>
-      <input id="new-email" name="email" type="email" autocomplete="off" required [(ngModel)]="email" />
-    </div>
-    <div class="field">
-      <label for="new-password">Пароль (от 10 символов)</label>
-      <input id="new-password" name="password" type="password" autocomplete="new-password" required minlength="10" [(ngModel)]="password" />
-    </div>
-    <div class="field">
-      <label for="new-role">Роль</label>
-      <select id="new-role" name="role" [(ngModel)]="role">
-        <option value="PSYCHOLOGIST">Психолог</option>
-        <option value="ADMIN">Администратор</option>
-      </select>
-    </div>
-  </div>
-  <button type="submit" [disabled]="busy()">Создать</button>
-</form>
+<button type="button" class="create" (click)="creating.set(true)">Новая учётная запись</button>
 
 <form class="search" role="search" (ngSubmit)="load(0)">
   <label class="visually-hidden" for="query">Поиск по почте</label>
@@ -46,19 +26,11 @@
           <span class="muted small">Создана {{ when(account.createdAt) }} · последний вход {{ when(account.lastLoginAt) }}</span>
         </div>
         <div class="actions">
-          <button type="button" class="quiet" (click)="askPassword(account)" [disabled]="busy()">Сменить пароль</button>
+          <button type="button" class="quiet" (click)="passwordFor.set(account)" [disabled]="busy()">Сменить пароль</button>
           <button type="button" class="quiet" (click)="toggleBlock(account)" [disabled]="busy()">
             {{ account.blocked ? 'Разблокировать' : 'Заблокировать' }}
           </button>
         </div>
-        @if (passwordFor() === account.id) {
-          <form class="password" (ngSubmit)="savePassword(account)">
-            <label class="visually-hidden" [for]="'pw-' + account.id">Новый пароль</label>
-            <input [id]="'pw-' + account.id" name="newPassword" type="password" autocomplete="new-password" placeholder="Новый пароль" required minlength="10" [(ngModel)]="newPassword" />
-            <button type="submit" [disabled]="busy()">Сохранить</button>
-            <button type="button" class="quiet" (click)="passwordFor.set(null)">Отмена</button>
-          </form>
-        }
       </article>
     } @empty {
       <p class="muted">Ничего не найдено.</p>
@@ -71,4 +43,11 @@
       <button type="button" class="quiet" [disabled]="current.page + 1 >= pages(current) || busy()" (click)="load(current.page + 1)">Дальше</button>
     </nav>
   }
+}
+
+@if (creating()) {
+  <app-new-account-dialog (closed)="creating.set(false)" (created)="created($event)" />
+}
+@if (passwordFor(); as account) {
+  <app-password-dialog [account]="account" (closed)="passwordFor.set(null)" (changed)="passwordChanged(account)" />
 }
