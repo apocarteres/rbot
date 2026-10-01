@@ -42,7 +42,7 @@ interface EditableInterval {
         } @empty {
           <p class="off">Выходной: промежутков нет.</p>
         }
-        <button type="button" class="quiet" apcrLocal (click)="add()">Добавить промежуток</button>
+        <button type="button" class="quiet" apcrLocal (click)="add()">Добавить</button>
         @if (failure()) {
           <p class="error" role="alert">{{ failure() }}</p>
         }

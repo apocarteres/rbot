@@ -10,7 +10,7 @@ import { SessionType } from './schedule-api';
     legend { padding: 0; margin-bottom: 4px; color: var(--muted); font-size: 0.85rem; }
     label { display: inline-flex; align-items: center; gap: 6px; }
     .off { color: var(--muted); }
-    .note { font-size: 0.8rem; }
+    .note { font-size: 0.8rem; color: var(--danger); }
   `,
   template: `
     <fieldset>
