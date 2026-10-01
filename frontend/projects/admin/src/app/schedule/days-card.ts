@@ -21,8 +21,7 @@ const AHEAD_DAYS = 180;
     .closed { color: var(--danger); }
   `,
   template: `
-    <section class="card">
-      <h2>Исключения</h2>
+    <section>
       <p class="muted">Отпуск и особые дни заменяют рабочую неделю на выбранные даты.</p>
       <div class="forms">
         <form (ngSubmit)="closeRange()">
@@ -72,6 +71,7 @@ const AHEAD_DAYS = 180;
 export class DaysCard implements OnInit {
   readonly zone = input.required<string>();
   readonly saved = output<void>();
+  readonly counted = output<number>();
 
   private readonly api = inject(ScheduleApi);
   private readonly clock = inject(AppClock);
@@ -127,6 +127,8 @@ export class DaysCard implements OnInit {
 
   private async load(): Promise<void> {
     const today = isoDate(this.clock.instant(), this.zone());
-    this.days.set(await this.api.days(today, plusDays(today, AHEAD_DAYS)));
+    const days = await this.api.days(today, plusDays(today, AHEAD_DAYS));
+    this.days.set(days);
+    this.counted.emit(days.length);
   }
 }

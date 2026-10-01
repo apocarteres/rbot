@@ -12,11 +12,8 @@ const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yek
   imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <form class="card" (ngSubmit)="save()">
-      <h2>Параметры записи</h2>
-      @if (!settings().complete) {
-        <p class="warning">Пока параметры не заполнены, запись клиентов закрыта.</p>
-      }
+    <form (ngSubmit)="save()">
+      <p class="muted">Параметры записи действуют для всех типов сессий. Пока они не заполнены, клиенты не могут записаться.</p>
       <div class="grid">
         <div class="field">
           <label for="zone">Часовой пояс</label>

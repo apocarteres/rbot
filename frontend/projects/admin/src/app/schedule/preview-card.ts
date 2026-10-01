@@ -18,14 +18,15 @@ interface SlotDay {
   imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    .day { padding: 8px 0; border-top: 1px solid var(--line); }
+    .preview { padding: 16px; }
+    .day { padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
+    .small { font-size: 0.8rem; margin: 12px 0 0; }
     .times { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .time { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
   `,
   template: `
-    <section class="card">
-      <h2>Предпросмотр записи</h2>
-      <p class="muted">Свободное время на {{ days }} дней так, как его увидит клиент.</p>
+    <section class="card preview">
+      <h2>Как увидит клиент</h2>
       @if (!settings().complete) {
         <p class="warning">Заполните параметры записи — без них слотов нет.</p>
       } @else if (types().length === 0) {
@@ -52,6 +53,7 @@ interface SlotDay {
         } @empty {
           <p class="muted">Свободного времени нет.</p>
         }
+        <p class="muted small">{{ days }} дней · пересчитывается после каждой правки</p>
       }
     </section>
   `,

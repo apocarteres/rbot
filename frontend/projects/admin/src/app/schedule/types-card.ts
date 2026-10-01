@@ -19,8 +19,7 @@ type Editable = { -readonly [K in keyof SessionType]: SessionType[K] };
     @media (max-width: 640px) { .type { grid-template-columns: 1fr 1fr; } }
   `,
   template: `
-    <section class="card">
-      <h2>Типы сессий</h2>
+    <section>
       <p class="muted">Клиент записывается только на включённые типы. Цена — в рублях за сессию.</p>
       @for (type of types(); track type.id) {
         <form class="type" (ngSubmit)="save(type)">
