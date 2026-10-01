@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +15,9 @@ import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import tools.jackson.databind.JsonNode;
 
-// MVP-04, RBOT-FEAT-009, ADR-0001, REQ-AUTH-040
+// MVP-04, RBOT-FEAT-009, ADR-0001, REQ-AUTH-040, REQ-CONFIG
 @Component
 class RestBotGateway implements BotGateway {
 
@@ -33,7 +35,7 @@ class RestBotGateway implements BotGateway {
         Integer.parseInt(settings.proxy().substring(split + 1)))));
     }
     JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(http.build());
-    factory.setReadTimeout(Duration.ofSeconds(10));
+    factory.setReadTimeout(Duration.ofSeconds(40));
     this.rest = RestClient.builder().requestFactory(factory).baseUrl(settings.apiBase()).build();
   }
 
@@ -51,6 +53,26 @@ class RestBotGateway implements BotGateway {
   @Override
   public void answerCallback(String callbackId) {
     call("answerCallbackQuery", Map.of("callback_query_id", callbackId));
+  }
+
+  @Override
+  public List<JsonNode> updates(long offset, int waitSeconds) {
+    if (!settings.configured()) {
+      return List.of();
+    }
+    try {
+      JsonNode answer = rest.post().uri("/bot{token}/getUpdates", settings.botToken()).contentType(MediaType.APPLICATION_JSON)
+        .body(Map.of("offset", offset, "timeout", waitSeconds, "allowed_updates", List.of("message", "callback_query")))
+        .retrieve().body(JsonNode.class);
+      List<JsonNode> updates = new ArrayList<>();
+      if (answer != null) {
+        answer.path("result").forEach(updates::add);
+      }
+      return updates;
+    } catch (RestClientException failed) {
+      LOG.warn("Telegram getUpdates отказал: " + failed.getClass().getSimpleName());
+      return List.of();
+    }
   }
 
   private void call(String method, Map<String, Object> body) {

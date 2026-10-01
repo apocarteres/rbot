@@ -14,10 +14,12 @@ import java.util.Set;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-// MVP-04, MVP-08, RBOT-FEAT-009, ADR-0002, REQ-AUTH-037, REQ-AUTH-038, REQ-AUTH-039
+// MVP-04, MVP-08, RBOT-FEAT-009, ADR-0002, REQ-DEPLOYMENT-028, REQ-AUTH-037, REQ-AUTH-038, REQ-AUTH-039
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(TelegramSettings.class)
+@EnableScheduling
 class TelegramAuthentication {
 
   static final String WEBHOOK = "/api/tg/webhook";

@@ -45,7 +45,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
   "platform.auth.admin.roles=PSYCHOLOGIST",
   "rbot.telegram.bot-token=" + TelegramIT.TOKEN,
   "rbot.telegram.bot-username=test_booking_bot",
-  "rbot.telegram.webhook-secret=" + TelegramIT.SECRET
+  "rbot.telegram.webhook-secret=" + TelegramIT.SECRET,
+  "rbot.telegram.polling=false"
 })
 @AutoConfigureMockMvc
 class TelegramIT extends IntegrationStores {

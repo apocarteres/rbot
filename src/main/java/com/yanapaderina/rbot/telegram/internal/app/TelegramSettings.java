@@ -3,10 +3,10 @@ package com.yanapaderina.rbot.telegram.internal.app;
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-// MVP-04, MVP-08, RBOT-FEAT-009, ADR-0002
+// MVP-04, MVP-08, RBOT-FEAT-009, ADR-0001, ADR-0002
 @ConfigurationProperties("rbot.telegram")
 public record TelegramSettings(String botToken, String botUsername, String webhookSecret, String apiBase, String proxy, String appUrl,
-  Duration initDataTtl) {
+  Duration initDataTtl, boolean polling) {
 
   public TelegramSettings {
     botToken = botToken == null ? "" : botToken.trim();
