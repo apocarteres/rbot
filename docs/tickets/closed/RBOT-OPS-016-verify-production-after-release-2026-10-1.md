@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-016
 type: ticket
-status: backlog
+status: done
 scope: deployment, operations
 authority: supporting
 priority: P1
@@ -37,3 +37,4 @@ related: RBOT-OPS-009, MVP-02, REQ-TICKETS
 
 ## Ход работы
 - 2026-10-01: тег `2026.10.1` развёрнут, затем `2026.10.2`. `rbot-backup.timer` включён развёртыванием, ближайший запуск — 2026-10-02 03:40 МСК. Наборы `rbot:001-schedule`…`rbot:004-interval-types` применены, повторный `migrate` при втором раскате изменений не дал. Копий ещё нет: `backups --check` отказывает до первого запуска задания и проверки восстановления.
+- 2026-10-01: первая копия снята заданием `rbot-backup.service` (запуск владельцем): `rbot-20261001T110958Z.dump`, 47708 байт, в `bones`, квитанция записана. `backup-restore-check.sh` восстановил её в `rbot_restore_check`: учётных записей 1, наборов изменений 8, запись `--restored` есть. `conventions backups --check` на рабочей среде: «Копии в порядке: database; восстановление проверено в срок». Все критерии выполнены.

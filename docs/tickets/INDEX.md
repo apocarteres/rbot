@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 16. Включены самостоятельные задачи и этапы планов функций.
+Всего: 15. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -30,7 +30,6 @@ authority: navigation
 | [Защитная эскалация тревожных сообщений](features/mvp/12-crisis-escalation.md) | P1 | Запланирована | Не назначен | backend, telegram, safety |
 | [Готовность к работе: хостинг в РФ, резервные копии, документы 152-ФЗ](features/mvp/13-production-readiness.md) | P1 | Запланирована | Не назначен | operations, personal-data, legal |
 | [Анкеты: шаблон, приём и раздел в кабинете](features/mvp/14-intake-forms.md) | P1 | Запланирована | Не назначен | backend, frontend, data, personal-data |
-| [Проверка рабочей среды после раската выпуска 2026.10.1](RBOT-OPS-016-verify-production-after-release-2026-10-1.md) | P1 | Запланирована | Не назначен | deployment, operations |
 | [Напоминания, закрытие сессий и очистка просроченного](features/mvp/10-reminders-and-session-closing.md) | P2 | Запланирована | Не назначен | backend, telegram |
 | [Вопросы психологу по домашнему заданию](features/mvp/11-homework-questions.md) | P2 | Запланирована | Не назначен | backend, frontend, telegram, personal-data |
 | [Клиент из Telegram не проходит через цепочку безопасности ядра](RBOT-SEC-001-telegram-client-outside-core-auth-chain.md) | P2 | Запланирована | Не назначен | security, backend, platform |
