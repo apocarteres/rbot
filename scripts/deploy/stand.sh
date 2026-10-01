@@ -50,6 +50,11 @@ read -r -a services <<< "$(printf '%s\n' "${services[@]}" | sort -u | tr '\n' ' 
 log "демон: $DOCKER_CONTEXT, проект $RBOT_STAND_PROJECT"
 (cd "$ROOT_DIR" && docker compose -p "$RBOT_STAND_PROJECT" -f docker-compose.qa.yml up -d --build --wait postgres redis "${services[@]}")
 
+log "ожидание проброса порта $RBOT_STAND_PORT"
+for _ in $(seq 1 24); do
+  curl -fsS -o /dev/null --max-time 5 "$RBOT_STAND_ADMIN/" 2> /dev/null && break
+  sleep 5
+done
 log "проверки"
 "$conventions" health --url "$RBOT_STAND_ADMIN/actuator/health"
 for site in "$RBOT_STAND_ADMIN" "$RBOT_STAND_BOT"; do
