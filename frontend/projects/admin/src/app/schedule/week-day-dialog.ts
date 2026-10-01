@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApcrAction } from '@apocarteres/action';
 import { ApcrModal, ApcrModalBackdrop } from '@apocarteres/modal';
@@ -8,13 +8,19 @@ import { time } from '../../../../../shared/dates';
 import { IntervalTypes } from './interval-types';
 import { Interval, ScheduleApi, SessionType } from './schedule-api';
 
+export interface WeekSource {
+  readonly weekday: number;
+  readonly title: string;
+  readonly intervals: readonly Interval[];
+}
+
 interface EditableInterval {
   start: string;
   end: string;
   types: readonly string[];
 }
 
-// MVP-02, RBOT-FEAT-004, RBOT-ARC-002, RBOT-ARC-003, RBOT-ARC-004, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-013, RBOT-ARC-002, RBOT-ARC-003, RBOT-ARC-004, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
 @Component({
   selector: 'app-week-day-dialog',
   imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop, IntervalTypes],
@@ -22,6 +28,8 @@ interface EditableInterval {
   styles: `
     .interval { padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
     .hours { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .tools select { width: auto; }
     .off { color: var(--muted); margin: 0 0 12px; }
   `,
   template: `
@@ -42,7 +50,15 @@ interface EditableInterval {
         } @empty {
           <p class="off">Выходной: промежутков нет.</p>
         }
-        <button type="button" class="quiet" apcrLocal (click)="add()">Добавить</button>
+        <div class="tools">
+          <button type="button" class="quiet" apcrLocal (click)="add()">Добавить</button>
+          @if (sources().length > 0) {
+            <select aria-label="Скопировать часы другого дня" name="copy" [ngModel]="''" (ngModelChange)="copy($event)">
+              <option value="" disabled>Скопировать из…</option>
+              @for (one of sources(); track one.weekday) { <option [value]="one.weekday">{{ one.title }}</option> }
+            </select>
+          }
+        </div>
         @if (failure()) {
           <p class="error" role="alert">{{ failure() }}</p>
         }
@@ -59,11 +75,13 @@ export class WeekDayDialog implements OnInit {
   readonly title = input.required<string>();
   readonly intervals = input.required<readonly Interval[]>();
   readonly types = input.required<readonly SessionType[]>();
+  readonly week = input<readonly WeekSource[]>([]);
   readonly closed = output<void>();
   readonly saved = output<readonly Interval[]>();
 
   private readonly api = inject(ScheduleApi);
   protected readonly draft = signal<EditableInterval[]>([]);
+  protected readonly sources = computed(() => this.week().filter((one) => one.weekday !== this.weekday() && one.intervals.length > 0));
   protected readonly failure = signal('');
   protected readonly close = (): void => this.closed.emit();
   protected readonly failed = (failure: unknown): void => this.failure.set(failureMessage(failure));
@@ -83,6 +101,13 @@ export class WeekDayDialog implements OnInit {
   protected add(): void {
     const last = this.draft().at(-1);
     this.draft.update((draft) => [...draft, { start: last ? last.end : '10:00', end: last ? '20:00' : '18:00', types: [] }]);
+  }
+
+  protected copy(weekday: string): void {
+    const source = this.week().find((one) => one.weekday === Number(weekday));
+    if (source) {
+      this.draft.set(source.intervals.map((one) => ({ start: time(one.start), end: time(one.end), types: [...one.types] })));
+    }
   }
 
   protected remove(index: number): void {

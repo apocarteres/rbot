@@ -10,7 +10,7 @@ interface Day {
   readonly intervals: readonly Interval[];
 }
 
-// MVP-02, RBOT-FEAT-004
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-013
 @Component({
   selector: 'app-week-card',
   imports: [WeekDayDialog, IntervalChip],
@@ -42,7 +42,7 @@ interface Day {
       </div>
     }
     @if (editing(); as day) {
-      <app-week-day-dialog [weekday]="day.weekday" [title]="day.title" [intervals]="day.intervals" [types]="types()"
+      <app-week-day-dialog [weekday]="day.weekday" [title]="day.title" [intervals]="day.intervals" [types]="types()" [week]="days()"
         (closed)="editing.set(null)" (saved)="applied(day, $event)" />
     }
   `,
