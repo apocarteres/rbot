@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 35. Включены самостоятельные задачи и этапы планов функций.
+Всего: 36. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -27,6 +27,7 @@ authority: navigation
 | [Клиент узнаёт о новой сборке и об устаревшем API механизмом ядра](RBOT-ARC-005-adopt-client-update.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, backend |
 | [Доступ к данным: без ORM, простой DAO, транзакция в прикладном слое](RBOT-DATA-001-adopt-data-access.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, java, persistence |
 | [Правка и создание в модальных окнах вместо inline-форм](RBOT-FEAT-001-dialogs-instead-of-inline-forms.md) | P1 | Выполнена | Не назначен | frontend |
+| [Приложение клиента: мастер записи и мои сессии](RBOT-FEAT-002-client-booking-wizard.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
 | [Без сообщений об успехе, отказ — окном с причиной](RBOT-FEAT-003-failure-dialogs-without-success-notices.md) | P1 | Выполнена | Не назначен | frontend |
 | [Промежутки расписания для выбранных типов сессий](RBOT-FEAT-004-interval-session-types.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
 | [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |

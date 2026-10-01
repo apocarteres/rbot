@@ -13,8 +13,16 @@ export function rubles(price: number): string {
 }
 
 // MVP-08, RBOT-FEAT-002
-export function formatTitle(format: SessionFormat | null): string {
-  return format ? FORMATS[format] : '';
+export function details(title: string | null, format: SessionFormat | null, price: number): string {
+  const shown = format && !(title ?? '').toLowerCase().includes(FORMATS[format]) ? [FORMATS[format]] : [];
+  return [...shown, rubles(price)].join(' · ');
+}
+
+// MVP-08, RBOT-FEAT-002
+export function shortDay(date: string): string {
+  const [year, month, day] = date.split('-').map(Number);
+  return new Intl.DateTimeFormat('ru-RU', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })
+    .format(Date.UTC(year, month - 1, day));
 }
 
 // MVP-08, RBOT-FEAT-002

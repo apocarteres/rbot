@@ -5,7 +5,7 @@ import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ClientApi, ClientSession, Offer, OfferedType, Slot } from '../client-api';
-import { DEFAULT_ZONE, formatTitle, rubles, when, zoneNote } from '../format';
+import { DEFAULT_ZONE, details, shortDay, when, zoneNote } from '../format';
 
 type Step = 'type' | 'day' | 'time' | 'confirm' | 'done';
 
@@ -63,7 +63,7 @@ interface SlotDay {
               @for (one of current.types; track one.id) {
                 <button type="button" class="option" [attr.aria-pressed]="type()?.id === one.id" (click)="chooseType(one)">
                   <strong>{{ one.title }}</strong>
-                  <span class="muted small">{{ one.durationMinutes }} мин · {{ format(one) }} · {{ price(one.price) }}</span>
+                  <span class="muted small">{{ one.durationMinutes }} мин · {{ details(one) }}</span>
                 </button>
               }
             </div>
@@ -72,7 +72,7 @@ interface SlotDay {
             <h1>Выберите день</h1>
             <div class="chips">
               @for (one of days(); track one.date) {
-                <button type="button" class="chip" [attr.aria-pressed]="day() === one.date" (click)="chooseDay(one.date)">{{ title(one.date) }}</button>
+                <button type="button" class="chip" [attr.aria-pressed]="day() === one.date" (click)="chooseDay(one.date)">{{ short(one.date) }}</button>
               } @empty {
                 <p class="muted">Свободного времени нет. Попробуйте другой тип сессии или загляните позже.</p>
               }
@@ -93,7 +93,7 @@ interface SlotDay {
               <section class="card">
                 <p><strong>{{ chosen.title }}</strong></p>
                 <p>{{ period() }}</p>
-                <p class="muted small">{{ format(chosen) }} · {{ price(chosen.price) }}, оплата психологу</p>
+                <p class="muted small">{{ details(chosen) }}, оплата психологу</p>
                 <p class="muted small">{{ note() }}. {{ cancelNote() }}</p>
                 <button type="button" class="wide" [disabled]="attempt.busy()" (click)="book()">Записаться</button>
               </section>
@@ -150,12 +150,12 @@ export class BookingWizard implements OnInit {
     void this.attempt.run(async () => this.offer.set(await this.api.offer()));
   }
 
-  protected format(type: OfferedType): string {
-    return formatTitle(type.format);
+  protected details(type: OfferedType): string {
+    return details(type.title, type.format, type.price);
   }
 
-  protected price(value: number): string {
-    return rubles(value);
+  protected short(date: string): string {
+    return shortDay(date);
   }
 
   protected title(date: string): string {

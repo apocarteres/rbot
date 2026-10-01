@@ -63,7 +63,7 @@ log "ожидание проброса порта $RBOT_STAND_PORT"
 if ! reachable 12; then
   log "порт не проброшен: Lima на mini теряет проброс при пересоздании контейнера, перезапуск клиента"
   docker restart "$RBOT_STAND_PROJECT-frontend-1" > /dev/null
-  reachable 18 || log "порт $RBOT_STAND_PORT так и не ответил"
+  reachable 48 || log "порт $RBOT_STAND_PORT так и не ответил"
 fi
 log "проверки"
 "$conventions" health --url "$RBOT_STAND_ADMIN/actuator/health"

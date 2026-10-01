@@ -4,7 +4,7 @@ import { AuthSession } from '@apocarteres/auth';
 import { Attempt } from '../../../../../shared/attempt';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ClientApi, ClientSession } from '../client-api';
-import { DEFAULT_ZONE, formatTitle, rubles, when, zoneNote } from '../format';
+import { DEFAULT_ZONE, details, when, zoneNote } from '../format';
 import { CancelDialog } from './cancel-dialog';
 
 // MVP-01, MVP-05, MVP-08, RBOT-FEAT-002
@@ -30,7 +30,7 @@ import { CancelDialog } from './cancel-dialog';
           <div class="session">
             <div class="what">
               <strong>{{ period(one) }}</strong>
-              <span class="muted small">{{ one.title }} · {{ format(one) }} · {{ price(one) }}</span>
+              <span class="muted small">{{ one.title }} · {{ details(one) }}</span>
             </div>
             <button type="button" class="quiet" [attr.aria-label]="'Отменить: ' + period(one)" (click)="cancelling.set(one)">Отменить</button>
           </div>
@@ -84,12 +84,8 @@ export class Home implements OnInit {
     return when(session.start, session.end, this.zone());
   }
 
-  protected format(session: ClientSession): string {
-    return formatTitle(session.format);
-  }
-
-  protected price(session: ClientSession): string {
-    return rubles(session.price);
+  protected details(session: ClientSession): string {
+    return details(session.title, session.format, session.price);
   }
 
   protected async cancelled(): Promise<void> {
