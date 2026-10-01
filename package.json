@@ -6,6 +6,6 @@
     "npm": "^11.19.0"
   },
   "devDependencies": {
-    "@apocarteres/project-conventions": "file:.platform/target/local-packages/apocarteres-project-conventions-13.7.0.tgz"
+    "@apocarteres/project-conventions": "file:.platform/target/local-packages/apocarteres-project-conventions-14.0.0.tgz"
   }
 }

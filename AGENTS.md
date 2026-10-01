@@ -1,6 +1,6 @@
 # rbot
 
-<!-- conventions:begin v13.7.0 -->
+<!-- conventions:begin v14.0.0 -->
 ## Правила кода
 
 Тексты: `node_modules/@apocarteres/project-conventions/docs`. Прочитать перед правкой кода.
