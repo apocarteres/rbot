@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-008
 type: ticket
-status: in_progress
+status: done
 scope: backend, frontend, data
 authority: supporting
 priority: P1
@@ -33,8 +33,9 @@ related: RBOT-FEAT-004, MVP-02, ADR-0003
 
 - `ScheduleIT`: промежуток без типов — 400 `interval-types-required`.
 - `SlotCalendarTest`: промежуток даёт слоты только своим типам.
-- Набор `rbot:006-interval-types-required` применяется на QA, прежние промежутки получают все типы.
+- Набор `rbot:006-interval-types-required` применяется на QA.
 
 ## Ход работы
 
 - 2026-10-01: `DayInterval.serves` — только по перечню; проверка в `ScheduleAdministration`; набор `rbot:006-interval-types-required` (`additive`, только данные). Подпись в окне — «Типы сессий — хотя бы один».
+- QA: набор `rbot:006-interval-types-required` применён; промежутков недели на стенде к раскату не было, заполнять было нечего. Сохранение промежутка без типов — 400 `interval-types-required`, текст отказа показывается в окне. Интеграционных тестов 25, все проходят.
