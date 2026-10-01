@@ -1,0 +1,11 @@
+# RBOT-OPS-009, REQ-BACKUPS-005
+[Unit]
+Description=rbot: ежедневная копия базы
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 Europe/Moscow
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

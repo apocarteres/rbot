@@ -1,0 +1,12 @@
+# RBOT-OPS-009, REQ-BACKUPS-002
+[Unit]
+Description=rbot: копия базы в bones
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+Environment=HOME=/root
+ExecStart=/opt/rbot/source/scripts/ops/backup.sh
+Nice=10

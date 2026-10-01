@@ -54,6 +54,17 @@
       },
       "web-stand": {
         "artifact": "docker/frontend-runtime/nginx.conf"
+      },
+      "unit-backup": {
+        "artifact": "deploy/systemd/rbot-backup.service",
+        "install": "/etc/systemd/system/rbot-backup.service",
+        "verify": "systemd-analyze verify {}"
+      },
+      "timer-backup": {
+        "artifact": "deploy/systemd/rbot-backup.timer",
+        "install": "/etc/systemd/system/rbot-backup.timer",
+        "verify": "systemd-analyze verify {}",
+        "enable": true
       }
     },
     "withoutDowntime": {
@@ -64,5 +75,19 @@
       ]
     }
   },
-  "commitRuleSince": "b8c22965ecf1741dd533b250c047f40b8239fb15"
+  "commitRuleSince": "b8c22965ecf1741dd533b250c047f40b8239fb15",
+  "backups": {
+    "sets": {
+      "database": {
+        "kind": "database",
+        "every": "24h",
+        "keep": "5d",
+        "store": "bones",
+        "receipt": "/var/lib/rbot/backups/database.receipt.json",
+        "timer": "rbot-backup.timer"
+      }
+    },
+    "restoreRecord": "/var/lib/rbot/backups/restored.json",
+    "restoreEvery": "90d"
+  }
 }

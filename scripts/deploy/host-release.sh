@@ -3,7 +3,7 @@ set -euo pipefail
 
 # MVP-01, RBOT-OPS-004, RBOT-OPS-007, RBOT-OPS-008, RBOT-OPS-011, REQ-DEPLOYMENT-002, REQ-DEPLOYMENT-004, REQ-DEPLOYMENT-005,
 # REQ-DEPLOYMENT-006, REQ-DEPLOYMENT-007, REQ-DEPLOYMENT-011, REQ-DEPLOYMENT-016, REQ-DEPLOYMENT-018, REQ-DEPLOYMENT-020,
-# REQ-DEPLOYMENT-022, REQ-DEPLOYMENT-024, REQ-DEPLOYMENT-025, REQ-DEPLOYMENT-029
+# REQ-DEPLOYMENT-022, REQ-DEPLOYMENT-024, REQ-DEPLOYMENT-025, REQ-DEPLOYMENT-029, RBOT-OPS-009, REQ-BACKUPS-005, REQ-BACKUPS-006
 
 commit="${1:?нужен коммит}"
 only="${2:-}"
@@ -81,7 +81,8 @@ install_component() {
   fi
   install -D -m 0644 "$artifact" "$target"
   conventions deployed --artifact "$artifact" --installed "$target"
-  if [ "$enable" = "true" ]; then
+  if [ -n "$enable" ]; then
+    systemctl daemon-reload
     systemctl enable --now "$(basename "$target")"
   fi
   log "установлено: $name → $target"
@@ -175,4 +176,8 @@ for app in admin bot; do
     "${check[@]}"
   fi
 done
+log "копии данных"
+if ! conventions backups --check; then
+  log "ОТКАЗ проверки копий: раскат установлен, копии нужно чинить (REQ-BACKUPS-006)"
+fi
 log "раскат $commit завершён"
