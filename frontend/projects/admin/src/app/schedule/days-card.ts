@@ -10,7 +10,7 @@ import { SpecialDayDialog } from './special-day-dialog';
 
 const AHEAD_DAYS = 180;
 
-// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004, RBOT-FEAT-006
 @Component({
   selector: 'app-days-card',
   imports: [ClosedDaysDialog, SpecialDayDialog, FailureDialog, IntervalChip],
@@ -20,6 +20,9 @@ const AHEAD_DAYS = 180;
     .list { display: flex; flex-direction: column; }
     .item { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
     .closed { color: var(--danger); }
+    .item > span { flex: 1; min-width: 0; }
+    app-interval-chip { margin-left: 8px; }
+    .icon { display: inline-grid; place-items: center; padding: 8px; line-height: 0; }
   `,
   template: `
     <section>
@@ -37,7 +40,11 @@ const AHEAD_DAYS = 180;
               }
               @if (day.note) { <span class="muted"> · {{ day.note }}</span> }
             </span>
-            <button type="button" class="quiet" (click)="clear(day)" [disabled]="attempt.busy()">Вернуть обычные часы</button>
+            <button type="button" class="quiet icon" [attr.aria-label]="'Удалить исключение: ' + title(day.date)"
+              title="Удалить исключение — вернуть обычные часы" (click)="clear(day)" [disabled]="attempt.busy()">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
+            </button>
           </div>
         } @empty {
           <p class="muted">Исключений на ближайшие полгода нет.</p>
