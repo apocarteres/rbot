@@ -17,7 +17,7 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
   { id: 'week', title: 'Неделя' },
   { id: 'days', title: 'Исключения' },
   { id: 'types', title: 'Типы сессий' },
-  { id: 'settings', title: 'Параметры' },
+  { id: 'settings', title: 'Правила записи' },
 ];
 
 // MVP-02, RBOT-FEAT-003, RBOT-FEAT-004
@@ -49,7 +49,7 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
           <span class="summary">{{ summary() }}</span>
         } @else {
           <span class="state closed">Запись закрыта</span>
-          <button type="button" class="link" (click)="open('settings')">Заполните параметры записи</button>
+          <button type="button" class="link" (click)="open('settings')">Заполните правила записи</button>
         }
       </div>
       <div class="layout">

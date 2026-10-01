@@ -29,7 +29,7 @@ interface SlotDay {
     <section class="card preview">
       <h2>Как увидит клиент</h2>
       @if (!settings().complete) {
-        <p class="warning">Заполните параметры записи — без них слотов нет.</p>
+        <p class="warning">Заполните правила записи — без них слотов нет.</p>
       } @else if (types().length === 0) {
         <p class="warning">Включите хотя бы один тип сессии.</p>
       } @else {
