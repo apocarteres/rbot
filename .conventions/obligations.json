@@ -1,5 +1,5 @@
 {
-  "releaseCount": 1,
+  "releaseCount": 2,
   "seen": {
     "local-quality-gates": 0,
     "release-cycle": 0,
@@ -133,12 +133,11 @@
     "liquibase-migrations": {
       "release": "RELEASE-2026-09-1",
       "ticket": "RBOT-OPS-011"
+    },
+    "backups": {
+      "release": "RELEASE-2026-10-1",
+      "ticket": "RBOT-OPS-009"
     }
   },
-  "deferred": {
-    "backups": {
-      "reason": "Данных клиентов в службе нет: база хранит только учётные записи сотрудников (администратор, психолог). Внешнее хранилище копий в РФ не выбрано владельцем 2026-10-01; копии до установки делает раскат (/var/backups/rbot, 7 дней). Обязательство исполняется до приёма данных клиентов (MVP-03, MVP-13).",
-      "recordedAt": "2026-09-30"
-    }
-  }
+  "deferred": {}
 }
