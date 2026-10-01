@@ -25,6 +25,7 @@ interface EditableInterval {
   selector: 'app-week-day-dialog',
   imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop, IntervalTypes],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:click)': 'outside($event)' },
   styles: `
     .interval { padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
     .hours { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -95,7 +96,8 @@ export class WeekDayDialog implements OnInit {
   private readonly api = inject(ScheduleApi);
   protected readonly draft = signal<EditableInterval[]>([]);
   protected readonly menu = signal(false);
-  protected readonly sources = computed(() => this.week().filter((one) => one.weekday !== this.weekday() && one.intervals.length > 0));
+  protected readonly sources = computed(() =>
+    this.week().filter((one) => Number(one.weekday) !== Number(this.weekday()) && one.title !== this.title() && one.intervals.length > 0));
   protected readonly failure = signal('');
   protected readonly close = (): void => this.closed.emit();
   protected readonly failed = (failure: unknown): void => this.failure.set(failureMessage(failure));
@@ -115,6 +117,12 @@ export class WeekDayDialog implements OnInit {
   protected add(): void {
     const last = this.draft().at(-1);
     this.draft.update((draft) => [...draft, { start: last ? last.end : '10:00', end: last ? '20:00' : '18:00', types: [] }]);
+  }
+
+  protected outside(event: MouseEvent): void {
+    if (this.menu() && !(event.target instanceof Element && event.target.closest('.arrow'))) {
+      this.menu.set(false);
+    }
   }
 
   protected copy(source: WeekSource): void {
