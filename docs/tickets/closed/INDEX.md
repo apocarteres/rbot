@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 43. Включены самостоятельные задачи и этапы планов функций.
+Всего: 44. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -34,6 +34,7 @@ authority: navigation
 | [Тип сессии у промежутка обязателен](RBOT-FEAT-008-interval-types-required.md) | P1 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | backend, frontend, data |
 | [Клиент через Telegram: приглашение, согласие, Mini App](RBOT-FEAT-009-telegram-client.md) | P1 | Выполнена | [RELEASE-2026-10-4](../../releases/RELEASE-2026-10-4.md) | backend, frontend, data, telegram, security, personal-data |
 | [Обновления Telegram опросом и прокси по IPv4](RBOT-FEAT-010-telegram-polling.md) | P1 | Выполнена | [RELEASE-2026-10-5](../../releases/RELEASE-2026-10-5.md) | backend, telegram, deployment |
+| [Стили не применялись на рабочей среде](RBOT-FEAT-011-styles-under-csp.md) | P1 | Выполнена | Не назначен | frontend, deployment, security |
 | [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
 | [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
 | [Сборка потребителя идёт на Java 25, как и сборка ядра](RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
