@@ -10,16 +10,17 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ClientBooking {
 
@@ -36,79 +37,95 @@ public class ClientBooking {
   }
 
   @Transactional(readOnly = true)
-  public Optional<ClientOffer> offer() {
-    return availability.terms().map(terms -> new ClientOffer(terms, availability.types().stream().filter(SessionType::active).toList()));
+  public Map<UUID, String> names(Collection<UUID> practitioners) {
+    return availability.names(practitioners);
   }
 
   @Transactional(readOnly = true)
-  public List<TimeRange> free(UUID typeId, LocalDate from, LocalDate to) {
-    open();
-    offered(typeId);
-    return availability.free(typeId, from, to);
+  public Optional<ClientOffer> offer(UUID practitioner) {
+    return availability.terms(practitioner)
+      .map(terms -> new ClientOffer(terms, availability.types(practitioner).stream().filter(SessionType::active).toList()));
   }
 
   @Transactional(readOnly = true)
-  public List<ClientSession> upcoming(UUID client) {
-    Map<UUID, SessionType> types = types();
-    return sessions.upcoming(client, clock.instant()).stream().map(row -> session(row, types)).toList();
+  public List<TimeRange> free(UUID practitioner, UUID typeId, LocalDate from, LocalDate to) {
+    open(practitioner);
+    offered(practitioner, typeId);
+    return availability.free(practitioner, typeId, from, to);
+  }
+
+  @Transactional(readOnly = true)
+  public List<ClientSession> upcoming(Collection<UUID> clients) {
+    Map<UUID, Map<UUID, SessionType>> types = new HashMap<>();
+    return sessions.upcoming(clients, clock.instant()).stream()
+      .map(row -> session(row, types.computeIfAbsent(row.practitioner(), this::everyType)))
+      .toList();
   }
 
   @Transactional
-  public ClientSession book(UUID client, UUID typeId, Instant start) {
-    BookingTerms terms = open();
-    SessionType type = offered(typeId);
-    requireFree(terms, typeId, start);
-    return session(ledger.book(client, type, start, client), Map.of(typeId, type));
+  public ClientSession book(UUID practitioner, UUID client, UUID typeId, Instant start) {
+    BookingTerms terms = open(practitioner);
+    SessionType type = offered(practitioner, typeId);
+    requireFree(practitioner, terms, typeId, start);
+    return session(ledger.book(practitioner, client, type, start, client), Map.of(typeId, type));
   }
 
   @Transactional
-  public ClientSession reschedule(UUID client, UUID sessionId, Instant start) {
-    BookingTerms terms = open();
-    SessionRow row = changeable(client, sessionId, terms.lead());
-    SessionType type = offered(row.type());
-    requireFree(terms, type.id(), start);
-    return session(ledger.reschedule(row, type, start, client), Map.of(type.id(), type));
+  public ClientSession reschedule(Set<UUID> clients, UUID sessionId, Instant start) {
+    SessionRow row = mine(clients, sessionId);
+    BookingTerms terms = open(row.practitioner());
+    changeable(row, terms.lead());
+    SessionType type = offered(row.practitioner(), row.type());
+    requireFree(row.practitioner(), terms, type.id(), start);
+    return session(ledger.reschedule(row, type, start, row.client()), Map.of(type.id(), type));
   }
 
   @Transactional
-  public ClientSession cancel(UUID client, UUID sessionId) {
-    SessionRow row = changeable(client, sessionId, availability.terms().map(BookingTerms::lead).orElse(Duration.ZERO));
-    return session(ledger.close(row, SessionStatus.CANCELLED, client), types());
+  public ClientSession cancel(Set<UUID> clients, UUID sessionId) {
+    SessionRow row = mine(clients, sessionId);
+    changeable(row, availability.terms(row.practitioner()).map(BookingTerms::lead).orElse(Duration.ZERO));
+    return session(ledger.close(row, SessionStatus.CANCELLED, row.client()), everyType(row.practitioner()));
   }
 
-  private SessionRow changeable(UUID client, UUID sessionId, Duration lead) {
-    SessionRow row = sessions.find(sessionId, client).orElseThrow(ClientBooking::missing);
+  private SessionRow mine(Set<UUID> clients, UUID sessionId) {
+    return sessions.find(sessionId).filter(row -> clients.contains(row.client())).orElseThrow(ClientBooking::missing);
+  }
+
+  private void changeable(SessionRow row, Duration lead) {
     if (!SessionStatus.BOOKED.name().equals(row.status())) {
       throw new BookingRefused(BookingRefused.SESSION_INACTIVE, "Сессия не назначена");
     }
     if (!CancelDeadline.allows(row.start(), clock.instant(), lead)) {
       throw new BookingRefused(BookingRefused.TOO_LATE, "До начала меньше " + lead.toMinutes() + " мин");
     }
-    return row;
   }
 
-  private void requireFree(BookingTerms terms, UUID typeId, Instant start) {
+  private void requireFree(UUID practitioner, BookingTerms terms, UUID typeId, Instant start) {
     LocalDate day = start.atZone(terms.zone()).toLocalDate();
-    if (availability.free(typeId, day, day).stream().noneMatch(slot -> slot.start().equals(start))) {
+    if (availability.free(practitioner, typeId, day, day).stream().noneMatch(slot -> slot.start().equals(start))) {
       throw new BookingRefused(BookingRefused.SLOT_TAKEN, "Время " + start + " не свободно");
     }
   }
 
-  private BookingTerms open() {
-    return availability.terms().orElseThrow(() -> new BookingRefused(BookingRefused.CLOSED, "Параметры записи не заданы"));
+  private BookingTerms open(UUID practitioner) {
+    return availability.terms(practitioner)
+      .orElseThrow(() -> new BookingRefused(BookingRefused.CLOSED, "Параметры записи не заданы"));
   }
 
-  private SessionType offered(UUID typeId) {
-    return availability.types().stream().filter(type -> type.id().equals(typeId) && type.active()).findFirst()
+  private SessionType offered(UUID practitioner, UUID typeId) {
+    return availability.types(practitioner).stream().filter(type -> type.id().equals(typeId) && type.active()).findFirst()
       .orElseThrow(() -> new BookingRefused(BookingRefused.TYPE_UNAVAILABLE, "Тип сессии недоступен для записи"));
   }
 
-  private Map<UUID, SessionType> types() {
-    return availability.everyType().stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
+  private Map<UUID, SessionType> everyType(UUID practitioner) {
+    Map<UUID, SessionType> types = new HashMap<>();
+    availability.everyType(practitioner).forEach(type -> types.put(type.id(), type));
+    return types;
   }
 
   private static ClientSession session(SessionRow row, Map<UUID, SessionType> types) {
-    return new ClientSession(row.id(), types.get(row.type()), row.start(), row.end(), SessionStatus.valueOf(row.status()), row.price());
+    return new ClientSession(row.id(), row.practitioner(), types.get(row.type()), row.start(), row.end(),
+      SessionStatus.valueOf(row.status()), row.price());
   }
 
   private static BookingRefused missing() {

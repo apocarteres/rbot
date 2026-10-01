@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, REQ-DATA-ACCESS-002
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-017, REQ-DATA-ACCESS-002
 @Repository
 public class WorkIntervalDao {
 
@@ -21,24 +21,25 @@ public class WorkIntervalDao {
     this.sql = statements.catalog("work-interval");
   }
 
-  public List<IntervalRow> list() {
-    return jdbc.sql(sql.get("list")).query(Rows.INTERVAL).list();
+  public List<IntervalRow> list(UUID practitioner) {
+    return jdbc.sql(sql.get("list")).param("practitioner", practitioner).query(Rows.INTERVAL).list();
   }
 
-  public int deleteWeekday(int weekday) {
-    return jdbc.sql(sql.get("delete-weekday")).param("weekday", weekday).update();
+  public int deleteWeekday(UUID practitioner, int weekday) {
+    return jdbc.sql(sql.get("delete-weekday")).param("practitioner", practitioner).param("weekday", weekday).update();
   }
 
-  public boolean insert(UUID id, int weekday, LocalTime starts, LocalTime ends, List<UUID> types) {
-    return jdbc.sql(sql.get("insert")).param("id", id).param("weekday", weekday).param("starts", starts).param("ends", ends)
+  public boolean insert(UUID id, UUID practitioner, int weekday, LocalTime starts, LocalTime ends, List<UUID> types) {
+    return jdbc.sql(sql.get("insert")).param("id", id).param("practitioner", practitioner).param("weekday", weekday)
+      .param("starts", starts).param("ends", ends)
       .param("types", types.stream().map(UUID::toString).collect(Collectors.joining(","))).update() == 1;
   }
 
-  public int dropType(UUID type) {
-    return jdbc.sql(sql.get("drop-type")).param("type", type).update();
+  public int dropType(UUID practitioner, UUID type) {
+    return jdbc.sql(sql.get("drop-type")).param("practitioner", practitioner).param("type", type).update();
   }
 
-  public int deleteEmpty() {
-    return jdbc.sql(sql.get("delete-empty")).update();
+  public int deleteEmpty(UUID practitioner) {
+    return jdbc.sql(sql.get("delete-empty")).param("practitioner", practitioner).update();
   }
 }

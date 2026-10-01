@@ -1,0 +1,17 @@
+# RBOT-FEAT-017, ADR-0003, ADR-0005, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:010-practices
+      author: rbot
+      labels: breaking
+      changes:
+        - sqlFile:
+            path: ../sql/010-practices-columns.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+        - customChange:
+            class: com.yanapaderina.migration.PracticeOwner
+        - sqlFile:
+            path: ../sql/010-practices-constraints.sql
+            relativeToChangelogFile: true
+            splitStatements: true

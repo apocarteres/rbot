@@ -1,2 +1,2 @@
 DELETE FROM work_interval
-WHERE weekday = :weekday
+WHERE practitioner_id = :practitioner AND weekday = :weekday

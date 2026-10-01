@@ -4,6 +4,7 @@ import com.yanapaderina.rbot.schedule.internal.app.ScheduleAdministration;
 import com.yanapaderina.rbot.schedule.internal.app.ScheduleDay;
 import com.yanapaderina.rbot.schedule.internal.app.ScheduleRefused;
 import com.yanapaderina.rbot.schedule.internal.app.SlotPreview;
+import io.github.apocarteres.platform.auth.CurrentAccount;
 import jakarta.validation.Valid;
 import java.time.DateTimeException;
 import java.time.DayOfWeek;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-02, RBOT-FEAT-016, ADR-0003
+// MVP-02, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003
 @RestController
 @RequestMapping("/api/cabinet/schedule")
 class ScheduleController {
@@ -39,75 +40,79 @@ class ScheduleController {
 
   @GetMapping("/settings")
   Views.Settings settings() {
-    return Views.Settings.of(schedule.settings());
+    return Views.Settings.of(schedule.settings(me()));
   }
 
   @PutMapping("/settings")
   Views.Settings changeSettings(@Valid @RequestBody Views.SettingsRequest request) {
-    return Views.Settings.of(schedule.changeSettings(request.domain(zone(request.zone()))));
+    return Views.Settings.of(schedule.changeSettings(me(), request.domain(zone(request.zone()))));
   }
 
   @GetMapping("/week")
   List<Views.Weekday> week() {
-    return Views.week(schedule.week());
+    return Views.week(schedule.week(me()));
   }
 
   @PutMapping("/week/{weekday}")
   List<Views.Interval> replaceWeekday(@PathVariable int weekday, @Valid @RequestBody Views.Hours request) {
-    return schedule.replaceWeekday(weekday(weekday), request.intervals().stream().map(Views.Interval::domain).toList())
+    return schedule.replaceWeekday(me(), weekday(weekday), request.intervals().stream().map(Views.Interval::domain).toList())
       .stream().map(Views.Interval::of).toList();
   }
 
   @GetMapping("/days")
   List<Views.Day> days(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-    return schedule.days(from, to).values().stream().map(Views.Day::of).toList();
+    return schedule.days(me(), from, to).values().stream().map(Views.Day::of).toList();
   }
 
   @PutMapping("/days/{date}")
   Views.Day setDay(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
     @Valid @RequestBody Views.DayRequest request) {
-    return Views.Day.of(schedule.setDay(new ScheduleDay(date, request.closed(), note(request.note()),
+    return Views.Day.of(schedule.setDay(me(), new ScheduleDay(date, request.closed(), note(request.note()),
       request.intervals().stream().map(Views.Interval::domain).toList())));
   }
 
   @PostMapping("/days/closed")
   Views.Closed closeDays(@Valid @RequestBody Views.ClosedRange request) {
-    return new Views.Closed(schedule.closeDays(request.from(), request.to(), note(request.note())));
+    return new Views.Closed(schedule.closeDays(me(), request.from(), request.to(), note(request.note())));
   }
 
   @DeleteMapping("/days/{date}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void clearDay(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-    schedule.clearDay(date);
+    schedule.clearDay(me(), date);
   }
 
   @GetMapping("/types")
   List<Views.Type> types() {
-    return schedule.types().stream().map(Views.Type::of).toList();
+    return schedule.types(me()).stream().map(Views.Type::of).toList();
   }
 
   @PostMapping("/types")
   @ResponseStatus(HttpStatus.CREATED)
   Views.Type createType(@Valid @RequestBody Views.TypeRequest request) {
-    return Views.Type.of(schedule.createType(request.domain(null)));
+    return Views.Type.of(schedule.createType(me(), request.domain(null)));
   }
 
   @PutMapping("/types/{id}")
   Views.Type changeType(@PathVariable UUID id, @Valid @RequestBody Views.TypeRequest request) {
-    return Views.Type.of(schedule.changeType(request.domain(id)));
+    return Views.Type.of(schedule.changeType(me(), request.domain(id)));
   }
 
   @DeleteMapping("/types/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   void deleteType(@PathVariable UUID id) {
-    schedule.deleteType(id);
+    schedule.deleteType(me(), id);
   }
 
   @GetMapping("/slots")
   List<Views.Slot> slots(@RequestParam UUID type, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-    return slots.free(type, from, to).stream().map(Views.Slot::of).toList();
+    return slots.free(me(), type, from, to).stream().map(Views.Slot::of).toList();
+  }
+
+  private static UUID me() {
+    return CurrentAccount.id().orElseThrow();
   }
 
   private static DayOfWeek weekday(int value) {

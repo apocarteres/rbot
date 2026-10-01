@@ -16,7 +16,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0002, ADR-0005, REQ-DATA-ACCESS-003
+// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0002, ADR-0005, REQ-DATA-ACCESS-003
 @Service
 class ClientRegistry implements Clients {
 
@@ -34,15 +34,21 @@ class ClientRegistry implements Clients {
 
   @Override
   @Transactional(readOnly = true)
-  public Optional<UUID> ofAccount(UUID accountId) {
-    return clients.findByAccount(accountId);
+  public Optional<UUID> ofAccount(UUID practitioner, UUID accountId) {
+    return clients.findByAccount(practitioner, accountId);
   }
 
   @Override
   @Transactional
-  public UUID enrolAccount(UUID accountId) {
-    clients.insertForAccount(UUID.randomUUID(), accountId, clock.instant());
-    return clients.findByAccount(accountId).orElseThrow();
+  public UUID enrolAccount(UUID practitioner, UUID accountId) {
+    clients.insertForAccount(UUID.randomUUID(), practitioner, accountId, clock.instant());
+    return clients.findByAccount(practitioner, accountId).orElseThrow();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<ClientCard> byAccount(UUID accountId) {
+    return clients.byAccount(accountId);
   }
 
   @Override
@@ -53,8 +59,8 @@ class ClientRegistry implements Clients {
 
   @Override
   @Transactional(readOnly = true)
-  public Optional<UUID> ofTelegram(long telegramUserId) {
-    return clients.findByTelegram(telegramUserId);
+  public List<ClientCard> byTelegram(long telegramUserId) {
+    return clients.byTelegram(telegramUserId);
   }
 
   @Override
@@ -65,8 +71,8 @@ class ClientRegistry implements Clients {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ClientCard> cards() {
-    return clients.list();
+  public List<ClientCard> cards(UUID practitioner) {
+    return clients.list(practitioner);
   }
 
   @Override
@@ -77,20 +83,21 @@ class ClientRegistry implements Clients {
 
   @Override
   @Transactional
-  public Invitation invite(String label) {
+  public Invitation invite(UUID practitioner, String label) {
     String trimmed = label == null ? "" : label.trim();
     if (trimmed.isEmpty() || trimmed.length() > 100) {
       throw new ClientRefused(ClientRefused.LABEL, "Подпись клиента — от 1 до 100 знаков");
     }
     UUID id = UUID.randomUUID();
-    clients.insertProspect(id, trimmed, clock.instant());
+    clients.insertProspect(id, practitioner, trimmed, clock.instant());
     return issue(id);
   }
 
   @Override
   @Transactional
-  public Invitation reinvite(UUID clientId) {
-    ClientCard card = clients.find(clientId).orElseThrow(() -> new ClientRefused(ClientRefused.MISSING, "Клиента нет"));
+  public Invitation reinvite(UUID practitioner, UUID clientId) {
+    ClientCard card = clients.find(clientId).filter(one -> one.practitioner().equals(practitioner))
+      .orElseThrow(() -> new ClientRefused(ClientRefused.MISSING, "Клиента нет"));
     if (card.accountId().isPresent()) {
       throw new ClientRefused(ClientRefused.NOT_INVITABLE, "Клиент входит по почте");
     }
@@ -113,7 +120,8 @@ class ClientRegistry implements Clients {
     if (invited.isEmpty()) {
       return new Linking.InviteRejected();
     }
-    Optional<UUID> holder = clients.findByTelegram(telegramUserId);
+    UUID practitioner = clients.find(invited.get()).orElseThrow().practitioner();
+    Optional<UUID> holder = clients.findByTelegram(practitioner, telegramUserId);
     if (holder.isPresent() && !holder.get().equals(invited.get())) {
       return new Linking.TelegramTaken();
     }

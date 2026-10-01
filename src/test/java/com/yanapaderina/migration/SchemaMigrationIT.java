@@ -10,12 +10,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 
-// RBOT-OPS-011, RBOT-FEAT-002, RBOT-FEAT-004, RBOT-FEAT-005, RBOT-FEAT-016, REQ-DATA-ACCESS-008
+// RBOT-OPS-011, RBOT-FEAT-002, RBOT-FEAT-004, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, REQ-DATA-ACCESS-008
 class SchemaMigrationIT {
 
   private static final List<String> APPLIED = List.of("platform-auth:001-account", "platform-auth:002-role", "platform-auth:003-token",
     "platform-auth:004-access-key", "platform-job-lock:001-lock", "rbot:001-schedule", "rbot:002-clients", "rbot:003-booking", "rbot:004-interval-types", "rbot:005-session-reschedule",
-    "rbot:006-interval-types-required", "rbot:007-client-invites", "rbot:008-telegram-updates", "rbot:009-session-type-buffer");
+    "rbot:006-interval-types-required", "rbot:007-client-invites", "rbot:008-telegram-updates", "rbot:009-session-type-buffer", "rbot:010-practices");
 
   @Test
   void freshDatabaseGetsCoreChangelog() throws Exception {

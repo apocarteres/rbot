@@ -13,14 +13,16 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, ADR-0003, REQ-CODE-DESIGN-003
+// MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-CODE-DESIGN-003
 @Service
 public class SlotPreview implements Availability {
 
@@ -43,14 +45,14 @@ public class SlotPreview implements Availability {
 
   @Override
   @Transactional(readOnly = true)
-  public ZoneId zone() {
-    return ScheduleRows.settings(settings.find()).zone();
+  public ZoneId zone(UUID practitioner) {
+    return ScheduleRows.settings(settings.find(practitioner)).zone();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Optional<BookingTerms> terms() {
-    PracticeSettings practice = ScheduleRows.settings(settings.find());
+  public Optional<BookingTerms> terms(UUID practitioner) {
+    PracticeSettings practice = ScheduleRows.settings(settings.find(practitioner));
     if (!practice.complete()) {
       return Optional.empty();
     }
@@ -59,27 +61,34 @@ public class SlotPreview implements Availability {
 
   @Override
   @Transactional(readOnly = true)
-  public List<SessionType> types() {
-    return types.list().stream().map(ScheduleRows::type).toList();
+  public List<SessionType> types(UUID practitioner) {
+    return types.list(practitioner).stream().map(ScheduleRows::type).toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<SessionType> everyType() {
-    return types.listAll().stream().map(ScheduleRows::type).toList();
+  public List<SessionType> everyType(UUID practitioner) {
+    return types.listAll(practitioner).stream().map(ScheduleRows::type).toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<TimeRange> free(UUID typeId, LocalDate from, LocalDate to) {
+  public Map<UUID, String> names(Collection<UUID> practitioners) {
+    return settings.names(practitioners);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<TimeRange> free(UUID practitioner, UUID typeId, LocalDate from, LocalDate to) {
     ScheduleRules.range(from, to);
-    PracticeSettings practice = ScheduleRows.settings(settings.find());
-    SessionType type = types.find(typeId).map(ScheduleRows::type)
+    PracticeSettings practice = ScheduleRows.settings(settings.find(practitioner));
+    SessionType type = types.find(practitioner, typeId).map(ScheduleRows::type)
       .orElseThrow(() -> new ScheduleRefused(ScheduleRefused.TYPE_MISSING, "Типа сессии нет"));
     TimeRange window = new TimeRange(ZonedDateTime.of(from.atStartOfDay(), practice.zone()).toInstant(),
       ZonedDateTime.of(to.plusDays(1).atStartOfDay(), practice.zone()).toInstant());
-    List<TimeRange> taken = busy.orderedStream().flatMap(source -> source.busy(window).stream()).toList();
-    return new SlotCalendar(practice, ScheduleRows.week(intervals.list()), ScheduleRows.days(days.between(from, to)), taken)
+    List<TimeRange> taken = busy.orderedStream().flatMap(source -> source.busy(practitioner, window).stream()).toList();
+    return new SlotCalendar(practice, ScheduleRows.week(intervals.list(practitioner)),
+      ScheduleRows.days(days.between(practitioner, from, to)), taken)
       .free(from, to, type.id(), type.duration(), type.buffer(), clock.instant());
   }
 }

@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.RowMapper;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, REQ-PERSISTENCE-013
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-017, REQ-PERSISTENCE-013
 final class Rows {
 
   static final RowMapper<SettingsRow> SETTINGS = (rs, n) -> new SettingsRow(rs.getString("zone"),
-    integer(rs, "lead_minutes"), integer(rs, "horizon_days"), integer(rs, "slot_step_minutes"));
+    integer(rs, "lead_minutes"), integer(rs, "horizon_days"), integer(rs, "slot_step_minutes"), rs.getString("display_name"));
 
   static final RowMapper<IntervalRow> INTERVAL = (rs, n) -> new IntervalRow(rs.getInt("weekday"),
     rs.getObject("starts", LocalTime.class), rs.getObject("ends", LocalTime.class), types(rs));

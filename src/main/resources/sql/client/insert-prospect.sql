@@ -1,2 +1,2 @@
-INSERT INTO client (id, label, status, created_at)
-VALUES (:id, :label, 'PROSPECT', :createdAt)
+INSERT INTO client (id, practitioner_id, label, status, created_at)
+VALUES (:id, :practitioner, :label, 'PROSPECT', :createdAt)

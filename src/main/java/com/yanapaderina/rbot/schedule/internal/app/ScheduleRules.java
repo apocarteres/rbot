@@ -36,6 +36,9 @@ final class ScheduleRules {
   static PracticeSettings settings(PracticeSettings settings) {
     within(settings.lead(), Duration.ZERO, Duration.ofDays(7), "минимальный срок записи");
     within(settings.step(), Duration.ofMinutes(5), Duration.ofHours(4), "шаг слотов");
+    settings.displayName().filter(name -> name.length() > 100).ifPresent(name -> {
+      throw new ScheduleRefused(ScheduleRefused.SETTINGS, "Имя для клиентов — не длиннее 100 знаков");
+    });
     settings.horizonDays().filter(days -> days < 1 || days > 365).ifPresent(days -> {
       throw new ScheduleRefused(ScheduleRefused.SETTINGS, "Горизонт записи " + days + " дн.: от 1 до 365");
     });

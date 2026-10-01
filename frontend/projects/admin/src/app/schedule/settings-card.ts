@@ -7,7 +7,7 @@ import { ScheduleApi, Settings } from './schedule-api';
 const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yekaterinburg', 'Asia/Omsk', 'Asia/Novosibirsk',
   'Asia/Krasnoyarsk', 'Asia/Irkutsk', 'Asia/Yakutsk', 'Asia/Vladivostok', 'Asia/Magadan', 'Asia/Kamchatka'];
 
-// MVP-02, RBOT-FEAT-003, RBOT-FEAT-007, RBOT-FEAT-016
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-007, RBOT-FEAT-016, RBOT-FEAT-017
 @Component({
   selector: 'app-settings-card',
   imports: [FormsModule, FailureDialog],
@@ -20,6 +20,11 @@ const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yek
     <form (ngSubmit)="save()">
       <p class="muted">Правила действуют для всех типов сессий. Пока они не заполнены, клиенты не могут записаться.</p>
       <div class="grid">
+        <div class="field">
+          <label for="display-name">Имя для клиентов</label>
+          <input id="display-name" name="displayName" maxlength="100" placeholder="Яна Падерина" aria-describedby="display-name-hint" [(ngModel)]="displayName" />
+          <span id="display-name-hint" class="hint">Так вас видят клиенты в боте, если они ходят к нескольким психологам.</span>
+        </div>
         <div class="field">
           <label for="zone">Часовой пояс</label>
           <select id="zone" name="zone" aria-describedby="zone-hint" [(ngModel)]="zone">
@@ -61,6 +66,7 @@ export class SettingsCard implements OnInit {
   protected readonly zones = ZONES;
 
   protected zone = 'Europe/Moscow';
+  protected displayName = '';
   protected leadHours: number | null = null;
   protected horizonDays: number | null = null;
   protected stepMinutes: number | null = null;
@@ -68,6 +74,7 @@ export class SettingsCard implements OnInit {
   ngOnInit(): void {
     const settings = this.settings();
     this.zone = settings.zone;
+    this.displayName = settings.displayName ?? '';
     this.leadHours = settings.leadMinutes === null ? null : settings.leadMinutes / 60;
     this.horizonDays = settings.horizonDays;
     this.stepMinutes = settings.slotStepMinutes;
@@ -80,6 +87,7 @@ export class SettingsCard implements OnInit {
         leadMinutes: this.leadHours === null ? null : Math.round(this.leadHours * 60),
         horizonDays: this.horizonDays,
         slotStepMinutes: this.stepMinutes,
+        displayName: this.displayName.trim() || null,
       });
       this.saved.emit(saved);
     });

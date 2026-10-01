@@ -5,6 +5,7 @@ import com.yanapaderina.rbot.clients.Clients;
 import com.yanapaderina.rbot.clients.Invitation;
 import io.github.apocarteres.platform.auth.Account;
 import io.github.apocarteres.platform.auth.Accounts;
+import io.github.apocarteres.platform.auth.CurrentAccount;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -21,12 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-03, RBOT-FEAT-009, ADR-0002, REQ-CODE-DESIGN-005
+// MVP-03, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0002, REQ-CODE-DESIGN-005
 @RestController
 @RequestMapping("/api/cabinet/clients")
 class CabinetClientsController {
-
-  private static final String CLIENT_ROLE = "CLIENT";
 
   private final Clients clients;
   private final Accounts accounts;
@@ -40,20 +39,23 @@ class CabinetClientsController {
 
   @GetMapping
   List<ClientView> list() {
-    accounts.withRole(CLIENT_ROLE).forEach(clients::enrolAccount);
-    return clients.cards().stream().map(this::view).filter(view -> view.name() != null)
+    return clients.cards(me()).stream().map(this::view).filter(view -> view.name() != null)
       .sorted(Comparator.comparing(ClientView::name, String.CASE_INSENSITIVE_ORDER)).toList();
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   InviteView invite(@Valid @RequestBody InviteRequest request) {
-    return invite(clients.invite(request.label()));
+    return invite(clients.invite(me(), request.label()));
   }
 
   @PostMapping("/{id}/invite")
   InviteView reinvite(@PathVariable UUID id) {
-    return invite(clients.reinvite(id));
+    return invite(clients.reinvite(me(), id));
+  }
+
+  private static UUID me() {
+    return CurrentAccount.id().orElseThrow();
   }
 
   private InviteView invite(Invitation invitation) {

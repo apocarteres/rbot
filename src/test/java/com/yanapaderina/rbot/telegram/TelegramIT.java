@@ -38,7 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0002
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0002
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -111,12 +111,14 @@ class TelegramIT extends IntegrationStores {
     write(put("/api/cabinet/schedule/settings"), psychologist,
       "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60}", 200);
     String therapy = type(psychologist, "Психотерапия очно", 60, 0, true);
+    String practice = JsonPath.read(mvc.perform(get("/api/miniapp/practices").header("X-Telegram-Init-Data", miniApp))
+      .andExpect(jsonPath("$.length()").value(1)).andReturn().getResponse().getContentAsString(), "$[0].id");
     LocalDate day = clock.instant().atZone(MOSCOW).toLocalDate().plusDays(1);
     write(put("/api/cabinet/schedule/week/" + day.getDayOfWeek().getValue()), psychologist,
       "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
     String start = ZonedDateTime.of(day, LocalTime.parse("11:00"), MOSCOW).toInstant().toString();
     mvc.perform(post("/api/miniapp/sessions").header("X-Telegram-Init-Data", miniApp).contentType(MediaType.APPLICATION_JSON)
-        .content("{\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}"))
+        .content("{\"practice\":\"" + practice + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}"))
       .andExpect(status().isCreated());
     mvc.perform(get("/api/miniapp/sessions").header("X-Telegram-Init-Data", miniApp))
       .andExpect(jsonPath("$.length()").value(1));

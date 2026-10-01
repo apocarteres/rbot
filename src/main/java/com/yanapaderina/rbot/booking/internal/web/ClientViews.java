@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, REQ-CODE-DESIGN-005
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, REQ-CODE-DESIGN-005
 final class ClientViews {
 
   private ClientViews() {
@@ -42,17 +42,21 @@ final class ClientViews {
     }
   }
 
-  record Session(UUID id, UUID typeId, String title, SessionFormat format, Instant start, Instant end, SessionStatus status,
-    BigDecimal price) {
+  record Practice(UUID id, String name) {
+  }
 
-    static Session of(ClientSession session) {
+  record Session(UUID id, UUID practice, String practiceName, UUID typeId, String title, SessionFormat format, Instant start,
+    Instant end, SessionStatus status, BigDecimal price) {
+
+    static Session of(ClientSession session, String practiceName) {
       SessionType type = session.type();
-      return new Session(session.id(), type == null ? null : type.id(), type == null ? null : type.title(),
-        type == null ? null : type.format(), session.start(), session.end(), session.status(), session.price());
+      return new Session(session.id(), session.practitioner(), practiceName, type == null ? null : type.id(),
+        type == null ? null : type.title(), type == null ? null : type.format(), session.start(), session.end(), session.status(),
+        session.price());
     }
   }
 
-  record BookRequest(@NotNull UUID typeId, @NotNull Instant start) {
+  record BookRequest(@NotNull UUID practice, @NotNull UUID typeId, @NotNull Instant start) {
   }
 
   record MoveRequest(@NotNull Instant start) {

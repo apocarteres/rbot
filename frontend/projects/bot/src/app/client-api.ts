@@ -21,6 +21,11 @@ export interface Offer {
   readonly types: readonly OfferedType[];
 }
 
+export interface Practice {
+  readonly id: string;
+  readonly name: string;
+}
+
 export interface Slot {
   readonly start: string;
   readonly end: string;
@@ -28,6 +33,8 @@ export interface Slot {
 
 export interface ClientSession {
   readonly id: string;
+  readonly practice: string;
+  readonly practiceName: string;
   readonly typeId: string | null;
   readonly title: string | null;
   readonly format: SessionFormat | null;
@@ -37,26 +44,30 @@ export interface ClientSession {
   readonly price: number;
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017
 @Injectable({ providedIn: 'root' })
 export class ClientApi {
   private readonly http = inject(HttpClient);
   private readonly base = insideTelegram() ? '/api/miniapp' : '/api/client';
 
-  offer(): Promise<Offer> {
-    return firstValueFrom(this.http.get<Offer>(`${this.base}/offer`));
+  practices(): Promise<readonly Practice[]> {
+    return firstValueFrom(this.http.get<readonly Practice[]>(`${this.base}/practices`));
   }
 
-  slots(type: string, from: string, to: string): Promise<readonly Slot[]> {
-    return firstValueFrom(this.http.get<readonly Slot[]>(`${this.base}/slots`, { params: { type, from, to } }));
+  offer(practice: string): Promise<Offer> {
+    return firstValueFrom(this.http.get<Offer>(`${this.base}/offer`, { params: { practice } }));
+  }
+
+  slots(practice: string, type: string, from: string, to: string): Promise<readonly Slot[]> {
+    return firstValueFrom(this.http.get<readonly Slot[]>(`${this.base}/slots`, { params: { practice, type, from, to } }));
   }
 
   sessions(): Promise<readonly ClientSession[]> {
     return firstValueFrom(this.http.get<readonly ClientSession[]>(`${this.base}/sessions`));
   }
 
-  book(typeId: string, start: string): Promise<ClientSession> {
-    return firstValueFrom(this.http.post<ClientSession>(`${this.base}/sessions`, { typeId, start }));
+  book(practice: string, typeId: string, start: string): Promise<ClientSession> {
+    return firstValueFrom(this.http.post<ClientSession>(`${this.base}/sessions`, { practice, typeId, start }));
   }
 
   reschedule(id: string, start: string): Promise<ClientSession> {

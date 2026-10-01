@@ -4,26 +4,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0002, ADR-0005
+// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0002, ADR-0005
 public interface Clients {
 
-  Optional<UUID> ofAccount(UUID accountId);
+  Optional<UUID> ofAccount(UUID practitioner, UUID accountId);
 
-  UUID enrolAccount(UUID accountId);
+  UUID enrolAccount(UUID practitioner, UUID accountId);
+
+  List<ClientCard> byAccount(UUID accountId);
+
+  List<ClientCard> byTelegram(long telegramUserId);
 
   Optional<UUID> accountOf(UUID clientId);
 
-  Optional<UUID> ofTelegram(long telegramUserId);
-
   Optional<Long> telegramOf(UUID clientId);
 
-  List<ClientCard> cards();
+  List<ClientCard> cards(UUID practitioner);
 
   Optional<ClientCard> card(UUID clientId);
 
-  Invitation invite(String label);
+  Invitation invite(UUID practitioner, String label);
 
-  Invitation reinvite(UUID clientId);
+  Invitation reinvite(UUID practitioner, UUID clientId);
 
   boolean inviteOpen(String token);
 

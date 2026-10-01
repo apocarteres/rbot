@@ -29,7 +29,7 @@ class SlotCalendarTest {
   private static final UUID SUPERVISION = UUID.fromString("6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0009");
 
   private static PracticeSettings settings(Duration lead, int horizonDays, Duration step) {
-    return new PracticeSettings(MOSCOW, Optional.of(lead), Optional.of(horizonDays), Optional.of(step));
+    return new PracticeSettings(MOSCOW, Optional.of(lead), Optional.of(horizonDays), Optional.of(step), Optional.empty());
   }
 
   private static WeekTemplate mondays(String start, String end) {
@@ -97,7 +97,7 @@ class SlotCalendarTest {
   @Test
   @DisplayName("Без параметров записи слотов нет: settings-incomplete")
   void incompleteSettingsAreRefused() {
-    PracticeSettings empty = new PracticeSettings(MOSCOW, Optional.empty(), Optional.empty(), Optional.empty());
+    PracticeSettings empty = new PracticeSettings(MOSCOW, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     assertThatThrownBy(() -> new SlotCalendar(empty, mondays("10:00", "11:00"), Map.of(), List.of()))
       .isInstanceOf(ScheduleRefused.class)
       .extracting(failure -> ((ScheduleRefused) failure).code().value()).isEqualTo("settings-incomplete");

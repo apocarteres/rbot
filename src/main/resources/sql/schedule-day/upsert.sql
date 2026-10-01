@@ -1,3 +1,3 @@
-INSERT INTO schedule_day (day, closed, note)
-VALUES (:day, :closed, :note)
-ON CONFLICT (day) DO UPDATE SET closed = EXCLUDED.closed, note = EXCLUDED.note
+INSERT INTO schedule_day (practitioner_id, day, closed, note)
+VALUES (:practitioner, :day, :closed, :note)
+ON CONFLICT (practitioner_id, day) DO UPDATE SET closed = EXCLUDED.closed, note = EXCLUDED.note

@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthSession } from '@apocarteres/auth';
 
-// MVP-01, MVP-02, MVP-14, RBOT-FEAT-005, RBOT-FEAT-009
+// MVP-01, MVP-02, MVP-14, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017
 @Component({
   selector: 'app-home',
   imports: [RouterLink],
@@ -14,6 +15,9 @@ import { RouterLink } from '@angular/router';
   template: `
     <h1>Добро пожаловать</h1>
     <p class="muted">Остальные разделы появятся по плану MVP.</p>
+    @if (!session.has('PSYCHOLOGIST')) {
+      <p>У вас нет своей практики: вы управляете <a routerLink="/accounts">учётными записями</a>.</p>
+    } @else {
     <div class="grid">
       <a class="card ready" routerLink="/sessions">
         <h2>Записи</h2>
@@ -35,9 +39,11 @@ import { RouterLink } from '@angular/router';
         </section>
       }
     </div>
+    }
   `,
 })
 export class Home {
+  protected readonly session = inject(AuthSession);
   protected readonly sections = [
     { title: 'Анкеты', text: 'Анкеты новых клиентов.' },
     { title: 'Правила отмены', text: 'Политика отмен и штрафы.' },

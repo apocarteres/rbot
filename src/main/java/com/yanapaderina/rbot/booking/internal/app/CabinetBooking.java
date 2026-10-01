@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class CabinetBooking {
 
@@ -50,14 +50,14 @@ public class CabinetBooking {
   }
 
   @Transactional(readOnly = true)
-  public List<CabinetSession> between(LocalDate from, LocalDate to) {
+  public List<CabinetSession> between(UUID practitioner, LocalDate from, LocalDate to) {
     if (to.isBefore(from) || from.plusDays(MAX_RANGE_DAYS).isBefore(to)) {
       throw new BookingRefused(BookingRefused.RANGE, "Диапазон " + from + "–" + to);
     }
-    ZoneId zone = availability.zone();
-    Map<UUID, SessionType> types = types();
+    ZoneId zone = availability.zone(practitioner);
+    Map<UUID, SessionType> types = types(practitioner);
     Map<UUID, Optional<ClientCard>> cards = new HashMap<>();
-    return sessions.between(from.atStartOfDay(zone).toInstant(), to.plusDays(1).atStartOfDay(zone).toInstant()).stream()
+    return sessions.between(practitioner, from.atStartOfDay(zone).toInstant(), to.plusDays(1).atStartOfDay(zone).toInstant()).stream()
       .map(row -> {
         Optional<ClientCard> card = cards.computeIfAbsent(row.client(), clients::card);
         boolean byClient = row.cancelledBy() != null && (row.cancelledBy().equals(row.client())
@@ -69,48 +69,49 @@ public class CabinetBooking {
   }
 
   @Transactional
-  public CabinetSession book(UUID clientId, UUID typeId, Instant start, UUID by) {
-    ClientCard card = clients.card(clientId).orElseThrow(() -> new BookingRefused(BookingRefused.CLIENT_MISSING, "Клиента нет"));
-    SessionType type = type(typeId);
+  public CabinetSession book(UUID practitioner, UUID clientId, UUID typeId, Instant start) {
+    ClientCard card = clients.card(clientId).filter(one -> one.practitioner().equals(practitioner))
+      .orElseThrow(() -> new BookingRefused(BookingRefused.CLIENT_MISSING, "Клиента нет"));
+    SessionType type = type(practitioner, typeId);
     future(start);
-    SessionRow row = ledger.book(card.id(), type, start, by);
-    events.publishEvent(new SessionNotice(row.client(), SessionNotice.Change.BOOKED, row.start(), row.end(), Optional.empty(),
+    SessionRow row = ledger.book(practitioner, card.id(), type, start, practitioner);
+    events.publishEvent(new SessionNotice(practitioner, row.client(), SessionNotice.Change.BOOKED, row.start(), row.end(), Optional.empty(),
       type.title()));
     return view(row, type, name(Optional.of(card)));
   }
 
   @Transactional
-  public CabinetSession reschedule(UUID sessionId, Instant start, UUID by) {
-    SessionRow row = booked(sessionId);
-    SessionType type = type(row.type());
+  public CabinetSession reschedule(UUID practitioner, UUID sessionId, Instant start) {
+    SessionRow row = booked(practitioner, sessionId);
+    SessionType type = type(practitioner, row.type());
     future(start);
-    SessionRow moved = ledger.reschedule(row, type, start, by);
-    events.publishEvent(new SessionNotice(row.client(), SessionNotice.Change.RESCHEDULED, moved.start(), moved.end(),
+    SessionRow moved = ledger.reschedule(row, type, start, practitioner);
+    events.publishEvent(new SessionNotice(practitioner, row.client(), SessionNotice.Change.RESCHEDULED, moved.start(), moved.end(),
       Optional.of(row.start()), type.title()));
     return view(moved, type, name(clients.card(row.client())));
   }
 
   @Transactional
-  public CabinetSession cancel(UUID sessionId, UUID by) {
-    SessionRow row = booked(sessionId);
-    SessionType type = types().get(row.type());
-    SessionRow closed = ledger.close(row, SessionStatus.CANCELLED, by);
-    events.publishEvent(new SessionNotice(row.client(), SessionNotice.Change.CANCELLED, row.start(), row.end(), Optional.empty(),
+  public CabinetSession cancel(UUID practitioner, UUID sessionId) {
+    SessionRow row = booked(practitioner, sessionId);
+    SessionType type = types(practitioner).get(row.type());
+    SessionRow closed = ledger.close(row, SessionStatus.CANCELLED, practitioner);
+    events.publishEvent(new SessionNotice(practitioner, row.client(), SessionNotice.Change.CANCELLED, row.start(), row.end(), Optional.empty(),
       type == null ? "" : type.title()));
     return view(closed, type, name(clients.card(row.client())));
   }
 
   @Transactional
-  public CabinetSession noShow(UUID sessionId) {
-    SessionRow row = booked(sessionId);
+  public CabinetSession noShow(UUID practitioner, UUID sessionId) {
+    SessionRow row = booked(practitioner, sessionId);
     if (!sessions.markNoShow(sessionId, clock.instant())) {
       throw new BookingRefused(BookingRefused.NOT_STARTED, "Сессия ещё не началась");
     }
-    return view(row.withStatus(SessionStatus.NO_SHOW.name(), row.cancelledBy()), types().get(row.type()), name(clients.card(row.client())));
+    return view(row.withStatus(SessionStatus.NO_SHOW.name(), row.cancelledBy()), types(practitioner).get(row.type()), name(clients.card(row.client())));
   }
 
-  private SessionRow booked(UUID sessionId) {
-    SessionRow row = sessions.find(sessionId).orElseThrow(() -> new BookingRefused(BookingRefused.SESSION_MISSING, "Сессии нет"));
+  private SessionRow booked(UUID practitioner, UUID sessionId) {
+    SessionRow row = sessions.find(sessionId).filter(one -> one.practitioner().equals(practitioner)).orElseThrow(() -> new BookingRefused(BookingRefused.SESSION_MISSING, "Сессии нет"));
     if (!SessionStatus.BOOKED.name().equals(row.status())) {
       throw new BookingRefused(BookingRefused.SESSION_INACTIVE, "Сессия не назначена");
     }
@@ -123,8 +124,8 @@ public class CabinetBooking {
     }
   }
 
-  private SessionType type(UUID typeId) {
-    return availability.types().stream().filter(type -> type.id().equals(typeId)).findFirst()
+  private SessionType type(UUID practitioner, UUID typeId) {
+    return availability.types(practitioner).stream().filter(type -> type.id().equals(typeId)).findFirst()
       .orElseThrow(() -> new BookingRefused(BookingRefused.TYPE_UNAVAILABLE, "Типа сессии нет"));
   }
 
@@ -132,8 +133,8 @@ public class CabinetBooking {
     return card.flatMap(one -> one.label().or(() -> one.accountId().flatMap(accounts::find).map(Account::email))).orElse(null);
   }
 
-  private Map<UUID, SessionType> types() {
-    return availability.everyType().stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
+  private Map<UUID, SessionType> types(UUID practitioner) {
+    return availability.everyType(practitioner).stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
   }
 
   private static CabinetSession view(SessionRow row, SessionType type, String name) {

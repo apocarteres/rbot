@@ -1,13 +1,15 @@
 package com.yanapaderina.rbot.booking.internal.web;
 
 import com.yanapaderina.rbot.booking.internal.app.BookingRefused;
-import com.yanapaderina.rbot.booking.internal.app.ClientBooking;
+import com.yanapaderina.rbot.clients.ClientCard;
 import com.yanapaderina.rbot.clients.Clients;
 import io.github.apocarteres.platform.auth.CurrentIdentity;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,53 +21,80 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-08, RBOT-FEAT-009, ADR-0002, ADR-0003, REQ-AUTH-039
+// MVP-08, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0002, ADR-0003, REQ-AUTH-039
 @RestController
 @RequestMapping("/api/miniapp")
 class MiniAppController {
 
-  private final ClientBooking booking;
+  private final ClientEndpoints endpoints;
   private final Clients clients;
 
-  MiniAppController(ClientBooking booking, Clients clients) {
-    this.booking = booking;
+  MiniAppController(ClientEndpoints endpoints, Clients clients) {
+    this.endpoints = endpoints;
     this.clients = clients;
   }
 
+  @GetMapping("/practices")
+  List<ClientViews.Practice> practices() {
+    return endpoints.practices(scope());
+  }
+
   @GetMapping("/offer")
-  ClientViews.Offer offer() {
-    return ClientViews.Offer.of(booking.offer());
+  ClientViews.Offer offer(@RequestParam UUID practice) {
+    return endpoints.offer(scope(), practice);
   }
 
   @GetMapping("/slots")
-  List<ClientViews.Slot> slots(@RequestParam UUID type, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+  List<ClientViews.Slot> slots(@RequestParam UUID practice, @RequestParam UUID type,
+    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-    return booking.free(type, from, to).stream().map(ClientViews.Slot::of).toList();
+    return endpoints.slots(scope(), practice, type, from, to);
   }
 
   @GetMapping("/sessions")
   List<ClientViews.Session> sessions() {
-    return booking.upcoming(account()).stream().map(ClientViews.Session::of).toList();
+    return endpoints.sessions(scope());
   }
 
   @PostMapping("/sessions")
   @ResponseStatus(HttpStatus.CREATED)
   ClientViews.Session book(@Valid @RequestBody ClientViews.BookRequest request) {
-    return ClientViews.Session.of(booking.book(account(), request.typeId(), request.start()));
+    return endpoints.book(scope(), request);
   }
 
   @PostMapping("/sessions/{id}/reschedule")
   ClientViews.Session reschedule(@PathVariable UUID id, @Valid @RequestBody ClientViews.MoveRequest request) {
-    return ClientViews.Session.of(booking.reschedule(account(), id, request.start()));
+    return endpoints.reschedule(scope(), id, request);
   }
 
   @PostMapping("/sessions/{id}/cancel")
   ClientViews.Session cancel(@PathVariable UUID id) {
-    return ClientViews.Session.of(booking.cancel(account(), id));
+    return endpoints.cancel(scope(), id);
   }
 
-  private UUID account() {
-    return CurrentIdentity.get().map(identity -> Long.parseLong(identity.id())).flatMap(clients::ofTelegram)
+  private ClientScope scope() {
+    long user = CurrentIdentity.get().map(identity -> Long.parseLong(identity.id()))
       .orElseThrow(() -> new BookingRefused(BookingRefused.NOT_LINKED, "Telegram не привязан к клиенту"));
+    List<ClientCard> cards = clients.byTelegram(user);
+    if (cards.isEmpty()) {
+      throw new BookingRefused(BookingRefused.NOT_LINKED, "Telegram не привязан к клиенту");
+    }
+    return new ClientScope() {
+      @Override
+      public List<UUID> practices() {
+        return cards.stream().map(ClientCard::practitioner).distinct().toList();
+      }
+
+      @Override
+      public UUID client(UUID practice) {
+        return cards.stream().filter(card -> card.practitioner().equals(practice)).map(ClientCard::id).findFirst()
+          .orElseThrow(() -> new BookingRefused(BookingRefused.PRACTICE_MISSING, "Психолог недоступен"));
+      }
+
+      @Override
+      public Set<UUID> clients() {
+        return cards.stream().map(ClientCard::id).collect(Collectors.toSet());
+      }
+    };
   }
 }

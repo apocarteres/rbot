@@ -4,20 +4,21 @@ import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
-import { ClientApi, ClientSession, Offer, OfferedType, Slot } from '../client-api';
+import { ClientApi, ClientSession, Offer, OfferedType, Practice, Slot } from '../client-api';
 import { DEFAULT_ZONE, details, shortDay, when, zoneNote } from '../format';
 
-type Step = 'type' | 'day' | 'time' | 'confirm' | 'done';
+type Step = 'practice' | 'type' | 'day' | 'time' | 'confirm' | 'done';
 
 const STEPS: readonly Step[] = ['type', 'day', 'time', 'confirm'];
 const MOVE_STEPS: readonly Step[] = ['day', 'time', 'confirm'];
+const CLOSED: Offer = { open: false, zone: null, leadMinutes: null, horizonDays: null, types: [] };
 
 interface SlotDay {
   readonly date: string;
   readonly slots: readonly Slot[];
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-CODE-DESIGN-007
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-booking-wizard',
   imports: [RouterLink, FailureDialog],
@@ -49,7 +50,16 @@ interface SlotDay {
       </div>
       <div class="progress" aria-hidden="true"><span [style.width.%]="number() * 100 / steps().length"></span></div>
     }
-    @if (offer(); as current) {
+    @if (step() === 'practice') {
+      <h1>К кому записаться?</h1>
+      <div class="options">
+        @for (one of practices(); track one.id) {
+          <button type="button" class="option" [attr.aria-pressed]="practice() === one.id" (click)="choosePractice(one)">
+            <strong>{{ one.name }}</strong>
+          </button>
+        }
+      </div>
+    } @else if (offer(); as current) {
       @if (!current.open || current.types.length === 0) {
         <section class="card">
           <h1>Запись пока закрыта</h1>
@@ -125,6 +135,8 @@ export class BookingWizard implements OnInit {
 
   protected readonly attempt = new Attempt();
   protected readonly step = signal<Step>('type');
+  protected readonly practices = signal<readonly Practice[]>([]);
+  protected readonly practice = signal('');
   protected readonly offer = signal<Offer | null>(null);
   protected readonly type = signal<OfferedType | null>(null);
   protected readonly slots = signal<readonly Slot[]>([]);
@@ -132,7 +144,12 @@ export class BookingWizard implements OnInit {
   protected readonly slot = signal<Slot | null>(null);
   protected readonly booked = signal<ClientSession | null>(null);
   protected readonly moving = signal<ClientSession | null>(null);
-  protected readonly steps = computed(() => (this.moving() ? MOVE_STEPS : STEPS));
+  protected readonly steps = computed<readonly Step[]>(() => {
+    if (this.moving()) {
+      return MOVE_STEPS;
+    }
+    return this.practices().length > 1 ? ['practice', ...STEPS] : STEPS;
+  });
 
   protected readonly zone = computed(() => this.offer()?.zone ?? DEFAULT_ZONE);
   protected readonly number = computed(() => this.steps().indexOf(this.step()) + 1);
@@ -154,15 +171,29 @@ export class BookingWizard implements OnInit {
   ngOnInit(): void {
     const move = this.route.snapshot.queryParamMap.get('move');
     void this.attempt.run(async () => {
-      const [offer, sessions] = await Promise.all([this.api.offer(), move ? this.api.sessions() : Promise.resolve([])]);
-      this.offer.set(offer);
+      const [practices, sessions] = await Promise.all([this.api.practices(), move ? this.api.sessions() : Promise.resolve([])]);
+      this.practices.set(practices);
       const old = sessions.find((one) => one.id === move);
-      const type = offer.types.find((one) => one.id === old?.typeId);
-      if (old && type) {
-        this.moving.set(old);
-        this.type.set(type);
-        await this.loadSlots();
-        this.step.set('day');
+      if (old) {
+        this.practice.set(old.practice);
+        const offer = await this.api.offer(old.practice);
+        this.offer.set(offer);
+        const type = offer.types.find((one) => one.id === old.typeId);
+        if (type) {
+          this.moving.set(old);
+          this.type.set(type);
+          await this.loadSlots();
+          this.step.set('day');
+        }
+        return;
+      }
+      if (practices.length === 1) {
+        this.practice.set(practices[0].id);
+        this.offer.set(await this.api.offer(practices[0].id));
+      } else if (practices.length > 1) {
+        this.step.set('practice');
+      } else {
+        this.offer.set(CLOSED);
       }
     });
   }
@@ -186,6 +217,14 @@ export class BookingWizard implements OnInit {
   protected period(): string {
     const chosen = this.slot();
     return chosen ? when(chosen.start, chosen.end, this.zone()) : '';
+  }
+
+  protected async choosePractice(practice: Practice): Promise<void> {
+    this.practice.set(practice.id);
+    this.type.set(null);
+    if (await this.attempt.run(async () => this.offer.set(await this.api.offer(practice.id)))) {
+      this.step.set('type');
+    }
   }
 
   protected async chooseType(type: OfferedType): Promise<void> {
@@ -226,7 +265,7 @@ export class BookingWizard implements OnInit {
     }
     const old = this.moving();
     const done = await this.attempt.run(async () =>
-      this.booked.set(await (old ? this.api.reschedule(old.id, slot.start) : this.api.book(type.id, slot.start))));
+      this.booked.set(await (old ? this.api.reschedule(old.id, slot.start) : this.api.book(this.practice(), type.id, slot.start))));
     if (done) {
       this.step.set('done');
       return;
@@ -249,7 +288,7 @@ export class BookingWizard implements OnInit {
       return;
     }
     const today = isoDate(this.clock.instant(), this.zone());
-    this.slots.set(await this.api.slots(type.id, today, plusDays(today, offer.horizonDays ?? 14)));
+    this.slots.set(await this.api.slots(this.practice(), type.id, today, plusDays(today, offer.horizonDays ?? 14)));
   }
 }
 

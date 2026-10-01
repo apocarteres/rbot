@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.jayway.jsonpath.JsonPath;
 import com.yanapaderina.rbot.IntegrationStores;
+import com.yanapaderina.rbot.clients.Clients;
 import io.github.apocarteres.platform.auth.Accounts;
 import io.github.apocarteres.platform.auth.NoProfile;
 import jakarta.servlet.http.Cookie;
@@ -30,7 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0003
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=cabinet-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -52,6 +53,9 @@ class CabinetSessionsIT extends IntegrationStores {
 
   @Autowired
   private Accounts accounts;
+
+  @Autowired
+  private Clients clients;
 
   @BeforeEach
   void practice() throws Exception {
@@ -130,10 +134,9 @@ class CabinetSessionsIT extends IntegrationStores {
       .andExpect(jsonPath("$.code").value("sessions-range-rejected"));
   }
 
-  private String clientId() throws Exception {
-    String clients = mvc.perform(get("/api/cabinet/clients").cookie(psychologist())).andReturn().getResponse().getContentAsString();
-    java.util.List<String> ids = JsonPath.read(clients, "$[?(@.email == '" + CLIENT + "')].id");
-    return ids.getFirst();
+  private String clientId() {
+    java.util.UUID practice = accounts.findByEmail("cabinet-psychologist@example.test").orElseThrow().id();
+    return clients.enrolAccount(practice, accounts.findByEmail(CLIENT).orElseThrow().id()).toString();
   }
 
   private LocalDate today() {

@@ -31,6 +31,7 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'session-start-past': 'Выберите время в будущем.',
   'client-missing': 'Клиент не найден.',
   'sessions-range-rejected': 'Неверный диапазон дат.',
+  'practice-missing': 'Этот психолог вам недоступен. Откройте приглашение от него.',
   'client-not-linked': 'Telegram не привязан. Откройте ссылку-приглашение от психолога.',
   'client-label-rejected': 'Подпись клиента — от 1 до 100 знаков.',
   'client-card-missing': 'Клиент не найден.',

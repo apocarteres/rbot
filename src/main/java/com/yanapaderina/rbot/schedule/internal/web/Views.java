@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, REQ-CODE-DESIGN-005
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-017, REQ-CODE-DESIGN-005
 final class Views {
 
   private Views() {
@@ -38,11 +38,11 @@ final class Views {
     }
   }
 
-  record Settings(String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, boolean complete) {
+  record Settings(String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, String displayName, boolean complete) {
 
     static Settings of(PracticeSettings settings) {
       return new Settings(settings.zone().getId(), minutes(settings.lead()), settings.horizonDays().orElse(null),
-        minutes(settings.step()), settings.complete());
+        minutes(settings.step()), settings.displayName().orElse(null), settings.complete());
     }
 
     private static Integer minutes(Optional<Duration> value) {
@@ -50,10 +50,11 @@ final class Views {
     }
   }
 
-  record SettingsRequest(@NotNull String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes) {
+  record SettingsRequest(@NotNull String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, String displayName) {
 
     PracticeSettings domain(ZoneId zoneId) {
-      return new PracticeSettings(zoneId, duration(leadMinutes), Optional.ofNullable(horizonDays), duration(slotStepMinutes));
+      return new PracticeSettings(zoneId, duration(leadMinutes), Optional.ofNullable(horizonDays), duration(slotStepMinutes),
+        Optional.ofNullable(displayName).map(String::trim).filter(name -> !name.isEmpty()));
     }
 
     private static Optional<Duration> duration(Integer minutes) {

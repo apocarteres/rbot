@@ -1,3 +1,3 @@
-SELECT zone, lead_minutes, horizon_days, slot_step_minutes
+SELECT zone, lead_minutes, horizon_days, slot_step_minutes, display_name
 FROM practice_settings
-WHERE id = 1
+WHERE practitioner_id = :practitioner

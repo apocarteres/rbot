@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,12 +15,12 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-DATA-ACCESS-002, REQ-PERSISTENCE-013
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-002, REQ-PERSISTENCE-013
 @Repository
 public class SessionDao {
 
   private static final RowMapper<SessionRow> SESSION = (rs, n) -> new SessionRow(rs.getObject("id", UUID.class),
-    rs.getObject("client_id", UUID.class), rs.getObject("type_id", UUID.class), instant(rs, "starts_at"), instant(rs, "ends_at"),
+    rs.getObject("practitioner_id", UUID.class), rs.getObject("client_id", UUID.class), rs.getObject("type_id", UUID.class), instant(rs, "starts_at"), instant(rs, "ends_at"),
     rs.getString("status"), rs.getBigDecimal("price_snapshot"), rs.getObject("cancelled_by", UUID.class),
     rs.getObject("rescheduled_to", UUID.class));
 
@@ -34,7 +35,7 @@ public class SessionDao {
   }
 
   public boolean insert(SessionRow row, Instant occupiedUntil, UUID createdBy, Instant at) {
-    return jdbc.sql(sql.get("insert")).param("id", row.id()).param("clientId", row.client()).param("typeId", row.type())
+    return jdbc.sql(sql.get("insert")).param("id", row.id()).param("practitioner", row.practitioner()).param("clientId", row.client()).param("typeId", row.type())
       .param("startsAt", StoredInstant.offsetOf(row.start())).param("endsAt", StoredInstant.offsetOf(row.end()))
       .param("occupiedUntil", StoredInstant.offsetOf(occupiedUntil)).param("status", row.status()).param("price", row.price())
       .param("createdBy", createdBy).param("createdAt", StoredInstant.offsetOf(at)).update() == 1;
@@ -48,17 +49,20 @@ public class SessionDao {
     return jdbc.sql(sql.get("find-any")).param("id", id).query(SESSION).optional();
   }
 
-  public List<SessionRow> upcoming(UUID client, Instant now) {
-    return jdbc.sql(sql.get("upcoming")).param("clientId", client).param("now", StoredInstant.offsetOf(now)).query(SESSION).list();
+  public List<SessionRow> upcoming(Collection<UUID> clients, Instant now) {
+    if (clients.isEmpty()) {
+      return List.of();
+    }
+    return jdbc.sql(sql.get("upcoming")).param("clients", clients).param("now", StoredInstant.offsetOf(now)).query(SESSION).list();
   }
 
-  public List<SessionRow> between(Instant from, Instant to) {
-    return jdbc.sql(sql.get("between")).param("from", StoredInstant.offsetOf(from)).param("to", StoredInstant.offsetOf(to))
+  public List<SessionRow> between(UUID practitioner, Instant from, Instant to) {
+    return jdbc.sql(sql.get("between")).param("practitioner", practitioner).param("from", StoredInstant.offsetOf(from)).param("to", StoredInstant.offsetOf(to))
       .query(SESSION).list();
   }
 
-  public List<OccupiedRow> occupied(Instant from, Instant to) {
-    return jdbc.sql(sql.get("occupied")).param("from", StoredInstant.offsetOf(from)).param("to", StoredInstant.offsetOf(to))
+  public List<OccupiedRow> occupied(UUID practitioner, Instant from, Instant to) {
+    return jdbc.sql(sql.get("occupied")).param("practitioner", practitioner).param("from", StoredInstant.offsetOf(from)).param("to", StoredInstant.offsetOf(to))
       .query(OCCUPIED).list();
   }
 

@@ -8,7 +8,7 @@ import { DEFAULT_ZONE, details, when, zoneNote } from '../format';
 import { insideTelegram } from '../telegram';
 import { CancelDialog } from './cancel-dialog';
 
-// MVP-01, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009
+// MVP-01, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017
 @Component({
   selector: 'app-home',
   imports: [RouterLink, CancelDialog, FailureDialog],
@@ -33,7 +33,7 @@ import { CancelDialog } from './cancel-dialog';
           <div class="session">
             <div class="what">
               <strong>{{ period(one) }}</strong>
-              <span class="muted small">{{ one.title }} · {{ details(one) }}</span>
+              <span class="muted small">@if (many()) { {{ one.practiceName }} · }{{ one.title }} · {{ details(one) }}</span>
             </div>
             <span class="actions">
               <a class="quiet-link" routerLink="/book" [queryParams]="{ move: one.id }" [attr.aria-label]="'Перенести: ' + period(one)">Перенести</a>
@@ -81,6 +81,7 @@ export class Home implements OnInit {
   protected readonly telegram = insideTelegram();
   protected readonly client = computed(() => this.telegram || (this.auth.account()?.roles.includes('CLIENT') ?? false));
   protected readonly zone = signal(DEFAULT_ZONE);
+  protected readonly many = signal(false);
   protected readonly note = computed(() => zoneNote(this.zone()));
 
   ngOnInit(): void {
@@ -109,8 +110,11 @@ export class Home implements OnInit {
 
   private async load(): Promise<void> {
     await this.attempt.run(async () => {
-      const [offer, sessions] = await Promise.all([this.api.offer(), this.api.sessions()]);
-      this.zone.set(offer.zone ?? DEFAULT_ZONE);
+      const [practices, sessions] = await Promise.all([this.api.practices(), this.api.sessions()]);
+      this.many.set(practices.length > 1);
+      if (practices.length > 0) {
+        this.zone.set((await this.api.offer(practices[0].id)).zone ?? DEFAULT_ZONE);
+      }
       this.sessions.set(sessions);
       this.loaded.set(true);
     });

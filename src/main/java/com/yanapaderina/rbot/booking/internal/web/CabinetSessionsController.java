@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-CODE-DESIGN-005
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0003, REQ-CODE-DESIGN-005
 @RestController
 @RequestMapping("/api/cabinet")
 class CabinetSessionsController {
@@ -37,31 +37,31 @@ class CabinetSessionsController {
   @GetMapping("/sessions")
   List<Session> sessions(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-    return booking.between(from, to).stream().map(Session::of).toList();
+    return booking.between(me(), from, to).stream().map(Session::of).toList();
   }
 
   @PostMapping("/sessions")
   @ResponseStatus(HttpStatus.CREATED)
   Session book(@Valid @RequestBody BookRequest request) {
-    return Session.of(booking.book(request.clientId(), request.typeId(), request.start(), actor()));
+    return Session.of(booking.book(me(), request.clientId(), request.typeId(), request.start()));
   }
 
   @PostMapping("/sessions/{id}/reschedule")
   Session reschedule(@PathVariable UUID id, @Valid @RequestBody MoveRequest request) {
-    return Session.of(booking.reschedule(id, request.start(), actor()));
+    return Session.of(booking.reschedule(me(), id, request.start()));
   }
 
   @PostMapping("/sessions/{id}/cancel")
   Session cancel(@PathVariable UUID id) {
-    return Session.of(booking.cancel(id, actor()));
+    return Session.of(booking.cancel(me(), id));
   }
 
   @PostMapping("/sessions/{id}/no-show")
   Session noShow(@PathVariable UUID id) {
-    return Session.of(booking.noShow(id));
+    return Session.of(booking.noShow(me(), id));
   }
 
-  private static UUID actor() {
+  private static UUID me() {
     return CurrentAccount.id().orElseThrow();
   }
 

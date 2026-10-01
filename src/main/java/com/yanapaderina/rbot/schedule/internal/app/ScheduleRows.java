@@ -18,20 +18,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-017
 final class ScheduleRows {
 
   private ScheduleRows() {
   }
 
-  static PracticeSettings settings(SettingsRow row) {
-    return new PracticeSettings(ZoneId.of(row.zone()), minutes(row.leadMinutes()), Optional.ofNullable(row.horizonDays()),
-      minutes(row.slotStepMinutes()));
+  static PracticeSettings settings(Optional<SettingsRow> stored) {
+    return stored.map(row -> new PracticeSettings(ZoneId.of(row.zone()), minutes(row.leadMinutes()), Optional.ofNullable(row.horizonDays()),
+        minutes(row.slotStepMinutes()), Optional.ofNullable(row.displayName())))
+      .orElseGet(() -> new PracticeSettings(PracticeSettings.DEFAULT_ZONE, Optional.empty(), Optional.empty(), Optional.empty(),
+        Optional.empty()));
   }
 
   static SettingsRow row(PracticeSettings settings) {
     return new SettingsRow(settings.zone().getId(), toMinutes(settings.lead()), settings.horizonDays().orElse(null),
-      toMinutes(settings.step()));
+      toMinutes(settings.step()), settings.displayName().orElse(null));
   }
 
   static WeekTemplate week(List<IntervalRow> rows) {

@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 
-// MVP-03, MVP-04, RBOT-FEAT-009, ADR-0002, ADR-0005
+// MVP-03, MVP-04, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0002, ADR-0005
 @Service
 public class UpdateHandler {
 
@@ -46,14 +46,14 @@ public class UpdateHandler {
   }
 
   private void onMessage(long chat, long user, String text) {
-    if (clients.ofTelegram(user).isPresent()) {
-      bot.sendMessage(chat, texts.text("menu"), app());
-      return;
-    }
     String token = text.startsWith("/start ") ? text.substring("/start ".length()).trim() : "";
     if (!token.isEmpty() && token.length() <= 64 && clients.inviteOpen(token)) {
       bot.sendMessage(chat, texts.text("consent.request", texts.text("consent.text")),
         List.of(BotGateway.Button.callback(texts.text("consent.button"), CONSENT + token)));
+      return;
+    }
+    if (!clients.byTelegram(user).isEmpty()) {
+      bot.sendMessage(chat, texts.text("menu"), app());
       return;
     }
     bot.sendMessage(chat, texts.text(token.isEmpty() ? "invite.needed" : "invite.rejected"), List.of());

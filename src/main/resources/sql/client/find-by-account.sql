@@ -1,3 +1,3 @@
 SELECT id
 FROM client
-WHERE account_id = :accountId
+WHERE practitioner_id = :practitioner AND account_id = :accountId

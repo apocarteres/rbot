@@ -1,3 +1,3 @@
 SELECT id
 FROM client
-WHERE telegram_user_id = :telegramUserId
+WHERE practitioner_id = :practitioner AND telegram_user_id = :telegramUserId

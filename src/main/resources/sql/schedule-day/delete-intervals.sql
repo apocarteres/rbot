@@ -1,2 +1,2 @@
 DELETE FROM schedule_day_interval
-WHERE day = :day
+WHERE practitioner_id = :practitioner AND day = :day

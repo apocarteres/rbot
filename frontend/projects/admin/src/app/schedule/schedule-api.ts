@@ -15,6 +15,7 @@ export interface Settings {
   readonly leadMinutes: number | null;
   readonly horizonDays: number | null;
   readonly slotStepMinutes: number | null;
+  readonly displayName: string | null;
   readonly complete: boolean;
 }
 
