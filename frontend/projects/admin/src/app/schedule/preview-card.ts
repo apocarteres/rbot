@@ -13,7 +13,7 @@ interface SlotDay {
   readonly times: readonly string[];
 }
 
-// MVP-02, RBOT-FEAT-003, REQ-CODE-DESIGN-007
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-014, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-preview-card',
   imports: [FormsModule, FailureDialog],
@@ -22,6 +22,7 @@ interface SlotDay {
     .preview { padding: 16px; }
     .day { padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
     .small { font-size: 0.8rem; margin: 12px 0 0; }
+    .hint { margin: 0; }
     .times { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .time { border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; }
   `,
@@ -40,6 +41,7 @@ interface SlotDay {
               <option [value]="one.id">{{ one.title }}</option>
             }
           </select>
+          @if (length()) { <span class="muted small hint">{{ length() }}</span> }
         </div>
         @for (day of slotDays(); track day.date) {
           <div class="day">
@@ -69,6 +71,11 @@ export class PreviewCard {
   protected readonly attempt = new Attempt();
   protected readonly days = PREVIEW_DAYS;
   protected readonly type = signal('');
+  protected readonly length = computed(() => {
+    const chosen = this.types().find((one) => one.id === this.type());
+    const buffer = this.settings().bufferMinutes ?? 0;
+    return chosen ? `${chosen.durationMinutes} мин${buffer > 0 ? ` + перерыв ${buffer} мин` : ''}` : '';
+  });
   private readonly slots = signal<readonly Slot[]>([]);
 
   protected readonly slotDays = computed<readonly SlotDay[]>(() => {

@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 46. Включены самостоятельные задачи и этапы планов функций.
+Всего: 47. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -60,6 +60,7 @@ authority: navigation
 | [Вкладка «Правила записи» с пояснениями к полям](RBOT-FEAT-007-booking-rules-tab.md) | P2 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | frontend |
 | [Выключенный тип сессии нельзя отметить у промежутка](RBOT-FEAT-012-inactive-types-in-intervals.md) | P2 | Выполнена | [RELEASE-2026-10-7](../../releases/RELEASE-2026-10-7.md) | frontend |
 | [Копирование часов другого дня недели](RBOT-FEAT-013-copy-weekday-hours.md) | P2 | Выполнена | Не назначен | frontend |
+| [Длительность типа в предпросмотре и пересоздание клиента стенда](RBOT-FEAT-014-preview-session-length.md) | P2 | Выполнена | Не назначен | frontend, deployment |
 | [Переходы базы — Liquibase, таблицы ядра — журналами ядра](RBOT-OPS-011-liquibase-migrations.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | persistence, deployment |
 | [Размер сборки клиента держит проверка](RBOT-QUAL-004-adopt-bundle-budgets.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, build |
 | [Секреты шифруются средством платформы](RBOT-SEC-002-adopt-secret-cipher.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, security |

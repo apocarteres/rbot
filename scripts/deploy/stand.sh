@@ -61,8 +61,8 @@ reachable() {
 
 log "ожидание проброса порта $RBOT_STAND_PORT"
 if ! reachable 12; then
-  log "порт не проброшен: Lima на mini теряет проброс при пересоздании контейнера, перезапуск клиента"
-  docker restart "$RBOT_STAND_PROJECT-frontend-1" > /dev/null
+  log "порт не проброшен: Lima на mini теряет проброс, клиент пересоздаётся"
+  (cd "$ROOT_DIR" && docker compose -p "$RBOT_STAND_PROJECT" -f docker-compose.qa.yml up -d --force-recreate --no-deps frontend > /dev/null)
   reachable 48 || log "порт $RBOT_STAND_PORT так и не ответил"
 fi
 log "проверки"
