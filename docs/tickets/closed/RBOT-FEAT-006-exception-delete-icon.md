@@ -5,7 +5,7 @@ status: done
 scope: frontend
 authority: supporting
 priority: P2
-release: unassigned
+release: RELEASE-2026-10-3
 related: MVP-02
 ---
 

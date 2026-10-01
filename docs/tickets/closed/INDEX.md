@@ -30,8 +30,8 @@ authority: navigation
 | [Приложение клиента: мастер записи и мои сессии](RBOT-FEAT-002-client-booking-wizard.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | backend, frontend, data |
 | [Без сообщений об успехе, отказ — окном с причиной](RBOT-FEAT-003-failure-dialogs-without-success-notices.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | frontend |
 | [Промежутки расписания для выбранных типов сессий](RBOT-FEAT-004-interval-session-types.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | backend, frontend, data |
-| [Записи в кабинете и перенос](RBOT-FEAT-005-cabinet-sessions-and-reschedule.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
-| [Тип сессии у промежутка обязателен](RBOT-FEAT-008-interval-types-required.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
+| [Записи в кабинете и перенос](RBOT-FEAT-005-cabinet-sessions-and-reschedule.md) | P1 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | backend, frontend, data |
+| [Тип сессии у промежутка обязателен](RBOT-FEAT-008-interval-types-required.md) | P1 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | backend, frontend, data |
 | [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
 | [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
 | [Сборка потребителя идёт на Java 25, как и сборка ядра](RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
@@ -53,8 +53,8 @@ authority: navigation
 | [Каждый блок @defer объявляет @error](RBOT-ARC-006-adopt-defer-error.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
 | [Идентификаторы задач несут префикс проекта](RBOT-DOC-001-adopt-ticket-prefix.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | process, documentation |
 | [Сообщение фиксации начинается с идентификатора задачи](RBOT-DOC-002-adopt-commit-ticket-id.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | process, release |
-| [Удаление исключения кнопкой-иконкой](RBOT-FEAT-006-exception-delete-icon.md) | P2 | Выполнена | Не назначен | frontend |
-| [Вкладка «Правила записи» с пояснениями к полям](RBOT-FEAT-007-booking-rules-tab.md) | P2 | Выполнена | Не назначен | frontend |
+| [Удаление исключения кнопкой-иконкой](RBOT-FEAT-006-exception-delete-icon.md) | P2 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | frontend |
+| [Вкладка «Правила записи» с пояснениями к полям](RBOT-FEAT-007-booking-rules-tab.md) | P2 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | frontend |
 | [Переходы базы — Liquibase, таблицы ядра — журналами ядра](RBOT-OPS-011-liquibase-migrations.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | persistence, deployment |
 | [Размер сборки клиента держит проверка](RBOT-QUAL-004-adopt-bundle-budgets.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, build |
 | [Секреты шифруются средством платформы](RBOT-SEC-002-adopt-secret-cipher.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, security |
