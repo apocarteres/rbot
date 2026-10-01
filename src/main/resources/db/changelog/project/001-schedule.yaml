@@ -1,0 +1,11 @@
+# MVP-02, ADR-0003, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:001-schedule
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: 001-schedule.sql
+            relativeToChangelogFile: true
+            splitStatements: true

@@ -1,4 +1,7 @@
-# RBOT-OPS-011, REQ-DATA-ACCESS-007
+# RBOT-OPS-011, MVP-02, REQ-DATA-ACCESS-007
 databaseChangeLog:
   - include:
       file: classpath:platform/changelog/platform-auth.yaml
+  - includeAll:
+      path: project/
+      relativeToChangelogFile: true

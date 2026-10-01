@@ -19,7 +19,8 @@ class PlatformArchRulesTest {
 
   static final Map<String, Set<String>> MODULE_DEPENDENCIES = Map.of(
     "access", Set.of(),
-    "accounts", Set.of("access"));
+    "accounts", Set.of("access"),
+    "schedule", Set.of());
 
   private static final DescribedPredicate<JavaClass> DATA_ACCESS =
     DescribedPredicate.describe("лежат в пакете internal.data", type -> type.getPackageName().endsWith(".internal.data"));
