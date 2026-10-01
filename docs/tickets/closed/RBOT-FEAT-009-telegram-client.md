@@ -5,7 +5,7 @@ status: done
 scope: backend, frontend, data, telegram, security, personal-data
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-4
 related: MVP-03, MVP-04, MVP-08, ADR-0001, ADR-0002, ADR-0005
 ---
 
