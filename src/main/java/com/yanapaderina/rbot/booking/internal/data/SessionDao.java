@@ -1,0 +1,63 @@
+package com.yanapaderina.rbot.booking.internal.data;
+
+import io.github.apocarteres.platform.persistence.SqlCatalog;
+import io.github.apocarteres.platform.persistence.SqlStatements;
+import io.github.apocarteres.platform.persistence.StoredInstant;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Repository;
+
+// MVP-05, RBOT-FEAT-002, ADR-0003, REQ-DATA-ACCESS-002, REQ-PERSISTENCE-013
+@Repository
+public class SessionDao {
+
+  private static final RowMapper<SessionRow> SESSION = (rs, n) -> new SessionRow(rs.getObject("id", UUID.class),
+    rs.getObject("client_id", UUID.class), rs.getObject("type_id", UUID.class), instant(rs, "starts_at"), instant(rs, "ends_at"),
+    rs.getString("status"), rs.getBigDecimal("price_snapshot"));
+
+  private static final RowMapper<OccupiedRow> OCCUPIED = (rs, n) -> new OccupiedRow(instant(rs, "starts"), instant(rs, "ends"));
+
+  private final JdbcClient jdbc;
+  private final SqlCatalog sql;
+
+  SessionDao(JdbcClient jdbc, SqlStatements statements) {
+    this.jdbc = jdbc;
+    this.sql = statements.catalog("session");
+  }
+
+  public boolean insert(SessionRow row, Instant occupiedUntil, UUID createdBy, Instant at) {
+    return jdbc.sql(sql.get("insert")).param("id", row.id()).param("clientId", row.client()).param("typeId", row.type())
+      .param("startsAt", StoredInstant.offsetOf(row.start())).param("endsAt", StoredInstant.offsetOf(row.end()))
+      .param("occupiedUntil", StoredInstant.offsetOf(occupiedUntil)).param("status", row.status()).param("price", row.price())
+      .param("createdBy", createdBy).param("createdAt", StoredInstant.offsetOf(at)).update() == 1;
+  }
+
+  public Optional<SessionRow> find(UUID id, UUID client) {
+    return jdbc.sql(sql.get("find")).param("id", id).param("clientId", client).query(SESSION).optional();
+  }
+
+  public List<SessionRow> upcoming(UUID client, Instant now) {
+    return jdbc.sql(sql.get("upcoming")).param("clientId", client).param("now", StoredInstant.offsetOf(now)).query(SESSION).list();
+  }
+
+  public List<OccupiedRow> occupied(Instant from, Instant to) {
+    return jdbc.sql(sql.get("occupied")).param("from", StoredInstant.offsetOf(from)).param("to", StoredInstant.offsetOf(to))
+      .query(OCCUPIED).list();
+  }
+
+  public boolean cancel(UUID id, UUID client, UUID by, Instant at) {
+    return jdbc.sql(sql.get("cancel")).param("id", id).param("clientId", client).param("by", by)
+      .param("at", StoredInstant.offsetOf(at)).update() == 1;
+  }
+
+  private static Instant instant(ResultSet rs, String column) throws SQLException {
+    return rs.getObject(column, OffsetDateTime.class).toInstant();
+  }
+}

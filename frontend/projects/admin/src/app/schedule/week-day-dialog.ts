@@ -4,21 +4,24 @@ import { ApcrAction } from '@apocarteres/action';
 import { ApcrModal, ApcrModalBackdrop } from '@apocarteres/modal';
 import { focusFirstField } from '../../../../../shared/dialog-focus';
 import { failureMessage } from '../../../../../shared/failures';
-import { time } from './dates';
-import { Interval, ScheduleApi } from './schedule-api';
+import { time } from '../../../../../shared/dates';
+import { IntervalTypes } from './interval-types';
+import { Interval, ScheduleApi, SessionType } from './schedule-api';
 
 interface EditableInterval {
   start: string;
   end: string;
+  types: readonly string[];
 }
 
-// MVP-02, RBOT-ARC-002, RBOT-ARC-003, RBOT-ARC-004, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
+// MVP-02, RBOT-FEAT-004, RBOT-ARC-002, RBOT-ARC-003, RBOT-ARC-004, REQ-CLIENT-MODAL-001, REQ-CLIENT-MODAL-005, REQ-CLIENT-MODAL-009
 @Component({
   selector: 'app-week-day-dialog',
-  imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop],
+  imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop, IntervalTypes],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    .interval { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+    .interval { padding: 10px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+    .hours { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .off { color: var(--muted); margin: 0 0 12px; }
   `,
   template: `
@@ -28,10 +31,13 @@ interface EditableInterval {
         <h2 id="week-day-title">{{ title() }}</h2>
         @for (interval of draft(); track $index) {
           <div class="interval">
-            <input type="time" [attr.aria-label]="'Начало промежутка ' + ($index + 1)" [(ngModel)]="interval.start" [name]="'s' + $index" />
-            <span>—</span>
-            <input type="time" [attr.aria-label]="'Конец промежутка ' + ($index + 1)" [(ngModel)]="interval.end" [name]="'e' + $index" />
-            <button type="button" class="quiet" apcrLocal (click)="remove($index)">Убрать</button>
+            <div class="hours">
+              <input type="time" [attr.aria-label]="'Начало промежутка ' + ($index + 1)" [(ngModel)]="interval.start" [name]="'s' + $index" />
+              <span>—</span>
+              <input type="time" [attr.aria-label]="'Конец промежутка ' + ($index + 1)" [(ngModel)]="interval.end" [name]="'e' + $index" />
+              <button type="button" class="quiet" apcrLocal (click)="remove($index)">Убрать</button>
+            </div>
+            <app-interval-types [types]="types()" [(selected)]="interval.types" />
           </div>
         } @empty {
           <p class="off">Выходной: промежутков нет.</p>
@@ -52,6 +58,7 @@ export class WeekDayDialog implements OnInit {
   readonly weekday = input.required<number>();
   readonly title = input.required<string>();
   readonly intervals = input.required<readonly Interval[]>();
+  readonly types = input.required<readonly SessionType[]>();
   readonly closed = output<void>();
   readonly saved = output<readonly Interval[]>();
 
@@ -62,7 +69,7 @@ export class WeekDayDialog implements OnInit {
   protected readonly failed = (failure: unknown): void => this.failure.set(failureMessage(failure));
   protected readonly save = (): Promise<readonly Interval[]> => {
     this.failure.set('');
-    return this.api.saveWeekday(this.weekday(), this.draft().map((one) => ({ start: one.start, end: one.end })));
+    return this.api.saveWeekday(this.weekday(), this.draft().map((one) => ({ start: one.start, end: one.end, types: one.types })));
   };
 
   constructor() {
@@ -70,12 +77,12 @@ export class WeekDayDialog implements OnInit {
   }
 
   ngOnInit(): void {
-    this.draft.set(this.intervals().map((one) => ({ start: time(one.start), end: time(one.end) })));
+    this.draft.set(this.intervals().map((one) => ({ start: time(one.start), end: time(one.end), types: one.types })));
   }
 
   protected add(): void {
     const last = this.draft().at(-1);
-    this.draft.update((draft) => [...draft, { start: last ? last.end : '10:00', end: last ? '20:00' : '18:00' }]);
+    this.draft.update((draft) => [...draft, { start: last ? last.end : '10:00', end: last ? '20:00' : '18:00', types: [] }]);
   }
 
   protected remove(index: number): void {

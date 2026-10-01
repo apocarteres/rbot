@@ -1,5 +1,6 @@
 package com.yanapaderina.rbot.schedule.internal.app;
 
+import com.yanapaderina.rbot.schedule.SessionType;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;

@@ -1,5 +1,7 @@
 package com.yanapaderina.rbot.schedule.internal.app;
 
+import com.yanapaderina.rbot.schedule.SessionFormat;
+import com.yanapaderina.rbot.schedule.SessionType;
 import com.yanapaderina.rbot.schedule.internal.data.DayRow;
 import com.yanapaderina.rbot.schedule.internal.data.IntervalRow;
 import com.yanapaderina.rbot.schedule.internal.data.SessionTypeRow;
@@ -14,8 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
-// MVP-02
+// MVP-02, RBOT-FEAT-004
 final class ScheduleRows {
 
   private ScheduleRows() {
@@ -34,7 +37,7 @@ final class ScheduleRows {
   static WeekTemplate week(List<IntervalRow> rows) {
     Map<DayOfWeek, List<DayInterval>> days = new EnumMap<>(DayOfWeek.class);
     for (IntervalRow row : rows) {
-      days.computeIfAbsent(DayOfWeek.of(row.weekday()), day -> new ArrayList<>()).add(new DayInterval(row.starts(), row.ends()));
+      days.computeIfAbsent(DayOfWeek.of(row.weekday()), day -> new ArrayList<>()).add(new DayInterval(row.starts(), row.ends(), Set.copyOf(row.types())));
     }
     return new WeekTemplate(days);
   }
@@ -46,7 +49,8 @@ final class ScheduleRows {
     }
     Map<LocalDate, ScheduleDay> days = new LinkedHashMap<>();
     grouped.forEach((day, group) -> days.put(day, new ScheduleDay(day, group.getFirst().closed(), group.getFirst().note(),
-      group.stream().filter(row -> row.starts() != null).map(row -> new DayInterval(row.starts(), row.ends())).toList())));
+      group.stream().filter(row -> row.starts() != null).map(row -> new DayInterval(row.starts(), row.ends(), Set.copyOf(row.types())))
+        .toList())));
     return days;
   }
 

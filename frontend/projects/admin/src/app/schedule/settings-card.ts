@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Attempt } from './attempt';
+import { Attempt } from '../../../../../shared/attempt';
+import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ScheduleApi, Settings } from './schedule-api';
 
 const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yekaterinburg', 'Asia/Omsk', 'Asia/Novosibirsk',
   'Asia/Krasnoyarsk', 'Asia/Irkutsk', 'Asia/Yakutsk', 'Asia/Vladivostok', 'Asia/Magadan', 'Asia/Kamchatka'];
 
-// MVP-02
+// MVP-02, RBOT-FEAT-003
 @Component({
   selector: 'app-settings-card',
-  imports: [FormsModule],
+  imports: [FormsModule, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form (ngSubmit)="save()">
@@ -40,14 +41,11 @@ const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yek
           <input id="buffer" name="buffer" type="number" min="0" max="240" step="5" [(ngModel)]="bufferMinutes" />
         </div>
       </div>
-      @if (attempt.error()) {
-        <p class="error" role="alert">{{ attempt.error() }}</p>
-      }
-      @if (attempt.notice()) {
-        <p class="notice" role="status">{{ attempt.notice() }}</p>
-      }
       <button type="submit" [disabled]="attempt.busy()">Сохранить</button>
     </form>
+    @if (attempt.failure()) {
+      <app-failure-dialog [message]="attempt.failure()" (closed)="attempt.dismiss()" />
+    }
   `,
 })
 export class SettingsCard implements OnInit {
@@ -73,8 +71,8 @@ export class SettingsCard implements OnInit {
     this.bufferMinutes = settings.bufferMinutes;
   }
 
-  protected save(): Promise<void> {
-    return this.attempt.run(async () => {
+  protected async save(): Promise<void> {
+    await this.attempt.run(async () => {
       const saved = await this.api.saveSettings({
         zone: this.zone,
         leadMinutes: this.leadHours === null ? null : Math.round(this.leadHours * 60),
@@ -83,7 +81,6 @@ export class SettingsCard implements OnInit {
         bufferMinutes: this.bufferMinutes,
       });
       this.saved.emit(saved);
-      return 'Параметры сохранены.';
     });
   }
 }

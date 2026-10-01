@@ -2,6 +2,7 @@ package com.yanapaderina.rbot.accounts.internal.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.yanapaderina.rbot.booking.internal.app.BookingRefused;
 import com.yanapaderina.rbot.schedule.internal.app.ScheduleRefused;
 import io.github.apocarteres.platform.auth.AuthRefused;
 import io.github.apocarteres.platform.web.errors.ErrorCode;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-// RBOT-API-001, MVP-02, REQ-API-001
+// RBOT-API-001, MVP-02, RBOT-FEAT-002, REQ-API-001
 class ErrorCodesMatchClientTest {
 
   private static final Path CLIENT_TEXTS = Path.of("frontend/shared/failures.ts");
@@ -30,7 +31,7 @@ class ErrorCodesMatchClientTest {
   @Test
   @DisplayName("Каждый код ошибки службы и показываемый код ядра есть в словаре текстов клиента")
   void everyServerCodeHasClientText() throws IOException {
-    Set<String> server = Stream.of(declared(AccountRefused.class), declared(ScheduleRefused.class), CORE_CODES_SHOWN.stream()).flatMap(codes -> codes)
+    Set<String> server = Stream.of(declared(AccountRefused.class), declared(ScheduleRefused.class), declared(BookingRefused.class), CORE_CODES_SHOWN.stream()).flatMap(codes -> codes)
       .map(ErrorCode::value)
       .collect(Collectors.toSet());
     assertThat(clientCodes()).containsAll(server);

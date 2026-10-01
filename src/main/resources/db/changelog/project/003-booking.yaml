@@ -1,0 +1,11 @@
+# MVP-05, RBOT-FEAT-002, ADR-0003, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:003-booking
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/003-booking.sql
+            relativeToChangelogFile: true
+            splitStatements: true

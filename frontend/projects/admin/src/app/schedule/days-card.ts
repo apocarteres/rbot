@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { AppClock } from '../../../../../shared/clock';
-import { Attempt } from './attempt';
+import { Attempt } from '../../../../../shared/attempt';
+import { dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
+import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ClosedDaysDialog } from './closed-days-dialog';
-import { dayTitle, isoDate, plusDays, time } from './dates';
-import { Day, ScheduleApi } from './schedule-api';
+import { intervalLabel } from './interval-label';
+import { Day, ScheduleApi, SessionType } from './schedule-api';
 import { SpecialDayDialog } from './special-day-dialog';
 
 const AHEAD_DAYS = 180;
 
-// MVP-02
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004
 @Component({
   selector: 'app-days-card',
-  imports: [ClosedDaysDialog, SpecialDayDialog],
+  imports: [ClosedDaysDialog, SpecialDayDialog, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -26,12 +28,6 @@ const AHEAD_DAYS = 180;
         <button type="button" (click)="dialog.set('closed')">Отпуск или выходные</button>
         <button type="button" class="quiet" (click)="dialog.set('special')">Особые часы</button>
       </div>
-      @if (attempt.error()) {
-        <p class="error" role="alert">{{ attempt.error() }}</p>
-      }
-      @if (attempt.notice()) {
-        <p class="notice" role="status">{{ attempt.notice() }}</p>
-      }
       <div class="list">
         @for (day of days(); track day.date) {
           <div class="item">
@@ -47,13 +43,17 @@ const AHEAD_DAYS = 180;
       </div>
     </section>
     @switch (dialog()) {
-      @case ('closed') { <app-closed-days-dialog (closed)="dialog.set(null)" (saved)="closedDays($event)" /> }
-      @case ('special') { <app-special-day-dialog (closed)="dialog.set(null)" (saved)="specialDay($event)" /> }
+      @case ('closed') { <app-closed-days-dialog (closed)="dialog.set(null)" (saved)="changed()" /> }
+      @case ('special') { <app-special-day-dialog [types]="types()" (closed)="dialog.set(null)" (saved)="changed()" /> }
+    }
+    @if (attempt.failure()) {
+      <app-failure-dialog [message]="attempt.failure()" (closed)="attempt.dismiss()" />
     }
   `,
 })
 export class DaysCard implements OnInit {
   readonly zone = input.required<string>();
+  readonly types = input.required<readonly SessionType[]>();
   readonly saved = output<void>();
   readonly counted = output<number>();
 
@@ -73,33 +73,22 @@ export class DaysCard implements OnInit {
   }
 
   protected hours(day: Day): string {
-    return day.intervals.map((one) => `${time(one.start)}–${time(one.end)}`).join(', ');
+    return day.intervals.map((one) => intervalLabel(one, this.types())).join('; ');
   }
 
-  protected closedDays(days: number): Promise<void> {
+  protected async changed(): Promise<void> {
     this.dialog.set(null);
-    return this.attempt.run(async () => {
+    await this.attempt.run(async () => {
       await this.load();
       this.saved.emit();
-      return `Закрыто дней: ${days}.`;
     });
   }
 
-  protected specialDay(day: Day): Promise<void> {
-    this.dialog.set(null);
-    return this.attempt.run(async () => {
-      await this.load();
-      this.saved.emit();
-      return `${dayTitle(day.date)}: особые часы заданы.`;
-    });
-  }
-
-  protected clear(day: Day): Promise<void> {
-    return this.attempt.run(async () => {
+  protected async clear(day: Day): Promise<void> {
+    await this.attempt.run(async () => {
       await this.api.clearDay(day.date);
       await this.load();
       this.saved.emit();
-      return `${dayTitle(day.date)}: обычные часы.`;
     });
   }
 

@@ -1,19 +1,12 @@
 <h1>Учётные записи</h1>
 <p class="muted">Регистрации нет: учётные записи психолога и администраторов создаются здесь. Почта не подключена, поэтому пароль задаёт администратор.</p>
 
-@if (error()) {
-  <p class="error" role="alert">{{ error() }}</p>
-}
-@if (notice()) {
-  <p class="notice" role="status">{{ notice() }}</p>
-}
-
 <button type="button" class="create" (click)="creating.set(true)">Новая учётная запись</button>
 
 <form class="search" role="search" (ngSubmit)="load(0)">
   <label class="visually-hidden" for="query">Поиск по почте</label>
   <input id="query" name="query" type="search" placeholder="Поиск по почте" [(ngModel)]="query" />
-  <button type="submit" class="quiet" [disabled]="busy()">Найти</button>
+  <button type="submit" class="quiet" [disabled]="attempt.busy()">Найти</button>
 </form>
 
 @if (page(); as current) {
@@ -26,8 +19,8 @@
           <span class="muted small">Создана {{ when(account.createdAt) }} · последний вход {{ when(account.lastLoginAt) }}</span>
         </div>
         <div class="actions">
-          <button type="button" class="quiet" (click)="passwordFor.set(account)" [disabled]="busy()">Сменить пароль</button>
-          <button type="button" class="quiet" (click)="toggleBlock(account)" [disabled]="busy()">
+          <button type="button" class="quiet" (click)="passwordFor.set(account)" [disabled]="attempt.busy()">Сменить пароль</button>
+          <button type="button" class="quiet" (click)="toggleBlock(account)" [disabled]="attempt.busy()">
             {{ account.blocked ? 'Разблокировать' : 'Заблокировать' }}
           </button>
         </div>
@@ -38,16 +31,19 @@
   </div>
   @if (pages(current) > 1) {
     <nav class="pager" aria-label="Страницы">
-      <button type="button" class="quiet" [disabled]="current.page === 0 || busy()" (click)="load(current.page - 1)">Назад</button>
+      <button type="button" class="quiet" [disabled]="current.page === 0 || attempt.busy()" (click)="load(current.page - 1)">Назад</button>
       <span class="muted">{{ current.page + 1 }} из {{ pages(current) }}</span>
-      <button type="button" class="quiet" [disabled]="current.page + 1 >= pages(current) || busy()" (click)="load(current.page + 1)">Дальше</button>
+      <button type="button" class="quiet" [disabled]="current.page + 1 >= pages(current) || attempt.busy()" (click)="load(current.page + 1)">Дальше</button>
     </nav>
   }
 }
 
 @if (creating()) {
-  <app-new-account-dialog (closed)="creating.set(false)" (created)="created($event)" />
+  <app-new-account-dialog (closed)="creating.set(false)" (created)="created()" />
 }
 @if (passwordFor(); as account) {
-  <app-password-dialog [account]="account" (closed)="passwordFor.set(null)" (changed)="passwordChanged(account)" />
+  <app-password-dialog [account]="account" (closed)="passwordFor.set(null)" (changed)="passwordFor.set(null)" />
+}
+@if (attempt.failure()) {
+  <app-failure-dialog [message]="attempt.failure()" (closed)="attempt.dismiss()" />
 }

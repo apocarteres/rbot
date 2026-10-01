@@ -1,0 +1,6 @@
+CREATE TABLE client (
+  id UUID PRIMARY KEY,
+  account_id UUID UNIQUE,
+  status VARCHAR(16) NOT NULL CHECK (status IN ('PROSPECT', 'ACTIVE', 'ARCHIVED')),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL
+);

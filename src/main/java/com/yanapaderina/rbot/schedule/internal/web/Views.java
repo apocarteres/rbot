@@ -1,11 +1,11 @@
 package com.yanapaderina.rbot.schedule.internal.web;
 
+import com.yanapaderina.rbot.schedule.SessionFormat;
+import com.yanapaderina.rbot.schedule.SessionType;
 import com.yanapaderina.rbot.schedule.TimeRange;
 import com.yanapaderina.rbot.schedule.internal.app.DayInterval;
 import com.yanapaderina.rbot.schedule.internal.app.PracticeSettings;
 import com.yanapaderina.rbot.schedule.internal.app.ScheduleDay;
-import com.yanapaderina.rbot.schedule.internal.app.SessionFormat;
-import com.yanapaderina.rbot.schedule.internal.app.SessionType;
 import com.yanapaderina.rbot.schedule.internal.app.WeekTemplate;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -18,22 +18,23 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
-// MVP-02, REQ-CODE-DESIGN-005
+// MVP-02, RBOT-FEAT-004, REQ-CODE-DESIGN-005
 final class Views {
 
   private Views() {
   }
 
-  record Interval(@NotNull LocalTime start, @NotNull LocalTime end) {
+  record Interval(@NotNull LocalTime start, @NotNull LocalTime end, List<UUID> types) {
 
     static Interval of(DayInterval interval) {
-      return new Interval(interval.start(), interval.end());
+      return new Interval(interval.start(), interval.end(), interval.types().stream().sorted().toList());
     }
 
     DayInterval domain() {
-      return new DayInterval(start, end);
+      return new DayInterval(start, end, types == null ? Set.of() : Set.copyOf(types));
     }
   }
 

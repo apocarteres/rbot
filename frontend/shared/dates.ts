@@ -1,4 +1,4 @@
-// MVP-02, REQ-CODE-DESIGN-007
+// MVP-02, RBOT-FEAT-002, REQ-CODE-DESIGN-007
 export const WEEKDAYS = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 
 export function isoDate(instant: number, zone: string): string {

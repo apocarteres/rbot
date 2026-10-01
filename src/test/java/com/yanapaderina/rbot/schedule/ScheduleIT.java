@@ -21,7 +21,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-// MVP-02, ADR-0003
+// MVP-02, RBOT-FEAT-004, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class ScheduleIT extends IntegrationStores {
 
   private static final String CONSULTATION = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0001";
+  private static final String THERAPY = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0002";
 
   @Autowired
   private MockMvc mvc;
@@ -88,6 +89,30 @@ class ScheduleIT extends IntegrationStores {
     write(post("/api/cabinet/schedule/types"), session,
       "{\"title\":\"\",\"durationMinutes\":5,\"price\":\"-1\",\"format\":\"ONLINE\",\"firstVisit\":false,\"active\":true}", 400)
       .andExpect(jsonPath("$.code").value("session-type-rejected"));
+  }
+
+  @Test
+  void intervalWithTypesServesOnlyThem() throws Exception {
+    Cookie[] session = login();
+    LocalDate wednesday = clock.instant().atZone(ZoneId.of("Europe/Moscow")).toLocalDate().plusDays(2)
+      .with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY));
+    write(put("/api/cabinet/schedule/settings"), session,
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":30,\"bufferMinutes\":0}");
+    write(put("/api/cabinet/schedule/week/3"), session,
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\",\"types\":[\"6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0999\"]}]}", 400)
+      .andExpect(jsonPath("$.code").value("interval-type-unknown"));
+    write(put("/api/cabinet/schedule/week/3"), session,
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\",\"types\":[\"" + THERAPY + "\"]}]}")
+      .andExpect(jsonPath("$[0].types[0]").value(THERAPY));
+    mvc.perform(get("/api/cabinet/schedule/week").cookie(session)).andExpect(jsonPath("$[2].intervals[0].types[0]").value(THERAPY));
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", THERAPY)
+        .param("from", wednesday.toString()).param("to", wednesday.toString()))
+      .andExpect(jsonPath("$.length()").value(3));
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", CONSULTATION)
+        .param("from", wednesday.toString()).param("to", wednesday.toString()))
+      .andExpect(jsonPath("$.length()").value(0));
+    write(put("/api/cabinet/schedule/week/3"), session, "{\"intervals\":[]}");
+    write(put("/api/cabinet/schedule/settings"), session, "{\"zone\":\"Europe/Moscow\"}");
   }
 
   @Test

@@ -35,9 +35,6 @@ type Editing = { readonly type: SessionType | null } | null;
       </div>
     }
     <button type="button" class="quiet add" (click)="editing.set({ type: null })">Добавить тип</button>
-    @if (notice()) {
-      <p class="notice" role="status">{{ notice() }}</p>
-    }
     @if (editing(); as open) {
       <app-type-dialog [type]="open.type" (closed)="editing.set(null)" (saved)="applied($event)" />
     }
@@ -49,7 +46,6 @@ export class TypesCard implements OnInit {
 
   protected readonly types = signal<readonly SessionType[]>([]);
   protected readonly editing = signal<Editing>(null);
-  protected readonly notice = signal('');
 
   ngOnInit(): void {
     this.types.set(this.initial());
@@ -64,7 +60,6 @@ export class TypesCard implements OnInit {
     const known = this.types().some((one) => one.id === type.id);
     this.types.update((types) => (known ? types.map((one) => (one.id === type.id ? type : one)) : [...types, type]));
     this.editing.set(null);
-    this.notice.set(`«${type.title}» сохранён.`);
     this.saved.emit(this.types());
   }
 }

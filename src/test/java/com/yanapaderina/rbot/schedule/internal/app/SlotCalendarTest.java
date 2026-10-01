@@ -13,16 +13,20 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-// MVP-02, ADR-0003
+// MVP-02, RBOT-FEAT-004, ADR-0003
 class SlotCalendarTest {
 
   private static final ZoneId MOSCOW = ZoneId.of("Europe/Moscow");
   private static final LocalDate MONDAY = LocalDate.of(2026, 10, 5);
   private static final Instant SUNDAY_NOON = Instant.parse("2026-10-04T09:00:00Z");
   private static final Duration HOUR = Duration.ofHours(1);
+  private static final UUID THERAPY = UUID.fromString("6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0002");
+  private static final UUID SUPERVISION = UUID.fromString("6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0009");
 
   private static PracticeSettings settings(Duration lead, int horizonDays, Duration step, Duration buffer) {
     return new PracticeSettings(MOSCOW, Optional.of(lead), Optional.of(horizonDays), Optional.of(step), Optional.of(buffer));
@@ -40,7 +44,7 @@ class SlotCalendarTest {
   @DisplayName("Шаблон «10:00 Europe/Moscow» даёт мгновение 07:00Z")
   void templateIsInPracticeZone() {
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ZERO, 30, HOUR, Duration.ZERO), mondays("10:00", "11:00"), Map.of(),
-      List.of()).free(MONDAY, MONDAY, HOUR, SUNDAY_NOON);
+      List.of()).free(MONDAY, MONDAY, THERAPY, HOUR, SUNDAY_NOON);
     assertThat(slots).containsExactly(new TimeRange(Instant.parse("2026-10-05T07:00:00Z"), Instant.parse("2026-10-05T08:00:00Z")));
   }
 
@@ -48,7 +52,7 @@ class SlotCalendarTest {
   @DisplayName("Слоты идут с шагом; слот с перерывом, не помещающийся в конец интервала, не выдаётся")
   void stepAndBufferFitTheInterval() {
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ZERO, 30, Duration.ofMinutes(30), Duration.ofMinutes(10)),
-      mondays("10:00", "12:00"), Map.of(), List.of()).free(MONDAY, MONDAY, HOUR, SUNDAY_NOON);
+      mondays("10:00", "12:00"), Map.of(), List.of()).free(MONDAY, MONDAY, THERAPY, HOUR, SUNDAY_NOON);
     assertThat(starts(slots)).containsExactly(Instant.parse("2026-10-05T07:00:00Z"), Instant.parse("2026-10-05T07:30:00Z"));
   }
 
@@ -57,7 +61,7 @@ class SlotCalendarTest {
   void leadTimeCutsEarlySlots() {
     Instant mondayMorning = Instant.parse("2026-10-05T05:00:00Z");
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ofHours(3), 30, HOUR, Duration.ZERO), mondays("10:00", "13:00"),
-      Map.of(), List.of()).free(MONDAY, MONDAY, HOUR, mondayMorning);
+      Map.of(), List.of()).free(MONDAY, MONDAY, THERAPY, HOUR, mondayMorning);
     assertThat(starts(slots)).containsExactly(Instant.parse("2026-10-05T08:00:00Z"), Instant.parse("2026-10-05T09:00:00Z"));
   }
 
@@ -65,7 +69,7 @@ class SlotCalendarTest {
   @DisplayName("Горизонт записи отсекает дальние слоты")
   void horizonCutsLateSlots() {
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ZERO, 7, HOUR, Duration.ZERO), mondays("10:00", "11:00"), Map.of(),
-      List.of()).free(MONDAY, MONDAY.plusWeeks(2), HOUR, SUNDAY_NOON);
+      List.of()).free(MONDAY, MONDAY.plusWeeks(2), THERAPY, HOUR, SUNDAY_NOON);
     assertThat(starts(slots)).containsExactly(Instant.parse("2026-10-05T07:00:00Z"));
   }
 
@@ -77,7 +81,7 @@ class SlotCalendarTest {
       MONDAY.plusWeeks(1), new ScheduleDay(MONDAY.plusWeeks(1), false, null,
         List.of(new DayInterval(LocalTime.parse("15:00"), LocalTime.parse("16:00")))));
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ZERO, 30, HOUR, Duration.ZERO), mondays("10:00", "11:00"), days,
-      List.of()).free(MONDAY, MONDAY.plusWeeks(1), HOUR, SUNDAY_NOON);
+      List.of()).free(MONDAY, MONDAY.plusWeeks(1), THERAPY, HOUR, SUNDAY_NOON);
     assertThat(starts(slots)).containsExactly(Instant.parse("2026-10-12T12:00:00Z"));
   }
 
@@ -86,7 +90,7 @@ class SlotCalendarTest {
   void busyTimeIsSkipped() {
     TimeRange booked = new TimeRange(Instant.parse("2026-10-05T07:00:00Z"), Instant.parse("2026-10-05T08:10:00Z"));
     List<TimeRange> slots = new SlotCalendar(settings(Duration.ZERO, 30, Duration.ofMinutes(30), Duration.ZERO),
-      mondays("10:00", "12:30"), Map.of(), List.of(booked)).free(MONDAY, MONDAY, HOUR, SUNDAY_NOON);
+      mondays("10:00", "12:30"), Map.of(), List.of(booked)).free(MONDAY, MONDAY, THERAPY, HOUR, SUNDAY_NOON);
     assertThat(starts(slots)).containsExactly(Instant.parse("2026-10-05T08:30:00Z"));
   }
 
@@ -105,5 +109,18 @@ class SlotCalendarTest {
     List<DayInterval> hours = List.of(new DayInterval(LocalTime.parse("10:00"), LocalTime.parse("12:00")),
       new DayInterval(LocalTime.parse("11:00"), LocalTime.parse("13:00")));
     assertThatThrownBy(() -> ScheduleRules.disjoint(hours)).isInstanceOf(ScheduleRefused.class);
+  }
+
+  @Test
+  @DisplayName("Промежуток с перечнем типов даёт слоты только этим типам, промежуток без перечня — всем")
+  void intervalServesListedTypes() {
+    WeekTemplate week = new WeekTemplate(Map.of(DayOfWeek.MONDAY, List.of(
+      new DayInterval(LocalTime.parse("10:00"), LocalTime.parse("11:00")),
+      new DayInterval(LocalTime.parse("12:00"), LocalTime.parse("13:00"), Set.of(SUPERVISION)))));
+    SlotCalendar calendar = new SlotCalendar(settings(Duration.ZERO, 30, HOUR, Duration.ZERO), week, Map.of(), List.of());
+    assertThat(starts(calendar.free(MONDAY, MONDAY, THERAPY, HOUR, SUNDAY_NOON)))
+      .containsExactly(Instant.parse("2026-10-05T07:00:00Z"));
+    assertThat(starts(calendar.free(MONDAY, MONDAY, SUPERVISION, HOUR, SUNDAY_NOON)))
+      .containsExactly(Instant.parse("2026-10-05T07:00:00Z"), Instant.parse("2026-10-05T09:00:00Z"));
   }
 }

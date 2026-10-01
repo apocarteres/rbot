@@ -7,6 +7,7 @@ export type SessionFormat = 'IN_PERSON' | 'ONLINE';
 export interface Interval {
   readonly start: string;
   readonly end: string;
+  readonly types: readonly string[];
 }
 
 export interface Settings {

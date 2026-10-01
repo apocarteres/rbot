@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, OnInit, output, signal } from '@angular/core';
-import { time, WEEKDAYS } from './dates';
-import { Interval, Weekday } from './schedule-api';
+import { WEEKDAYS } from '../../../../../shared/dates';
+import { intervalLabel } from './interval-label';
+import { Interval, SessionType, Weekday } from './schedule-api';
 import { WeekDayDialog } from './week-day-dialog';
 
 interface Day {
@@ -9,7 +10,7 @@ interface Day {
   readonly intervals: readonly Interval[];
 }
 
-// MVP-02
+// MVP-02, RBOT-FEAT-004
 @Component({
   selector: 'app-week-card',
   imports: [WeekDayDialog],
@@ -40,35 +41,31 @@ interface Day {
         <button type="button" class="quiet" [attr.aria-label]="'Изменить: ' + day.title" (click)="editing.set(day)">Изменить</button>
       </div>
     }
-    @if (notice()) {
-      <p class="notice" role="status">{{ notice() }}</p>
-    }
     @if (editing(); as day) {
-      <app-week-day-dialog [weekday]="day.weekday" [title]="day.title" [intervals]="day.intervals"
+      <app-week-day-dialog [weekday]="day.weekday" [title]="day.title" [intervals]="day.intervals" [types]="types()"
         (closed)="editing.set(null)" (saved)="applied(day, $event)" />
     }
   `,
 })
 export class WeekCard implements OnInit {
   readonly week = input.required<readonly Weekday[]>();
+  readonly types = input.required<readonly SessionType[]>();
   readonly saved = output<readonly Weekday[]>();
 
   protected readonly days = signal<readonly Day[]>([]);
   protected readonly editing = signal<Day | null>(null);
-  protected readonly notice = signal('');
 
   ngOnInit(): void {
     this.days.set(this.week().map((day) => ({ weekday: day.weekday, title: WEEKDAYS[day.weekday - 1], intervals: day.intervals })));
   }
 
   protected label(interval: Interval): string {
-    return `${time(interval.start)}–${time(interval.end)}`;
+    return intervalLabel(interval, this.types());
   }
 
   protected applied(day: Day, intervals: readonly Interval[]): void {
     this.days.update((days) => days.map((one) => (one.weekday === day.weekday ? { ...one, intervals } : one)));
     this.editing.set(null);
-    this.notice.set(`${day.title}: часы сохранены.`);
     this.saved.emit(this.days().map((one) => ({ weekday: one.weekday, intervals: one.intervals })));
   }
 }

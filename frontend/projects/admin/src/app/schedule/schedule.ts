@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
-import { Attempt } from './attempt';
+import { Attempt } from '../../../../../shared/attempt';
+import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { DaysCard } from './days-card';
 import { PreviewCard } from './preview-card';
 import { ScheduleApi, SessionType, Settings, Weekday } from './schedule-api';
@@ -19,10 +20,10 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
   { id: 'settings', title: 'Параметры' },
 ];
 
-// MVP-02
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004
 @Component({
   selector: 'app-schedule',
-  imports: [SettingsCard, WeekCard, DaysCard, TypesCard, PreviewCard],
+  imports: [SettingsCard, WeekCard, DaysCard, TypesCard, PreviewCard, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; margin-bottom: 16px; }
@@ -40,9 +41,6 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
     @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
   `,
   template: `
-    @if (attempt.error()) {
-      <p class="error" role="alert">{{ attempt.error() }}</p>
-    }
     @if (settings(); as current) {
       <div class="head">
         <h1>Расписание</h1>
@@ -67,8 +65,8 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
           </div>
           <div role="tabpanel" [id]="'panel-' + tab()" [attr.aria-labelledby]="'tab-' + tab()">
             @switch (tab()) {
-              @case ('week') { <app-week-card [week]="week()" (saved)="week.set($event); touch()" /> }
-              @case ('days') { <app-days-card [zone]="current.zone" (saved)="touch()" (counted)="exceptions.set($event)" /> }
+              @case ('week') { <app-week-card [week]="week()" [types]="types()" (saved)="week.set($event); touch()" /> }
+              @case ('days') { <app-days-card [zone]="current.zone" [types]="types()" (saved)="touch()" (counted)="exceptions.set($event)" /> }
               @case ('types') { <app-types-card [initial]="types()" (saved)="types.set($event)" /> }
               @case ('settings') { <app-settings-card [settings]="current" (saved)="settings.set($event)" /> }
             }
@@ -76,6 +74,9 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
         </section>
         <app-preview-card [settings]="current" [types]="activeTypes()" [version]="version()" />
       </div>
+    }
+    @if (attempt.failure()) {
+      <app-failure-dialog [message]="attempt.failure()" (closed)="attempt.dismiss()" />
     }
   `,
 })

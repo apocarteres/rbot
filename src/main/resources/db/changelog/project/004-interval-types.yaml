@@ -1,0 +1,11 @@
+# MVP-02, RBOT-FEAT-004, ADR-0003, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:004-interval-types
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/004-interval-types.sql
+            relativeToChangelogFile: true
+            splitStatements: true

@@ -6,10 +6,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-02, REQ-DATA-ACCESS-002
+// MVP-02, RBOT-FEAT-004, REQ-DATA-ACCESS-002
 @Repository
 public class ScheduleDayDao {
 
@@ -37,8 +38,8 @@ public class ScheduleDayDao {
     return jdbc.sql(sql.get("delete-intervals")).param("day", day).update();
   }
 
-  public boolean insertInterval(UUID id, LocalDate day, LocalTime starts, LocalTime ends) {
+  public boolean insertInterval(UUID id, LocalDate day, LocalTime starts, LocalTime ends, List<UUID> types) {
     return jdbc.sql(sql.get("insert-interval")).param("id", id).param("day", day).param("starts", starts).param("ends", ends)
-      .update() == 1;
+      .param("types", types.stream().map(UUID::toString).collect(Collectors.joining(","))).update() == 1;
   }
 }

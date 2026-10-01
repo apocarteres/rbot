@@ -16,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-// MVP-01, RUN-QA
+// MVP-01, RBOT-FEAT-002, RUN-QA
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("qa")
@@ -29,7 +29,7 @@ class QaAccountsIT extends IntegrationStores {
   void adminSeedManagesAccounts() throws Exception {
     mvc.perform(get("/api/admin/accounts").cookie(login("admin@yanapaderina.test", "qa-admin-password")))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.total").value(2));
+      .andExpect(jsonPath("$.total").value(3));
   }
 
   @Test
@@ -39,6 +39,13 @@ class QaAccountsIT extends IntegrationStores {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.account.roles[0]").value("PSYCHOLOGIST"));
     mvc.perform(get("/api/admin/accounts").cookie(psychologist)).andExpect(status().isForbidden());
+  }
+
+  @Test
+  void clientSeedEntersClientAreaOnly() throws Exception {
+    Cookie[] client = login("client@yanapaderina.test", "qa-client-password");
+    mvc.perform(get("/api/client/sessions").cookie(client)).andExpect(status().isOk());
+    mvc.perform(get("/api/cabinet/schedule/settings").cookie(client)).andExpect(status().isForbidden());
   }
 
   private Cookie[] login(String email, String password) throws Exception {

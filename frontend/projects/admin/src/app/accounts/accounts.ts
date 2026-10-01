@@ -2,15 +2,16 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { NewAccountDialog } from './new-account-dialog';
 import { PasswordDialog } from './password-dialog';
-import { failureMessage } from '../../../../../shared/failures';
+import { Attempt } from '../../../../../shared/attempt';
+import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { AccountPage, AccountsApi, AccountView } from './accounts-api';
 
-const ROLE_TITLES: Readonly<Record<string, string>> = { ADMIN: 'администратор', PSYCHOLOGIST: 'психолог' };
+const ROLE_TITLES: Readonly<Record<string, string>> = { ADMIN: 'администратор', PSYCHOLOGIST: 'психолог', CLIENT: 'клиент' };
 
-// MVP-01, MVP-02, REQ-AUTH-009, REQ-CODE-DESIGN-007
+// MVP-01, MVP-02, RBOT-FEAT-003, REQ-AUTH-009, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-accounts',
-  imports: [FormsModule, NewAccountDialog, PasswordDialog],
+  imports: [FormsModule, NewAccountDialog, PasswordDialog, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './accounts.scss',
   templateUrl: './accounts.html',
@@ -19,9 +20,7 @@ export class AccountsPage implements OnInit {
   private readonly api = inject(AccountsApi);
 
   protected readonly page = signal<AccountPage | null>(null);
-  protected readonly error = signal('');
-  protected readonly notice = signal('');
-  protected readonly busy = signal(false);
+  protected readonly attempt = new Attempt();
   protected readonly passwordFor = signal<AccountView | null>(null);
   protected readonly creating = signal(false);
 
@@ -46,43 +45,18 @@ export class AccountsPage implements OnInit {
   }
 
   protected async load(page: number): Promise<void> {
-    await this.run(async () => this.page.set(await this.api.list(this.query, page)));
+    await this.attempt.run(async () => this.page.set(await this.api.list(this.query, page)));
   }
 
-  protected async created(account: AccountView): Promise<void> {
+  protected async created(): Promise<void> {
     this.creating.set(false);
-    await this.run(async () => {
-      this.page.set(await this.api.list(this.query, 0));
-      this.notice.set(`Учётная запись ${account.email} создана.`);
-    });
-  }
-
-  protected passwordChanged(account: AccountView): void {
-    this.passwordFor.set(null);
-    this.notice.set(`Пароль для ${account.email} изменён.`);
+    await this.load(0);
   }
 
   protected async toggleBlock(account: AccountView): Promise<void> {
-    await this.run(async () => {
+    await this.attempt.run(async () => {
       await (account.blocked ? this.api.unblock(account.id) : this.api.block(account.id));
-      this.notice.set(`${account.email}: ${account.blocked ? 'разблокирована' : 'заблокирована'}.`);
       this.page.set(await this.api.list(this.query, this.page()?.page ?? 0));
     });
-  }
-
-  private async run(action: () => Promise<void>): Promise<void> {
-    if (this.busy()) {
-      return;
-    }
-    this.busy.set(true);
-    this.error.set('');
-    this.notice.set('');
-    try {
-      await action();
-    } catch (failure) {
-      this.error.set(failureMessage(failure));
-    } finally {
-      this.busy.set(false);
-    }
   }
 }

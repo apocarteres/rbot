@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AppClock } from '../../../../../shared/clock';
-import { Attempt } from './attempt';
-import { clock, dayTitle, isoDate, plusDays } from './dates';
+import { Attempt } from '../../../../../shared/attempt';
+import { clock, dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
+import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ScheduleApi, SessionType, Settings, Slot } from './schedule-api';
 
 const PREVIEW_DAYS = 14;
@@ -12,10 +13,10 @@ interface SlotDay {
   readonly times: readonly string[];
 }
 
-// MVP-02, REQ-CODE-DESIGN-007
+// MVP-02, RBOT-FEAT-003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-preview-card',
-  imports: [FormsModule],
+  imports: [FormsModule, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .preview { padding: 16px; }
@@ -40,9 +41,6 @@ interface SlotDay {
             }
           </select>
         </div>
-        @if (attempt.error()) {
-          <p class="error" role="alert">{{ attempt.error() }}</p>
-        }
         @for (day of slotDays(); track day.date) {
           <div class="day">
             <strong>{{ title(day.date) }}</strong>
@@ -56,6 +54,9 @@ interface SlotDay {
         <p class="muted small">{{ days }} дней · пересчитывается после каждой правки</p>
       }
     </section>
+    @if (attempt.failure()) {
+      <app-failure-dialog [message]="attempt.failure()" (closed)="attempt.dismiss()" />
+    }
   `,
 })
 export class PreviewCard {

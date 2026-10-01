@@ -1,19 +1,23 @@
 package com.yanapaderina.rbot.schedule.internal.app;
 
+import com.yanapaderina.rbot.schedule.SessionType;
 import com.yanapaderina.rbot.schedule.internal.data.PracticeSettingsDao;
 import com.yanapaderina.rbot.schedule.internal.data.ScheduleDayDao;
 import com.yanapaderina.rbot.schedule.internal.data.SessionTypeDao;
+import com.yanapaderina.rbot.schedule.internal.data.SessionTypeRow;
 import com.yanapaderina.rbot.schedule.internal.data.WorkIntervalDao;
 import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-02, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-02, RBOT-FEAT-004, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ScheduleAdministration {
 
@@ -50,9 +54,9 @@ public class ScheduleAdministration {
 
   @Transactional
   public List<DayInterval> replaceWeekday(DayOfWeek weekday, List<DayInterval> hours) {
-    List<DayInterval> sorted = ScheduleRules.disjoint(hours);
+    List<DayInterval> sorted = known(ScheduleRules.disjoint(hours));
     intervals.deleteWeekday(weekday.getValue());
-    sorted.forEach(hour -> intervals.insert(UUID.randomUUID(), weekday.getValue(), hour.start(), hour.end()));
+    sorted.forEach(hour -> intervals.insert(UUID.randomUUID(), weekday.getValue(), hour.start(), hour.end(), List.copyOf(hour.types())));
     return sorted;
   }
 
@@ -64,10 +68,10 @@ public class ScheduleAdministration {
 
   @Transactional
   public ScheduleDay setDay(ScheduleDay day) {
-    List<DayInterval> sorted = ScheduleRules.disjoint(day.intervals());
+    List<DayInterval> sorted = known(ScheduleRules.disjoint(day.intervals()));
     days.upsert(day.day(), day.closed(), day.note());
     days.deleteIntervals(day.day());
-    sorted.forEach(hour -> days.insertInterval(UUID.randomUUID(), day.day(), hour.start(), hour.end()));
+    sorted.forEach(hour -> days.insertInterval(UUID.randomUUID(), day.day(), hour.start(), hour.end(), List.copyOf(hour.types())));
     return new ScheduleDay(day.day(), day.closed(), day.note(), sorted);
   }
 
@@ -109,5 +113,13 @@ public class ScheduleAdministration {
       type.format(), type.firstVisit(), type.active()));
     types.update(ScheduleRows.row(changed));
     return changed;
+  }
+
+  private List<DayInterval> known(List<DayInterval> hours) {
+    Set<UUID> existing = types.list().stream().map(SessionTypeRow::id).collect(Collectors.toSet());
+    if (hours.stream().anyMatch(hour -> !existing.containsAll(hour.types()))) {
+      throw new ScheduleRefused(ScheduleRefused.INTERVAL_TYPE, "Тип сессии промежутка не найден");
+    }
+    return hours;
   }
 }

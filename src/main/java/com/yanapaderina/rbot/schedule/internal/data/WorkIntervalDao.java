@@ -5,10 +5,11 @@ import io.github.apocarteres.platform.persistence.SqlStatements;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-02, REQ-DATA-ACCESS-002
+// MVP-02, RBOT-FEAT-004, REQ-DATA-ACCESS-002
 @Repository
 public class WorkIntervalDao {
 
@@ -28,8 +29,8 @@ public class WorkIntervalDao {
     return jdbc.sql(sql.get("delete-weekday")).param("weekday", weekday).update();
   }
 
-  public boolean insert(UUID id, int weekday, LocalTime starts, LocalTime ends) {
+  public boolean insert(UUID id, int weekday, LocalTime starts, LocalTime ends, List<UUID> types) {
     return jdbc.sql(sql.get("insert")).param("id", id).param("weekday", weekday).param("starts", starts).param("ends", ends)
-      .update() == 1;
+      .param("types", types.stream().map(UUID::toString).collect(Collectors.joining(","))).update() == 1;
   }
 }
