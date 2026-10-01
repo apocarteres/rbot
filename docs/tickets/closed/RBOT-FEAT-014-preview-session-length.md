@@ -35,3 +35,4 @@ related: MVP-02, RUN-QA
 ## Ход работы
 
 - 2026-10-01: `preview-card.ts`, `scripts/deploy/stand.sh`.
+- 2026-10-01: после перезапуска демона Docker на `mini` сервер и клиент стенда не поднялись — у сервисов `docker-compose.qa.yml` не было политики перезапуска; добавлено `restart: unless-stopped`.

@@ -1,4 +1,4 @@
-# MVP-01, RUN-QA
+# MVP-01, RUN-QA, RBOT-FEAT-014
 name: rbot-qa
 
 x-backend-env: &backend-env
@@ -10,6 +10,7 @@ x-backend-env: &backend-env
 
 services:
   postgres:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: rbot
@@ -22,6 +23,7 @@ services:
       interval: 5s
       retries: 10
   redis:
+    restart: unless-stopped
     image: redis:7-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -38,6 +40,7 @@ services:
     environment:
       <<: *backend-env
   backend:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/backend-runtime/Dockerfile
@@ -59,6 +62,7 @@ services:
       start_period: 60s
       retries: 20
   frontend:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: docker/frontend-runtime/Dockerfile
