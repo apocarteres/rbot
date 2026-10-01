@@ -5,7 +5,7 @@ status: done
 scope: backend, frontend, data
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-2
 related: MVP-02, ADR-0003
 ---
 

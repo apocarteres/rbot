@@ -5,7 +5,7 @@ status: done
 scope: frontend
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-2
 related: MVP-01, MVP-02, REQ-CLIENT-MODAL, REQ-CLIENT-ACTION
 ---
 

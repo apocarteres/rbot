@@ -26,10 +26,10 @@ authority: navigation
 | [Окно не закрывается во время вызова, фон решает явно, отказ показывается в окне](RBOT-ARC-004-adopt-modal-busy-backdrop.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
 | [Клиент узнаёт о новой сборке и об устаревшем API механизмом ядра](RBOT-ARC-005-adopt-client-update.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, backend |
 | [Доступ к данным: без ORM, простой DAO, транзакция в прикладном слое](RBOT-DATA-001-adopt-data-access.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, java, persistence |
-| [Правка и создание в модальных окнах вместо inline-форм](RBOT-FEAT-001-dialogs-instead-of-inline-forms.md) | P1 | Выполнена | Не назначен | frontend |
-| [Приложение клиента: мастер записи и мои сессии](RBOT-FEAT-002-client-booking-wizard.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
-| [Без сообщений об успехе, отказ — окном с причиной](RBOT-FEAT-003-failure-dialogs-without-success-notices.md) | P1 | Выполнена | Не назначен | frontend |
-| [Промежутки расписания для выбранных типов сессий](RBOT-FEAT-004-interval-session-types.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
+| [Правка и создание в модальных окнах вместо inline-форм](RBOT-FEAT-001-dialogs-instead-of-inline-forms.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | frontend |
+| [Приложение клиента: мастер записи и мои сессии](RBOT-FEAT-002-client-booking-wizard.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | backend, frontend, data |
+| [Без сообщений об успехе, отказ — окном с причиной](RBOT-FEAT-003-failure-dialogs-without-success-notices.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | frontend |
+| [Промежутки расписания для выбранных типов сессий](RBOT-FEAT-004-interval-session-types.md) | P1 | Выполнена | [RELEASE-2026-10-2](../../releases/RELEASE-2026-10-2.md) | backend, frontend, data |
 | [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
 | [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
 | [Сборка потребителя идёт на Java 25, как и сборка ядра](RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
