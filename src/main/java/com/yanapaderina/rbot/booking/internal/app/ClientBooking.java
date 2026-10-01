@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ClientBooking {
 
@@ -58,7 +58,7 @@ public class ClientBooking {
     BookingTerms terms = open();
     SessionType type = offered(typeId);
     requireFree(terms, typeId, start);
-    return session(ledger.book(client, type, start, terms.buffer(), client), Map.of(typeId, type));
+    return session(ledger.book(client, type, start, client), Map.of(typeId, type));
   }
 
   @Transactional
@@ -67,7 +67,7 @@ public class ClientBooking {
     SessionRow row = changeable(client, sessionId, terms.lead());
     SessionType type = offered(row.type());
     requireFree(terms, type.id(), start);
-    return session(ledger.reschedule(row, type, start, terms.buffer(), client), Map.of(type.id(), type));
+    return session(ledger.reschedule(row, type, start, client), Map.of(type.id(), type));
   }
 
   @Transactional
@@ -104,7 +104,7 @@ public class ClientBooking {
   }
 
   private Map<UUID, SessionType> types() {
-    return availability.types().stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
+    return availability.everyType().stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
   }
 
   private static ClientSession session(SessionRow row, Map<UUID, SessionType> types) {

@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=cabinet-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 class CabinetSessionsIT extends IntegrationStores {
 
   private static final ZoneId MOSCOW = ZoneId.of("Europe/Moscow");
-  private static final String THERAPY = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0002";
+  private static String therapy;
   private static final String CLIENT = "visitor@example.test";
   private static final String PASSWORD = "client-password-1";
 
@@ -59,10 +59,13 @@ class CabinetSessionsIT extends IntegrationStores {
       accounts.create(CLIENT, PASSWORD, Set.of("CLIENT"), true, new NoProfile());
     }
     Cookie[] psychologist = psychologist();
+    if (therapy == null) {
+      therapy = type(psychologist, "Психотерапия очно", 60, 0, true);
+    }
     write(put("/api/cabinet/schedule/settings"), psychologist,
-      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"bufferMinutes\":0}", 200);
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60}", 200);
     for (int weekday = 1; weekday <= 7; weekday++) {
-      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + THERAPY + "\"]}]}", 200);
+      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
     }
   }
 
@@ -143,7 +146,7 @@ class CabinetSessionsIT extends IntegrationStores {
 
   private ResultActions book(Cookie[] session, String client, Instant start, int expected) throws Exception {
     return write(post("/api/cabinet/sessions"), session,
-      "{\"clientId\":\"" + client + "\",\"typeId\":\"" + THERAPY + "\",\"start\":\"" + start + "\"}", expected);
+      "{\"clientId\":\"" + client + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}", expected);
   }
 
   private ResultActions week(Cookie[] session, LocalDate day) throws Exception {
@@ -165,5 +168,12 @@ class CabinetSessionsIT extends IntegrationStores {
         .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
       .andExpect(status().isOk())
       .andReturn().getResponse().getCookies();
+  }
+
+  private String type(Cookie[] session, String title, int minutes, int buffer, boolean active) throws Exception {
+    String body = "{\"title\":\"" + title + "\",\"durationMinutes\":" + minutes + ",\"bufferMinutes\":" + buffer
+      + ",\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"active\":" + active + "}";
+    return JsonPath.read(mvc.perform(post("/api/cabinet/schedule/types").cookie(session).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content(body)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.id");
   }
 }

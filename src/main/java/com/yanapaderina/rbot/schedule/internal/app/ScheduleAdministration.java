@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, RBOT-FEAT-016, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class ScheduleAdministration {
 
@@ -98,8 +98,8 @@ public class ScheduleAdministration {
 
   @Transactional
   public SessionType createType(SessionType type) {
-    SessionType created = ScheduleRules.type(new SessionType(UUID.randomUUID(), type.title().trim(), type.duration(), type.price(),
-      type.format(), type.firstVisit(), type.active()));
+    SessionType created = ScheduleRules.type(new SessionType(UUID.randomUUID(), type.title().trim(), type.duration(), type.buffer(),
+      type.price(), type.format(), type.active()));
     types.insert(ScheduleRows.row(created), clock.instant());
     return created;
   }
@@ -109,10 +109,21 @@ public class ScheduleAdministration {
     if (types.find(type.id()).isEmpty()) {
       throw new ScheduleRefused(ScheduleRefused.TYPE_MISSING, "Типа сессии нет");
     }
-    SessionType changed = ScheduleRules.type(new SessionType(type.id(), type.title().trim(), type.duration(), type.price(),
-      type.format(), type.firstVisit(), type.active()));
+    SessionType changed = ScheduleRules.type(new SessionType(type.id(), type.title().trim(), type.duration(), type.buffer(),
+      type.price(), type.format(), type.active()));
     types.update(ScheduleRows.row(changed));
     return changed;
+  }
+
+  @Transactional
+  public void deleteType(UUID id) {
+    if (!types.delete(id, clock.instant())) {
+      throw new ScheduleRefused(ScheduleRefused.TYPE_MISSING, "Типа сессии нет");
+    }
+    intervals.dropType(id);
+    intervals.deleteEmpty();
+    days.dropType(id);
+    days.deleteEmpty();
   }
 
   private List<DayInterval> known(List<DayInterval> hours) {

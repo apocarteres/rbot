@@ -1,0 +1,11 @@
+# MVP-02, RBOT-FEAT-016, ADR-0003, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:009-session-type-buffer
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/009-session-type-buffer.sql
+            relativeToChangelogFile: true
+            splitStatements: true

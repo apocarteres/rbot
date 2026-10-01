@@ -8,7 +8,7 @@ import java.time.ZoneOffset;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-02, REQ-DATA-ACCESS-002
+// MVP-02, RBOT-FEAT-016, REQ-DATA-ACCESS-002
 @Repository
 public class PracticeSettingsDao {
 
@@ -30,7 +30,6 @@ public class PracticeSettingsDao {
       .param("leadMinutes", row.leadMinutes())
       .param("horizonDays", row.horizonDays())
       .param("slotStepMinutes", row.slotStepMinutes())
-      .param("bufferMinutes", row.bufferMinutes())
       .param("updatedAt", OffsetDateTime.ofInstant(at, ZoneOffset.UTC))
       .update() == 1;
   }

@@ -11,7 +11,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-// MVP-02, REQ-DATA-ACCESS-002
+// MVP-02, RBOT-FEAT-016, REQ-DATA-ACCESS-002
 @Repository
 public class SessionTypeDao {
 
@@ -25,6 +25,14 @@ public class SessionTypeDao {
 
   public List<SessionTypeRow> list() {
     return jdbc.sql(sql.get("list")).query(Rows.SESSION_TYPE).list();
+  }
+
+  public List<SessionTypeRow> listAll() {
+    return jdbc.sql(sql.get("list-all")).query(Rows.SESSION_TYPE).list();
+  }
+
+  public boolean delete(UUID id, Instant at) {
+    return jdbc.sql(sql.get("delete")).param("id", id).param("at", OffsetDateTime.ofInstant(at, ZoneOffset.UTC)).update() == 1;
   }
 
   public Optional<SessionTypeRow> find(UUID id) {
@@ -41,6 +49,6 @@ public class SessionTypeDao {
 
   private static JdbcClient.StatementSpec params(JdbcClient.StatementSpec statement, SessionTypeRow row) {
     return statement.param("id", row.id()).param("title", row.title()).param("durationMinutes", row.durationMinutes())
-      .param("price", row.price()).param("format", row.format()).param("firstVisit", row.firstVisit()).param("active", row.active());
+      .param("price", row.price()).param("bufferMinutes", row.bufferMinutes()).param("format", row.format()).param("active", row.active());
   }
 }

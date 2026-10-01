@@ -6,12 +6,10 @@ import com.yanapaderina.rbot.booking.internal.data.SessionRow;
 import com.yanapaderina.rbot.clients.ClientCard;
 import com.yanapaderina.rbot.clients.Clients;
 import com.yanapaderina.rbot.schedule.Availability;
-import com.yanapaderina.rbot.schedule.BookingTerms;
 import com.yanapaderina.rbot.schedule.SessionType;
 import io.github.apocarteres.platform.auth.Account;
 import io.github.apocarteres.platform.auth.Accounts;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -26,7 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
 @Service
 public class CabinetBooking {
 
@@ -75,7 +73,7 @@ public class CabinetBooking {
     ClientCard card = clients.card(clientId).orElseThrow(() -> new BookingRefused(BookingRefused.CLIENT_MISSING, "Клиента нет"));
     SessionType type = type(typeId);
     future(start);
-    SessionRow row = ledger.book(card.id(), type, start, buffer(), by);
+    SessionRow row = ledger.book(card.id(), type, start, by);
     events.publishEvent(new SessionNotice(row.client(), SessionNotice.Change.BOOKED, row.start(), row.end(), Optional.empty(),
       type.title()));
     return view(row, type, name(Optional.of(card)));
@@ -86,7 +84,7 @@ public class CabinetBooking {
     SessionRow row = booked(sessionId);
     SessionType type = type(row.type());
     future(start);
-    SessionRow moved = ledger.reschedule(row, type, start, buffer(), by);
+    SessionRow moved = ledger.reschedule(row, type, start, by);
     events.publishEvent(new SessionNotice(row.client(), SessionNotice.Change.RESCHEDULED, moved.start(), moved.end(),
       Optional.of(row.start()), type.title()));
     return view(moved, type, name(clients.card(row.client())));
@@ -126,12 +124,8 @@ public class CabinetBooking {
   }
 
   private SessionType type(UUID typeId) {
-    return Optional.ofNullable(types().get(typeId))
+    return availability.types().stream().filter(type -> type.id().equals(typeId)).findFirst()
       .orElseThrow(() -> new BookingRefused(BookingRefused.TYPE_UNAVAILABLE, "Типа сессии нет"));
-  }
-
-  private Duration buffer() {
-    return availability.terms().map(BookingTerms::buffer).orElse(Duration.ZERO);
   }
 
   private String name(Optional<ClientCard> card) {
@@ -139,7 +133,7 @@ public class CabinetBooking {
   }
 
   private Map<UUID, SessionType> types() {
-    return availability.types().stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
+    return availability.everyType().stream().collect(Collectors.toMap(SessionType::id, Function.identity()));
   }
 
   private static CabinetSession view(SessionRow row, SessionType type, String name) {

@@ -13,7 +13,7 @@ interface SlotDay {
   readonly times: readonly string[];
 }
 
-// MVP-02, RBOT-FEAT-003, RBOT-FEAT-014, REQ-CODE-DESIGN-007
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-014, RBOT-FEAT-016, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-preview-card',
   imports: [FormsModule, FailureDialog],
@@ -73,8 +73,7 @@ export class PreviewCard {
   protected readonly type = signal('');
   protected readonly length = computed(() => {
     const chosen = this.types().find((one) => one.id === this.type());
-    const buffer = this.settings().bufferMinutes ?? 0;
-    return chosen ? `${chosen.durationMinutes} мин${buffer > 0 ? ` + перерыв ${buffer} мин` : ''}` : '';
+    return chosen ? `${chosen.durationMinutes} мин` : '';
   });
   private readonly slots = signal<readonly Slot[]>([]);
 

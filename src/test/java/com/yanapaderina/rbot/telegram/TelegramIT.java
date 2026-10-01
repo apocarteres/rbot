@@ -38,7 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, ADR-0002
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, ADR-0002
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -53,7 +53,6 @@ class TelegramIT extends IntegrationStores {
 
   static final String TOKEN = "123456:integration-token-not-real";
   static final String SECRET = "webhook-secret-for-tests";
-  private static final String THERAPY = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0002";
   private static final ZoneId MOSCOW = ZoneId.of("Europe/Moscow");
   private static final AtomicLong UPDATES = new AtomicLong(1000);
 
@@ -110,16 +109,14 @@ class TelegramIT extends IntegrationStores {
       anyList());
 
     write(put("/api/cabinet/schedule/settings"), psychologist,
-      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"bufferMinutes\":0}", 200);
-    write(put("/api/cabinet/schedule/types/" + THERAPY), psychologist,
-      "{\"title\":\"Психотерапия очно\",\"durationMinutes\":60,\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"firstVisit\":false,\"active\":true}",
-      200);
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60}", 200);
+    String therapy = type(psychologist, "Психотерапия очно", 60, 0, true);
     LocalDate day = clock.instant().atZone(MOSCOW).toLocalDate().plusDays(1);
     write(put("/api/cabinet/schedule/week/" + day.getDayOfWeek().getValue()), psychologist,
-      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + THERAPY + "\"]}]}", 200);
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
     String start = ZonedDateTime.of(day, LocalTime.parse("11:00"), MOSCOW).toInstant().toString();
     mvc.perform(post("/api/miniapp/sessions").header("X-Telegram-Init-Data", miniApp).contentType(MediaType.APPLICATION_JSON)
-        .content("{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + start + "\"}"))
+        .content("{\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}"))
       .andExpect(status().isCreated());
     mvc.perform(get("/api/miniapp/sessions").header("X-Telegram-Init-Data", miniApp))
       .andExpect(jsonPath("$.length()").value(1));
@@ -172,5 +169,12 @@ class TelegramIT extends IntegrationStores {
   private ResultActions write(MockHttpServletRequestBuilder request, Cookie[] session, String body, int expected) throws Exception {
     return mvc.perform(request.cookie(session).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
       .andExpect(status().is(expected));
+  }
+
+  private String type(Cookie[] session, String title, int minutes, int buffer, boolean active) throws Exception {
+    String body = "{\"title\":\"" + title + "\",\"durationMinutes\":" + minutes + ",\"bufferMinutes\":" + buffer
+      + ",\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"active\":" + active + "}";
+    return JsonPath.read(mvc.perform(post("/api/cabinet/schedule/types").cookie(session).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content(body)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.id");
   }
 }

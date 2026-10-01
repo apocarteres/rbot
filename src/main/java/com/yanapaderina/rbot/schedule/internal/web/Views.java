@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-// MVP-02, RBOT-FEAT-004, REQ-CODE-DESIGN-005
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, REQ-CODE-DESIGN-005
 final class Views {
 
   private Views() {
@@ -38,12 +38,11 @@ final class Views {
     }
   }
 
-  record Settings(String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, Integer bufferMinutes,
-    boolean complete) {
+  record Settings(String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes, boolean complete) {
 
     static Settings of(PracticeSettings settings) {
       return new Settings(settings.zone().getId(), minutes(settings.lead()), settings.horizonDays().orElse(null),
-        minutes(settings.step()), minutes(settings.buffer()), settings.complete());
+        minutes(settings.step()), settings.complete());
     }
 
     private static Integer minutes(Optional<Duration> value) {
@@ -51,12 +50,10 @@ final class Views {
     }
   }
 
-  record SettingsRequest(@NotNull String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes,
-    Integer bufferMinutes) {
+  record SettingsRequest(@NotNull String zone, Integer leadMinutes, Integer horizonDays, Integer slotStepMinutes) {
 
     PracticeSettings domain(ZoneId zoneId) {
-      return new PracticeSettings(zoneId, duration(leadMinutes), Optional.ofNullable(horizonDays), duration(slotStepMinutes),
-        duration(bufferMinutes));
+      return new PracticeSettings(zoneId, duration(leadMinutes), Optional.ofNullable(horizonDays), duration(slotStepMinutes));
     }
 
     private static Optional<Duration> duration(Integer minutes) {
@@ -92,20 +89,20 @@ final class Views {
   record Closed(int days) {
   }
 
-  record Type(UUID id, String title, int durationMinutes, BigDecimal price, SessionFormat format, boolean firstVisit,
+  record Type(UUID id, String title, int durationMinutes, int bufferMinutes, BigDecimal price, SessionFormat format,
     boolean active) {
 
     static Type of(SessionType type) {
-      return new Type(type.id(), type.title(), Math.toIntExact(type.duration().toMinutes()), type.price(), type.format(),
-        type.firstVisit(), type.active());
+      return new Type(type.id(), type.title(), Math.toIntExact(type.duration().toMinutes()),
+        Math.toIntExact(type.buffer().toMinutes()), type.price(), type.format(), type.active());
     }
   }
 
-  record TypeRequest(@NotNull String title, int durationMinutes, @NotNull BigDecimal price, @NotNull SessionFormat format,
-    boolean firstVisit, boolean active) {
+  record TypeRequest(@NotNull String title, int durationMinutes, int bufferMinutes, @NotNull BigDecimal price,
+    @NotNull SessionFormat format, boolean active) {
 
     SessionType domain(UUID id) {
-      return new SessionType(id, title, Duration.ofMinutes(durationMinutes), price, format, firstVisit, active);
+      return new SessionType(id, title, Duration.ofMinutes(durationMinutes), Duration.ofMinutes(bufferMinutes), price, format, active);
     }
   }
 

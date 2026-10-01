@@ -7,7 +7,7 @@ import { ScheduleApi, Settings } from './schedule-api';
 const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yekaterinburg', 'Asia/Omsk', 'Asia/Novosibirsk',
   'Asia/Krasnoyarsk', 'Asia/Irkutsk', 'Asia/Yakutsk', 'Asia/Vladivostok', 'Asia/Magadan', 'Asia/Kamchatka'];
 
-// MVP-02, RBOT-FEAT-003, RBOT-FEAT-007
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-007, RBOT-FEAT-016
 @Component({
   selector: 'app-settings-card',
   imports: [FormsModule, FailureDialog],
@@ -44,11 +44,6 @@ const ZONES = ['Europe/Kaliningrad', 'Europe/Moscow', 'Europe/Samara', 'Asia/Yek
           <input id="step" name="step" type="number" min="5" max="240" step="5" aria-describedby="step-hint" [(ngModel)]="stepMinutes" />
           <span id="step-hint" class="hint">Как часто предлагается начало сессии: при 30 — в 10:00, 10:30, 11:00.</span>
         </div>
-        <div class="field">
-          <label for="buffer">Перерыв после сессии, мин</label>
-          <input id="buffer" name="buffer" type="number" min="0" max="240" step="5" aria-describedby="buffer-hint" [(ngModel)]="bufferMinutes" />
-          <span id="buffer-hint" class="hint">Свободное время после каждой сессии: следующая запись начнётся не раньше.</span>
-        </div>
       </div>
       <button type="submit" [disabled]="attempt.busy()">Сохранить</button>
     </form>
@@ -69,7 +64,6 @@ export class SettingsCard implements OnInit {
   protected leadHours: number | null = null;
   protected horizonDays: number | null = null;
   protected stepMinutes: number | null = null;
-  protected bufferMinutes: number | null = null;
 
   ngOnInit(): void {
     const settings = this.settings();
@@ -77,7 +71,6 @@ export class SettingsCard implements OnInit {
     this.leadHours = settings.leadMinutes === null ? null : settings.leadMinutes / 60;
     this.horizonDays = settings.horizonDays;
     this.stepMinutes = settings.slotStepMinutes;
-    this.bufferMinutes = settings.bufferMinutes;
   }
 
   protected async save(): Promise<void> {
@@ -87,7 +80,6 @@ export class SettingsCard implements OnInit {
         leadMinutes: this.leadHours === null ? null : Math.round(this.leadHours * 60),
         horizonDays: this.horizonDays,
         slotStepMinutes: this.stepMinutes,
-        bufferMinutes: this.bufferMinutes,
       });
       this.saved.emit(saved);
     });

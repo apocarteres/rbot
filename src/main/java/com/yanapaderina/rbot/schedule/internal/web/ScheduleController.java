@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-02, ADR-0003
+// MVP-02, RBOT-FEAT-016, ADR-0003
 @RestController
 @RequestMapping("/api/cabinet/schedule")
 class ScheduleController {
@@ -96,6 +96,12 @@ class ScheduleController {
   @PutMapping("/types/{id}")
   Views.Type changeType(@PathVariable UUID id, @Valid @RequestBody Views.TypeRequest request) {
     return Views.Type.of(schedule.changeType(request.domain(id)));
+  }
+
+  @DeleteMapping("/types/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void deleteType(@PathVariable UUID id) {
+    schedule.deleteType(id);
   }
 
   @GetMapping("/slots")

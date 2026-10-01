@@ -20,7 +20,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003, REQ-CODE-DESIGN-003
+// MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, ADR-0003, REQ-CODE-DESIGN-003
 @Service
 public class SlotPreview implements Availability {
 
@@ -54,14 +54,19 @@ public class SlotPreview implements Availability {
     if (!practice.complete()) {
       return Optional.empty();
     }
-    return Optional.of(new BookingTerms(practice.zone(), practice.lead().orElseThrow(), practice.horizonDays().orElseThrow(),
-      practice.buffer().orElseThrow()));
+    return Optional.of(new BookingTerms(practice.zone(), practice.lead().orElseThrow(), practice.horizonDays().orElseThrow()));
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<SessionType> types() {
     return types.list().stream().map(ScheduleRows::type).toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<SessionType> everyType() {
+    return types.listAll().stream().map(ScheduleRows::type).toList();
   }
 
   @Override
@@ -75,6 +80,6 @@ public class SlotPreview implements Availability {
       ZonedDateTime.of(to.plusDays(1).atStartOfDay(), practice.zone()).toInstant());
     List<TimeRange> taken = busy.orderedStream().flatMap(source -> source.busy(window).stream()).toList();
     return new SlotCalendar(practice, ScheduleRows.week(intervals.list()), ScheduleRows.days(days.between(from, to)), taken)
-      .free(from, to, type.id(), type.duration(), clock.instant());
+      .free(from, to, type.id(), type.duration(), type.buffer(), clock.instant());
   }
 }

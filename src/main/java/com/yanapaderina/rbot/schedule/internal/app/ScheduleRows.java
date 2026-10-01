@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-// MVP-02, RBOT-FEAT-004
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016
 final class ScheduleRows {
 
   private ScheduleRows() {
@@ -26,12 +26,12 @@ final class ScheduleRows {
 
   static PracticeSettings settings(SettingsRow row) {
     return new PracticeSettings(ZoneId.of(row.zone()), minutes(row.leadMinutes()), Optional.ofNullable(row.horizonDays()),
-      minutes(row.slotStepMinutes()), minutes(row.bufferMinutes()));
+      minutes(row.slotStepMinutes()));
   }
 
   static SettingsRow row(PracticeSettings settings) {
     return new SettingsRow(settings.zone().getId(), toMinutes(settings.lead()), settings.horizonDays().orElse(null),
-      toMinutes(settings.step()), toMinutes(settings.buffer()));
+      toMinutes(settings.step()));
   }
 
   static WeekTemplate week(List<IntervalRow> rows) {
@@ -55,13 +55,13 @@ final class ScheduleRows {
   }
 
   static SessionType type(SessionTypeRow row) {
-    return new SessionType(row.id(), row.title(), Duration.ofMinutes(row.durationMinutes()), row.price(),
-      SessionFormat.valueOf(row.format()), row.firstVisit(), row.active());
+    return new SessionType(row.id(), row.title(), Duration.ofMinutes(row.durationMinutes()), Duration.ofMinutes(row.bufferMinutes()),
+      row.price(), SessionFormat.valueOf(row.format()), row.active());
   }
 
   static SessionTypeRow row(SessionType type) {
     return new SessionTypeRow(type.id(), type.title(), Math.toIntExact(type.duration().toMinutes()), type.price(),
-      type.format().name(), type.firstVisit(), type.active());
+      Math.toIntExact(type.buffer().toMinutes()), type.format().name(), type.active());
   }
 
   private static Optional<Duration> minutes(Integer value) {

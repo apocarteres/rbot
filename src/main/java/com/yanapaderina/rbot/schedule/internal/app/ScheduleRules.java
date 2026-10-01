@@ -9,7 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-// MVP-02, ADR-0003
+// MVP-02, RBOT-FEAT-016, ADR-0003
 final class ScheduleRules {
 
   static final int MAX_RANGE_DAYS = 366;
@@ -36,7 +36,6 @@ final class ScheduleRules {
   static PracticeSettings settings(PracticeSettings settings) {
     within(settings.lead(), Duration.ZERO, Duration.ofDays(7), "минимальный срок записи");
     within(settings.step(), Duration.ofMinutes(5), Duration.ofHours(4), "шаг слотов");
-    within(settings.buffer(), Duration.ZERO, Duration.ofHours(4), "перерыв");
     settings.horizonDays().filter(days -> days < 1 || days > 365).ifPresent(days -> {
       throw new ScheduleRefused(ScheduleRefused.SETTINGS, "Горизонт записи " + days + " дн.: от 1 до 365");
     });
@@ -49,6 +48,9 @@ final class ScheduleRules {
     }
     if (type.duration().compareTo(Duration.ofMinutes(15)) < 0 || type.duration().compareTo(Duration.ofHours(8)) > 0) {
       throw new ScheduleRefused(ScheduleRefused.TYPE, "Длительность сессии — от 15 минут до 8 часов");
+    }
+    if (type.buffer().isNegative() || type.buffer().compareTo(Duration.ofHours(4)) > 0) {
+      throw new ScheduleRefused(ScheduleRefused.TYPE, "Перерыв после сессии — от 0 до 240 минут");
     }
     if (type.price().signum() < 0 || type.price().scale() > 2 || type.price().compareTo(new BigDecimal("9999999999.99")) > 0) {
       throw new ScheduleRefused(ScheduleRefused.TYPE, "Цена — неотрицательная, не больше двух знаков после запятой");

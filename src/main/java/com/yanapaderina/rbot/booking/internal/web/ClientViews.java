@@ -13,17 +13,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, REQ-CODE-DESIGN-005
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, REQ-CODE-DESIGN-005
 final class ClientViews {
 
   private ClientViews() {
   }
 
-  record Type(UUID id, String title, int durationMinutes, BigDecimal price, SessionFormat format, boolean firstVisit) {
+  record Type(UUID id, String title, int durationMinutes, BigDecimal price, SessionFormat format) {
 
     static Type of(SessionType type) {
-      return new Type(type.id(), type.title(), Math.toIntExact(type.duration().toMinutes()), type.price(), type.format(),
-        type.firstVisit());
+      return new Type(type.id(), type.title(), Math.toIntExact(type.duration().toMinutes()), type.price(), type.format());
     }
   }
 

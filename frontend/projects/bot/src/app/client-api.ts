@@ -11,7 +11,6 @@ export interface OfferedType {
   readonly durationMinutes: number;
   readonly price: number;
   readonly format: SessionFormat;
-  readonly firstVisit: boolean;
 }
 
 export interface Offer {

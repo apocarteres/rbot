@@ -15,7 +15,6 @@ export interface Settings {
   readonly leadMinutes: number | null;
   readonly horizonDays: number | null;
   readonly slotStepMinutes: number | null;
-  readonly bufferMinutes: number | null;
   readonly complete: boolean;
 }
 
@@ -35,9 +34,9 @@ export interface SessionType {
   readonly id: string;
   readonly title: string;
   readonly durationMinutes: number;
+  readonly bufferMinutes: number;
   readonly price: number;
   readonly format: SessionFormat;
-  readonly firstVisit: boolean;
   readonly active: boolean;
 }
 
@@ -46,7 +45,7 @@ export interface Slot {
   readonly end: string;
 }
 
-// MVP-02
+// MVP-02, RBOT-FEAT-016
 @Injectable({ providedIn: 'root' })
 export class ScheduleApi {
   private readonly http = inject(HttpClient);
@@ -95,6 +94,10 @@ export class ScheduleApi {
   saveType(type: SessionType): Promise<SessionType> {
     const { id, ...body } = type;
     return firstValueFrom(this.http.put<SessionType>(`${this.base}/types/${id}`, body));
+  }
+
+  deleteType(id: string): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${this.base}/types/${id}`));
   }
 
   slots(type: string, from: string, to: string): Promise<readonly Slot[]> {

@@ -20,7 +20,7 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
   { id: 'settings', title: 'Правила записи' },
 ];
 
-// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004, RBOT-FEAT-016
 @Component({
   selector: 'app-schedule',
   imports: [SettingsCard, WeekCard, DaysCard, TypesCard, PreviewCard, FailureDialog],
@@ -67,7 +67,7 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
             @switch (tab()) {
               @case ('week') { <app-week-card [week]="week()" [types]="types()" (saved)="week.set($event); touch()" /> }
               @case ('days') { <app-days-card [zone]="current.zone" [types]="types()" (saved)="touch()" (counted)="exceptions.set($event)" /> }
-              @case ('types') { <app-types-card [initial]="types()" (saved)="types.set($event)" /> }
+              @case ('types') { <app-types-card [initial]="types()" (saved)="typesChanged($event)" /> }
               @case ('settings') { <app-settings-card [settings]="current" (saved)="settings.set($event)" /> }
             }
           </div>
@@ -102,7 +102,7 @@ export class SchedulePage implements OnInit {
       return '';
     }
     return [current.zone, `за ${hours(current.leadMinutes ?? 0)}`, `на ${current.horizonDays} дн.`,
-      `шаг ${current.slotStepMinutes} мин`, `перерыв ${current.bufferMinutes} мин`].join(' · ');
+      `шаг ${current.slotStepMinutes} мин`].join(' · ');
   });
 
   ngOnInit(): void {
@@ -116,6 +116,12 @@ export class SchedulePage implements OnInit {
 
   protected open(tab: Tab): void {
     void this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, replaceUrl: true });
+  }
+
+  protected async typesChanged(types: readonly SessionType[]): Promise<void> {
+    this.types.set(types);
+    await this.attempt.run(async () => this.week.set(await this.api.week()));
+    this.touch();
   }
 
   protected touch(): void {

@@ -1,12 +1,14 @@
 package com.yanapaderina.rbot.schedule;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jayway.jsonpath.JsonPath;
 import com.yanapaderina.rbot.IntegrationStores;
 import jakarta.servlet.http.Cookie;
 import java.time.Clock;
@@ -21,7 +23,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, ADR-0003
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, RBOT-FEAT-016, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -30,8 +32,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class ScheduleIT extends IntegrationStores {
 
-  private static final String CONSULTATION = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0001";
-  private static final String THERAPY = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0002";
 
   @Autowired
   private MockMvc mvc;
@@ -44,17 +44,18 @@ class ScheduleIT extends IntegrationStores {
     Cookie[] session = login();
     LocalDate monday = clock.instant().atZone(ZoneId.of("Europe/Moscow")).toLocalDate().plusDays(2).with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
 
+    String consultation = type(session, "Разовая консультация", 90, 10, false);
     mvc.perform(get("/api/cabinet/schedule/settings").cookie(session))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.zone").value("Europe/Moscow"))
       .andExpect(jsonPath("$.complete").value(false));
-    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", CONSULTATION)
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", consultation)
         .param("from", monday.toString()).param("to", monday.toString()))
       .andExpect(status().isConflict())
       .andExpect(jsonPath("$.code").value("settings-incomplete"));
 
     write(put("/api/cabinet/schedule/settings"), session,
-      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":30,\"bufferMinutes\":10}")
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":30}")
       .andExpect(jsonPath("$.complete").value(true));
     write(put("/api/cabinet/schedule/week/1"), session,
       "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\"},{\"start\":\"11:00\",\"end\":\"13:00\"}]}", 400)
@@ -62,9 +63,9 @@ class ScheduleIT extends IntegrationStores {
     write(put("/api/cabinet/schedule/week/1"), session, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\"}]}", 400)
       .andExpect(jsonPath("$.code").value("interval-types-required"));
     write(put("/api/cabinet/schedule/week/1"), session,
-      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + CONSULTATION + "\"]}]}");
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + consultation + "\"]}]}");
 
-    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", CONSULTATION)
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", consultation)
         .param("from", monday.toString()).param("to", monday.toString()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(3));
@@ -72,46 +73,59 @@ class ScheduleIT extends IntegrationStores {
     write(post("/api/cabinet/schedule/days/closed"), session,
       "{\"from\":\"" + monday + "\",\"to\":\"" + monday.plusDays(1) + "\",\"note\":\"отпуск\"}")
       .andExpect(jsonPath("$.days").value(2));
-    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", CONSULTATION)
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", consultation)
         .param("from", monday.toString()).param("to", monday.toString()))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(0));
   }
 
   @Test
-  void sessionTypesAreEditedAndValidated() throws Exception {
+  void sessionTypesAreCreatedEditedAndDeleted() throws Exception {
     Cookie[] session = login();
+    String supervision = type(session, "Супервизия", 50, 15, true);
     mvc.perform(get("/api/cabinet/schedule/types").cookie(session))
       .andExpect(status().isOk())
-      .andExpect(jsonPath("$.length()").value(3))
-      .andExpect(jsonPath("$[0].firstVisit").value(true));
-    write(put("/api/cabinet/schedule/types/" + CONSULTATION), session,
-      "{\"title\":\"Разовая консультация\",\"durationMinutes\":90,\"price\":\"5000.00\",\"format\":\"IN_PERSON\",\"firstVisit\":true,\"active\":true}")
-      .andExpect(jsonPath("$.active").value(true))
+      .andExpect(jsonPath("$[?(@.id == '" + supervision + "')].bufferMinutes").value(15));
+    write(put("/api/cabinet/schedule/types/" + supervision), session,
+      "{\"title\":\"Супервизия\",\"durationMinutes\":50,\"bufferMinutes\":20,\"price\":\"5000.00\",\"format\":\"ONLINE\",\"active\":true}")
+      .andExpect(jsonPath("$.bufferMinutes").value(20))
       .andExpect(jsonPath("$.price").value(5000.00));
     write(post("/api/cabinet/schedule/types"), session,
-      "{\"title\":\"\",\"durationMinutes\":5,\"price\":\"-1\",\"format\":\"ONLINE\",\"firstVisit\":false,\"active\":true}", 400)
+      "{\"title\":\"\",\"durationMinutes\":5,\"bufferMinutes\":0,\"price\":\"-1\",\"format\":\"ONLINE\",\"active\":true}", 400)
       .andExpect(jsonPath("$.code").value("session-type-rejected"));
+    write(post("/api/cabinet/schedule/types"), session,
+      "{\"title\":\"Долгий перерыв\",\"durationMinutes\":60,\"bufferMinutes\":300,\"price\":\"1\",\"format\":\"ONLINE\",\"active\":true}", 400)
+      .andExpect(jsonPath("$.code").value("session-type-rejected"));
+
+    write(put("/api/cabinet/schedule/week/4"), session,
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\",\"types\":[\"" + supervision + "\"]}]}");
+    mvc.perform(delete("/api/cabinet/schedule/types/" + supervision).cookie(session).with(csrf())).andExpect(status().isNoContent());
+    mvc.perform(delete("/api/cabinet/schedule/types/" + supervision).cookie(session).with(csrf())).andExpect(status().isNotFound());
+    mvc.perform(get("/api/cabinet/schedule/types").cookie(session))
+      .andExpect(jsonPath("$[?(@.id == '" + supervision + "')]").isEmpty());
+    mvc.perform(get("/api/cabinet/schedule/week").cookie(session)).andExpect(jsonPath("$[3].intervals.length()").value(0));
   }
 
   @Test
   void intervalWithTypesServesOnlyThem() throws Exception {
     Cookie[] session = login();
+    String therapy = type(session, "Психотерапия очно", 60, 0, true);
+    String consultation = type(session, "Консультация", 90, 0, true);
     LocalDate wednesday = clock.instant().atZone(ZoneId.of("Europe/Moscow")).toLocalDate().plusDays(2)
       .with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY));
     write(put("/api/cabinet/schedule/settings"), session,
-      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":30,\"bufferMinutes\":0}");
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":30}");
     write(put("/api/cabinet/schedule/week/3"), session,
       "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\",\"types\":[\"6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0999\"]}]}", 400)
       .andExpect(jsonPath("$.code").value("interval-type-unknown"));
     write(put("/api/cabinet/schedule/week/3"), session,
-      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\",\"types\":[\"" + THERAPY + "\"]}]}")
-      .andExpect(jsonPath("$[0].types[0]").value(THERAPY));
-    mvc.perform(get("/api/cabinet/schedule/week").cookie(session)).andExpect(jsonPath("$[2].intervals[0].types[0]").value(THERAPY));
-    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", THERAPY)
+      "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"12:00\",\"types\":[\"" + therapy + "\"]}]}")
+      .andExpect(jsonPath("$[0].types[0]").value(therapy));
+    mvc.perform(get("/api/cabinet/schedule/week").cookie(session)).andExpect(jsonPath("$[2].intervals[0].types[0]").value(therapy));
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", therapy)
         .param("from", wednesday.toString()).param("to", wednesday.toString()))
       .andExpect(jsonPath("$.length()").value(3));
-    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", CONSULTATION)
+    mvc.perform(get("/api/cabinet/schedule/slots").cookie(session).param("type", consultation)
         .param("from", wednesday.toString()).param("to", wednesday.toString()))
       .andExpect(jsonPath("$.length()").value(0));
     write(put("/api/cabinet/schedule/week/3"), session, "{\"intervals\":[]}");
@@ -150,5 +164,12 @@ class ScheduleIT extends IntegrationStores {
         .content("{\"email\":\"psychologist@example.test\",\"password\":\"psychologist-password-1\"}"))
       .andExpect(status().isOk())
       .andReturn().getResponse().getCookies();
+  }
+
+  private String type(Cookie[] session, String title, int minutes, int buffer, boolean active) throws Exception {
+    String body = "{\"title\":\"" + title + "\",\"durationMinutes\":" + minutes + ",\"bufferMinutes\":" + buffer
+      + ",\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"active\":" + active + "}";
+    return JsonPath.read(mvc.perform(post("/api/cabinet/schedule/types").cookie(session).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content(body)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.id");
   }
 }

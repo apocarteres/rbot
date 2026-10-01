@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-// MVP-02, RBOT-FEAT-004, ADR-0003, REQ-CODE-DESIGN-003
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, ADR-0003, REQ-CODE-DESIGN-003
 public final class SlotCalendar {
 
   private final PracticeSettings settings;
@@ -28,10 +28,10 @@ public final class SlotCalendar {
     this.busy = List.copyOf(busy);
   }
 
-  public List<TimeRange> free(LocalDate from, LocalDate to, UUID type, Duration duration, Instant now) {
+  public List<TimeRange> free(LocalDate from, LocalDate to, UUID type, Duration duration, Duration buffer, Instant now) {
     Instant earliest = now.plus(settings.lead().orElseThrow());
     Instant latest = now.plus(Duration.ofDays(settings.horizonDays().orElseThrow()));
-    Duration occupied = duration.plus(settings.buffer().orElseThrow());
+    Duration occupied = duration.plus(buffer);
     Duration step = settings.step().orElseThrow();
     List<TimeRange> slots = new ArrayList<>();
     for (LocalDate day = from; !day.isAfter(to); day = day.plusDays(1)) {

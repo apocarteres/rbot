@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, ADR-0003
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=booking-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -50,7 +50,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 class ClientBookingIT extends IntegrationStores {
 
   private static final ZoneId MOSCOW = ZoneId.of("Europe/Moscow");
-  private static final String THERAPY = "6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0002";
+  private static String therapy;
+  private static String offline;
   private static final String PASSWORD = "client-password-1";
 
   @Autowired
@@ -76,13 +77,14 @@ class ClientBookingIT extends IntegrationStores {
       }
     }
     Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
+    if (therapy == null) {
+      therapy = type(psychologist, "Психотерапия очно", 60, 0, true);
+      offline = type(psychologist, "Психотерапия онлайн", 60, 0, false);
+    }
     settings(psychologist, 0);
     for (int weekday = 1; weekday <= 7; weekday++) {
-      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + THERAPY + "\"]}]}", 200);
+      write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
     }
-    write(put("/api/cabinet/schedule/types/" + THERAPY), psychologist,
-      "{\"title\":\"Психотерапия очно\",\"durationMinutes\":60,\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"firstVisit\":false,\"active\":true}",
-      200);
   }
 
   @Test
@@ -100,7 +102,7 @@ class ClientBookingIT extends IntegrationStores {
     slots(first, day).andExpect(jsonPath("$.length()").value(3));
 
     String start = at(day, "10:00").toString();
-    String booked = write(post("/api/client/sessions"), first, "{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + start + "\"}", 201)
+    String booked = write(post("/api/client/sessions"), first, "{\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}", 201)
       .andExpect(jsonPath("$.status").value("BOOKED"))
       .andExpect(jsonPath("$.title").value("Психотерапия очно"))
       .andExpect(jsonPath("$.price").value(4500.00))
@@ -110,7 +112,7 @@ class ClientBookingIT extends IntegrationStores {
     mvc.perform(get("/api/client/sessions").cookie(first)).andExpect(jsonPath("$.length()").value(1));
     mvc.perform(get("/api/client/sessions").cookie(second)).andExpect(jsonPath("$.length()").value(0));
     slots(second, day).andExpect(jsonPath("$.length()").value(2));
-    write(post("/api/client/sessions"), second, "{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + start + "\"}", 409)
+    write(post("/api/client/sessions"), second, "{\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}", 409)
       .andExpect(jsonPath("$.code").value("slot-taken"));
 
     write(post("/api/client/sessions/" + id + "/cancel"), second, "", 404).andExpect(jsonPath("$.code").value("session-missing"));
@@ -126,14 +128,14 @@ class ClientBookingIT extends IntegrationStores {
     Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
     LocalDate day = today().plusDays(2);
 
-    write(post("/api/client/sessions"), first, "{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + at(day, "10:15") + "\"}", 409)
+    write(post("/api/client/sessions"), first, "{\"typeId\":\"" + therapy + "\",\"start\":\"" + at(day, "10:15") + "\"}", 409)
       .andExpect(jsonPath("$.code").value("slot-taken"));
     write(post("/api/client/sessions"), first,
-      "{\"typeId\":\"6f0d4d1e-8c3b-4b52-9a51-2b1f2a0e0003\",\"start\":\"" + at(day, "10:00") + "\"}", 404)
+      "{\"typeId\":\"" + offline + "\",\"start\":\"" + at(day, "10:00") + "\"}", 404)
       .andExpect(jsonPath("$.code").value("session-type-unavailable"));
 
     String booked = write(post("/api/client/sessions"), first,
-        "{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + at(day, "11:00") + "\"}", 201)
+        "{\"typeId\":\"" + therapy + "\",\"start\":\"" + at(day, "11:00") + "\"}", 201)
       .andReturn().getResponse().getContentAsString();
     settings(psychologist, 10080);
     write(post("/api/client/sessions/" + JsonPath.read(booked, "$.id") + "/cancel"), first, "", 409)
@@ -154,7 +156,7 @@ class ClientBookingIT extends IntegrationStores {
       for (int i = 0; i < 10; i++) {
         attempts.add(() -> {
           try {
-            booking.book(account, UUID.fromString(THERAPY), start);
+            booking.book(account, UUID.fromString(therapy), start);
             return true;
           } catch (BookingRefused refused) {
             assertThat(refused.code()).isEqualTo(BookingRefused.SLOT_TAKEN);
@@ -176,7 +178,7 @@ class ClientBookingIT extends IntegrationStores {
   void clientReschedulesOwnSession() throws Exception {
     Cookie[] fourth = login("fourth@example.test", PASSWORD);
     LocalDate day = today().plusDays(4);
-    String booked = write(post("/api/client/sessions"), fourth, "{\"typeId\":\"" + THERAPY + "\",\"start\":\"" + at(day, "10:00") + "\"}", 201)
+    String booked = write(post("/api/client/sessions"), fourth, "{\"typeId\":\"" + therapy + "\",\"start\":\"" + at(day, "10:00") + "\"}", 201)
       .andReturn().getResponse().getContentAsString();
     String id = JsonPath.read(booked, "$.id");
 
@@ -211,11 +213,11 @@ class ClientBookingIT extends IntegrationStores {
 
   private void settings(Cookie[] psychologist, int leadMinutes) throws Exception {
     write(put("/api/cabinet/schedule/settings"), psychologist,
-      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":" + leadMinutes + ",\"horizonDays\":30,\"slotStepMinutes\":60,\"bufferMinutes\":0}", 200);
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":" + leadMinutes + ",\"horizonDays\":30,\"slotStepMinutes\":60}", 200);
   }
 
   private ResultActions slots(Cookie[] session, LocalDate day) throws Exception {
-    return mvc.perform(get("/api/client/slots").cookie(session).param("type", THERAPY).param("from", day.toString())
+    return mvc.perform(get("/api/client/slots").cookie(session).param("type", therapy).param("from", day.toString())
       .param("to", day.toString()));
   }
 
@@ -229,5 +231,12 @@ class ClientBookingIT extends IntegrationStores {
         .content("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}"))
       .andExpect(status().isOk())
       .andReturn().getResponse().getCookies();
+  }
+
+  private String type(Cookie[] session, String title, int minutes, int buffer, boolean active) throws Exception {
+    String body = "{\"title\":\"" + title + "\",\"durationMinutes\":" + minutes + ",\"bufferMinutes\":" + buffer
+      + ",\"price\":\"4500.00\",\"format\":\"IN_PERSON\",\"active\":" + active + "}";
+    return JsonPath.read(mvc.perform(post("/api/cabinet/schedule/types").cookie(session).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+        .content(body)).andExpect(status().isCreated()).andReturn().getResponse().getContentAsString(), "$.id");
   }
 }
