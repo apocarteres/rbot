@@ -4,7 +4,7 @@ import { withUnknownPath } from '@apocarteres/routing';
 import { LoginPage } from '../../../../shared/login-page';
 import { NotFound } from '../../../../shared/not-found';
 
-// MVP-01, RBOT-OPS-005, REQ-AUTH-015, REQ-DEPLOYMENT-018
+// MVP-01, MVP-02, RBOT-OPS-005, REQ-AUTH-015, REQ-DEPLOYMENT-018
 export const routes: Routes = withUnknownPath([
   {
     path: 'login',
@@ -17,6 +17,7 @@ export const routes: Routes = withUnknownPath([
     loadComponent: () => import('./shell/shell').then((m) => m.Shell),
     children: [
       { path: '', loadComponent: () => import('./home/home').then((m) => m.Home) },
+      { path: 'schedule', loadComponent: () => import('./schedule/schedule').then((m) => m.SchedulePage) },
       {
         path: 'accounts',
         canMatch: [withRole('ADMIN', '/')],

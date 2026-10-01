@@ -1,17 +1,24 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-// MVP-01
+// MVP-01, MVP-02, MVP-14
 @Component({
   selector: 'app-home',
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 24px; }
+    .ready { text-decoration: none; color: inherit; border-color: var(--accent); }
     .soon { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
   `,
   template: `
     <h1>Добро пожаловать</h1>
-    <p class="muted">Кабинет работает. Разделы ниже появятся по плану MVP.</p>
+    <p class="muted">Остальные разделы появятся по плану MVP.</p>
     <div class="grid">
+      <a class="card ready" routerLink="/schedule">
+        <h2>Расписание</h2>
+        <p class="muted">Рабочие дни и часы, отпуск, типы сессий, предпросмотр записи.</p>
+      </a>
       @for (section of sections; track section.title) {
         <section class="card">
           <span class="soon">Скоро</span>
@@ -24,7 +31,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 })
 export class Home {
   protected readonly sections = [
-    { title: 'Расписание', text: 'Рабочие дни и часы, отпуск, типы сессий.' },
+    { title: 'Анкеты', text: 'Анкеты новых клиентов.' },
     { title: 'Клиенты', text: 'Карточки клиентов и приглашения в бот.' },
     { title: 'Записи', text: 'Календарь сессий, переносы и отмены.' },
     { title: 'Правила отмены', text: 'Политика отмен и штрафы.' },

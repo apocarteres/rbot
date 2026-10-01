@@ -89,5 +89,8 @@
     },
     "restoreRecord": "/var/lib/rbot/backups/restored.json",
     "restoreEvery": "90d"
-  }
+  },
+  "clockAllowlist": [
+    "frontend/shared/system-clock.ts"
+  ]
 }

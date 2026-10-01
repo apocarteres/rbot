@@ -24,6 +24,7 @@ import { AuthSession } from '@apocarteres/auth';
       <span class="brand">Кабинет психолога</span>
       <nav aria-label="Разделы">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Главная</a>
+        <a routerLink="/schedule" routerLinkActive="active">Расписание</a>
         @if (session.has('ADMIN')) {
           <a routerLink="/accounts" routerLinkActive="active">Учётные записи</a>
         }
