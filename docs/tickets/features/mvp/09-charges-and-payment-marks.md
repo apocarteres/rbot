@@ -8,7 +8,7 @@ priority: P1
 release: unassigned
 depends-on: MVP-06
 related: ADR-0004
-questions: open
+questions: resolved
 ---
 
 # Штрафы и отметка оплаты психологом
@@ -43,7 +43,7 @@ questions: open
 
 ## Открытые вопросы
 
-**Вопросы:** открыты
+**Вопросы:** решены
 
 1. **Долг и новая запись** — [ADR-0004](../../../decisions/ADR-0004-cancellation-policy-and-charges.md), вопрос 2. От ответа зависит, отказывает ли `book` клиенту с открытым долгом.
-   Ответ: —
+   Ответ 2026-10-01: не может: `book` отказывает клиенту с неоплаченным штрафом (ADR-0004, вопрос 2).
