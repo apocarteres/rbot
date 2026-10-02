@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-018
 type: ticket
-status: in_progress
+status: done
 scope: backend, telegram, deployment
 authority: supporting
 priority: P1
