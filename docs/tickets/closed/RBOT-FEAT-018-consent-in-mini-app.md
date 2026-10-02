@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-018
 type: ticket
-status: in_progress
+status: done
 scope: backend, frontend, data, personal-data, telegram
 authority: supporting
 priority: P1
