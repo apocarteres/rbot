@@ -1,4 +1,4 @@
-# MVP-01, RUN-QA, RBOT-FEAT-014
+# MVP-01, RUN-QA, RBOT-FEAT-014, RBOT-FEAT-018
 name: rbot-qa
 
 x-backend-env: &backend-env
@@ -55,6 +55,9 @@ services:
       RBOT_ADDRESS: 0.0.0.0
       RBOT_PUBLIC_URL: http://qa.bot.yanapaderina.test:${RBOT_QA_PORT:-4206}
       RBOT_SECURE_COOKIE: "false"
+      RBOT_TELEGRAM_BOT_TOKEN: "100000:qa-stand-not-a-real-token"
+      RBOT_TELEGRAM_BOT_USERNAME: qa_booking_bot
+      RBOT_TELEGRAM_POLLING: "false"
       RBOT_INTERNAL_PROXIES: "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3}|172\\.(1[6-9]|2[0-9]|3[0-1])\\.\\d{1,3}\\.\\d{1,3}|127\\.0\\.0\\.1"
     healthcheck:
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"UP\"' <&3"]

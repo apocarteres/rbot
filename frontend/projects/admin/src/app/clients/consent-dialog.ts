@@ -12,7 +12,7 @@ import { ClientsApi, ConsentView } from './clients-api';
   imports: [FormsModule, ApcrAction, ApcrModal, ApcrModalBackdrop],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    .dialog { width: min(720px, 100%); }
+    .dialog { max-width: 720px; max-height: calc(100vh - 32px); overflow: auto; }
     textarea { width: 100%; min-height: 320px; resize: vertical; font: inherit; line-height: 1.45; }
     .small { font-size: 0.85rem; }
   `,

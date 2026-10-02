@@ -23,7 +23,7 @@ related: MVP-01
 
 ## Раскат
 
-`mise run deploy-qa` собирает сервер и клиент из рабочего дерева и поднимает `docker-compose.qa.yml`: PostgreSQL, Redis, миграции, сервер с профилем `qa`, nginx с обоими сайтами. Данные базы сохраняются в томе `rbot-qa_postgres` между раскатами. Чистая база: `DOCKER_CONTEXT=zavpn-mini docker compose -f docker-compose.qa.yml down -v`.
+`mise run deploy -- --env qa` собирает сервер и клиент из рабочего дерева и поднимает `docker-compose.qa.yml`: PostgreSQL, Redis, миграции, сервер с профилем `qa`, nginx с обоими сайтами. Данные базы сохраняются в томе `rbot-qa_postgres` между раскатами. Чистая база: `DOCKER_CONTEXT=zavpn-mini docker compose -f docker-compose.qa.yml down -v`.
 
 ## Тестовые учётные записи
 
@@ -35,3 +35,7 @@ related: MVP-01
 | `psychologist@yanapaderina.test` | `qa-psychologist-password` | психолог |
 
 Пароли лежат в публичном репозитории, поэтому профиль `qa` не включается вместе с `production`. На стенде нельзя держать реальные данные клиентов (152-ФЗ).
+
+## Mini App на стенде
+
+У стенда фиктивный токен бота `100000:qa-stand-not-a-real-token` (`docker-compose.qa.yml`), опрос Telegram выключен: стенд не ходит в Telegram. Mini App открывается в браузере с данными запуска, подписанными этим токеном, как это делает Telegram: `http://qa.bot.yanapaderina.test:4206/?invite=<токен из ссылки>#tgWebAppData=<initData>`. Ссылка-приглашение из кабинета ведёт на несуществующего бота `qa_booking_bot`: из неё нужен только токен после `start=`.
