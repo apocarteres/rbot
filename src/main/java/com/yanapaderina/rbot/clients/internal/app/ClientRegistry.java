@@ -6,6 +6,7 @@ import com.yanapaderina.rbot.clients.Clients;
 import com.yanapaderina.rbot.clients.ConsentRequest;
 import com.yanapaderina.rbot.clients.ConsentText;
 import com.yanapaderina.rbot.clients.Invitation;
+import com.yanapaderina.rbot.clients.PracticeNames;
 import com.yanapaderina.rbot.clients.internal.data.ClientDao;
 import com.yanapaderina.rbot.clients.internal.data.ConsentDao;
 import com.yanapaderina.rbot.clients.internal.data.InviteDao;
@@ -22,7 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0002, ADR-0005, REQ-DATA-ACCESS-003
+// MVP-03, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, ADR-0002, ADR-0005, REQ-DATA-ACCESS-003
 @Service
 class ClientRegistry implements Clients {
 
@@ -33,13 +34,15 @@ class ClientRegistry implements Clients {
   private final ClientDao clients;
   private final InviteDao invites;
   private final ConsentDao consents;
+  private final PracticeNames names;
   private final Clock clock;
   private final ConsentText draft;
 
-  ClientRegistry(ClientDao clients, InviteDao invites, ConsentDao consents, Clock clock) {
+  ClientRegistry(ClientDao clients, InviteDao invites, ConsentDao consents, PracticeNames names, Clock clock) {
     this.clients = clients;
     this.invites = invites;
     this.consents = consents;
+    this.names = names;
     this.clock = clock;
     this.draft = new ConsentText(1, draft(), Optional.empty());
   }
@@ -96,6 +99,7 @@ class ClientRegistry implements Clients {
   @Override
   @Transactional
   public Invitation invite(UUID practitioner, String label) {
+    named(practitioner);
     String trimmed = label == null ? "" : label.trim();
     if (trimmed.isEmpty() || trimmed.length() > 100) {
       throw new ClientRefused(ClientRefused.LABEL, "Подпись клиента — от 1 до 100 знаков");
@@ -113,6 +117,7 @@ class ClientRegistry implements Clients {
     if (card.accountId().isPresent()) {
       throw new ClientRefused(ClientRefused.NOT_INVITABLE, "Клиент входит по почте");
     }
+    named(practitioner);
     invites.withdraw(clientId);
     return issue(clientId);
   }
@@ -193,6 +198,12 @@ class ClientRegistry implements Clients {
     }
     if (consents.latestText(practitioner).orElseThrow().version() != consentVersion) {
       throw new ClientRefused(ClientRefused.CONSENT_OUTDATED, "Текст согласия обновился");
+    }
+  }
+
+  private void named(UUID practitioner) {
+    if (names.name(practitioner).isEmpty()) {
+      throw new ClientRefused(ClientRefused.NAMELESS, "Не заполнено имя для клиентов");
     }
   }
 

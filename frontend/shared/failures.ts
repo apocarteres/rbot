@@ -1,6 +1,6 @@
 import { ApiFailure } from '@apocarteres/http';
 
-// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-018, REQ-API-003
+// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-018, RBOT-FEAT-019, REQ-API-003
 export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'credentials-rejected': 'Неверная почта или пароль.',
   'account-blocked': 'Учётная запись заблокирована. Обратитесь к администратору.',
@@ -36,6 +36,7 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'client-label-rejected': 'Подпись клиента — от 1 до 100 знаков.',
   'client-card-missing': 'Клиент не найден.',
   'client-not-invitable': 'Клиент входит по почте: приглашение в Telegram ему не нужно.',
+  'practice-name-missing': 'Заполните «Имя для клиентов» в «Расписание» → «Правила записи»: его клиент видит в приглашении.',
   'invite-rejected': 'Приглашение не действует: оно уже использовано или устарело. Попросите у психолога новое.',
   'telegram-taken': 'Этот аккаунт Telegram уже привязан к другому клиенту психолога. Напишите психологу.',
   'consent-outdated': 'Психолог обновил текст согласия. Прочитайте новый текст.',

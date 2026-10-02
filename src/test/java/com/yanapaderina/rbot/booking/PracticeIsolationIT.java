@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// RBOT-FEAT-017, ADR-0003, ADR-0005
+// RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, ADR-0003, ADR-0005
 @SpringBootTest(properties = {
   "platform.auth.admin.email=first-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -62,10 +62,10 @@ class PracticeIsolationIT extends IntegrationStores {
     Cookie[] second = login("second-psychologist@example.test");
 
     String firstType = type(first, "Сессия первого");
-    String firstInvite = write(post("/api/cabinet/clients"), first, "{\"label\":\"Клиент первого\"}", 201)
-      .andReturn().getResponse().getContentAsString();
     write(put("/api/cabinet/schedule/settings"), first,
       "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"displayName\":\"Первый психолог\"}", 200);
+    String firstInvite = write(post("/api/cabinet/clients"), first, "{\"label\":\"Клиент первого\"}", 201)
+      .andReturn().getResponse().getContentAsString();
 
     mvc.perform(get("/api/cabinet/schedule/types").cookie(second)).andExpect(jsonPath("$.length()").value(0));
     mvc.perform(get("/api/cabinet/clients").cookie(second)).andExpect(jsonPath("$.length()").value(0));
@@ -80,6 +80,10 @@ class PracticeIsolationIT extends IntegrationStores {
     String firstClient = JsonPath.read(firstInvite, "$.clientId");
     write(post("/api/cabinet/clients/" + firstClient + "/invite"), second, "", 404);
 
+    write(post("/api/cabinet/clients"), second, "{\"label\":\"Клиент второго\"}", 409)
+      .andExpect(jsonPath("$.code").value("practice-name-missing"));
+    write(put("/api/cabinet/schedule/settings"), second,
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"displayName\":\"Второй психолог\"}", 200);
     String secondInvite = write(post("/api/cabinet/clients"), second, "{\"label\":\"Клиент второго\"}", 201)
       .andReturn().getResponse().getContentAsString();
     long user = 9001;
@@ -89,7 +93,7 @@ class PracticeIsolationIT extends IntegrationStores {
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(2))
       .andExpect(jsonPath("$[?(@.name == 'Первый психолог')]").exists())
-      .andExpect(jsonPath("$[?(@.name == 'Психолог')]").exists());
+      .andExpect(jsonPath("$[?(@.name == 'Второй психолог')]").exists());
     mvc.perform(get("/api/cabinet/clients").cookie(first))
       .andExpect(jsonPath("$.length()").value(1))
       .andExpect(jsonPath("$[0].name").value("Клиент первого"));

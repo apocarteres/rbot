@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
+import { ScheduleApi } from '../schedule/schedule-api';
 import { ClientsApi, ClientView, ConsentView } from './clients-api';
 import { ConsentDialog } from './consent-dialog';
 import { InviteDialog } from './invite-dialog';
@@ -10,10 +12,10 @@ const DATE = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' }
 
 type Inviting = { readonly client: ClientView | null } | null;
 
-// MVP-03, RBOT-FEAT-009, RBOT-FEAT-018, ADR-0002, ADR-0005
+// MVP-03, RBOT-FEAT-009, RBOT-FEAT-018, RBOT-FEAT-019, ADR-0002, ADR-0005
 @Component({
   selector: 'app-clients',
-  imports: [InviteDialog, ConsentDialog, FailureDialog],
+  imports: [RouterLink, InviteDialog, ConsentDialog, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 16px; }
@@ -34,8 +36,11 @@ type Inviting = { readonly client: ClientView | null } | null;
   template: `
     <div class="head">
       <h1>Клиенты</h1>
-      <button type="button" (click)="inviting.set({ client: null })">Пригласить клиента</button>
+      <button type="button" [disabled]="nameless()" (click)="inviting.set({ client: null })">Пригласить клиента</button>
     </div>
+    @if (nameless()) {
+      <p class="warning" role="status">Чтобы приглашать клиентов, заполните <a routerLink="/schedule" [queryParams]="{ tab: 'settings' }">«Имя для клиентов»</a> в правилах записи: его клиент видит в приглашении и в приложении.</p>
+    }
     <section class="card">
       @for (one of clients(); track one.id) {
         <div class="row">
@@ -46,7 +51,7 @@ type Inviting = { readonly client: ClientView | null } | null;
             @default { <span class="tag wait">{{ pending(one) }}</span> }
           }
           @if (one.channel !== 'EMAIL') {
-            <button type="button" class="quiet" (click)="inviting.set({ client: one })">Новая ссылка</button>
+            <button type="button" class="quiet" [disabled]="nameless()" (click)="inviting.set({ client: one })">Новая ссылка</button>
           }
         </div>
       } @empty {
@@ -76,6 +81,7 @@ type Inviting = { readonly client: ClientView | null } | null;
 })
 export class ClientsPage implements OnInit {
   private readonly api = inject(ClientsApi);
+  private readonly schedule = inject(ScheduleApi);
   private readonly clock = inject(AppClock);
 
   protected readonly attempt = new Attempt();
@@ -84,6 +90,7 @@ export class ClientsPage implements OnInit {
   protected readonly inviting = signal<Inviting>(null);
   protected readonly consent = signal<ConsentView | null>(null);
   protected readonly editing = signal(false);
+  protected readonly nameless = signal(false);
 
   ngOnInit(): void {
     void this.load();
@@ -115,7 +122,8 @@ export class ClientsPage implements OnInit {
 
   private async load(): Promise<void> {
     await this.attempt.run(async () => {
-      const [clients, consent] = await Promise.all([this.api.list(), this.api.consent()]);
+      const [clients, consent, settings] = await Promise.all([this.api.list(), this.api.consent(), this.schedule.settings()]);
+      this.nameless.set(!settings.displayName?.trim());
       this.clients.set(clients);
       this.consent.set(consent);
       this.loaded.set(true);

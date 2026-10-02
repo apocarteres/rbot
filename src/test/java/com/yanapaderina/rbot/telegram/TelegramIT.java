@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-OPS-018, ADR-0002, ADR-0005
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-OPS-018, ADR-0002, ADR-0005
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -87,6 +87,7 @@ class TelegramIT extends IntegrationStores {
   @Test
   void invitedClientLinksTelegramAndBooksInMiniApp() throws Exception {
     Cookie[] psychologist = psychologist();
+    named(psychologist);
     String invite = write(post("/api/cabinet/clients"), psychologist, "{\"label\":\"Анна П.\"}", 201)
       .andReturn().getResponse().getContentAsString();
     String link = JsonPath.read(invite, "$.link");
@@ -109,7 +110,7 @@ class TelegramIT extends IntegrationStores {
     String tokenBody = "{\"token\":\"" + token + "\"}";
     miniApp(post("/api/miniapp/invitation"), miniApp, tokenBody, 200)
       .andExpect(jsonPath("$.version").value(1))
-      .andExpect(jsonPath("$.practiceName").value("Психолог"))
+      .andExpect(jsonPath("$.practiceName").value("Тестовый психолог"))
       .andExpect(jsonPath("$.text").value(org.hamcrest.Matchers.startsWith("Я соглашаюсь")));
     miniApp(post("/api/miniapp/invitation/accept"), miniApp, "{\"token\":\"" + token + "\",\"version\":2}", 409)
       .andExpect(jsonPath("$.code").value("consent-outdated"));
@@ -122,7 +123,7 @@ class TelegramIT extends IntegrationStores {
       anyList());
 
     write(put("/api/cabinet/schedule/settings"), psychologist,
-      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60}", 200);
+      "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"displayName\":\"Тестовый психолог\"}", 200);
     String therapy = type(psychologist, "Психотерапия очно", 60, 0, true);
     String practice = JsonPath.read(mvc.perform(get("/api/miniapp/practices").header("X-Telegram-Init-Data", miniApp))
       .andExpect(jsonPath("$.length()").value(1)).andReturn().getResponse().getContentAsString(), "$[0].id");
@@ -168,7 +169,9 @@ class TelegramIT extends IntegrationStores {
 
   @Test
   void legacyConsentButtonOpensApp() throws Exception {
-    String invite = write(post("/api/cabinet/clients"), psychologist(), "{\"label\":\"Борис К.\"}", 201)
+    Cookie[] psychologist = psychologist();
+    named(psychologist);
+    String invite = write(post("/api/cabinet/clients"), psychologist, "{\"label\":\"Борис К.\"}", 201)
       .andReturn().getResponse().getContentAsString();
     String link = JsonPath.read(invite, "$.link");
     String token = link.substring(link.indexOf("start=") + 6);
@@ -225,6 +228,10 @@ class TelegramIT extends IntegrationStores {
     mvc.perform(post("/api/tg/webhook").header("X-Telegram-Bot-Api-Secret-Token", SECRET).contentType(MediaType.APPLICATION_JSON)
         .content(body))
       .andExpect(status().isOk());
+  }
+
+  private void named(Cookie[] psychologist) throws Exception {
+    write(put("/api/cabinet/schedule/settings"), psychologist, "{\"zone\":\"Europe/Moscow\",\"leadMinutes\":0,\"horizonDays\":30,\"slotStepMinutes\":60,\"displayName\":\"Тестовый психолог\"}", 200);
   }
 
   private ResultActions miniApp(MockHttpServletRequestBuilder request, String initData, String body, int expected) throws Exception {
