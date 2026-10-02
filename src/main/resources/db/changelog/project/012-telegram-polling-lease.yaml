@@ -1,0 +1,11 @@
+# RBOT-OPS-018, REQ-DEPLOYMENT-026, REQ-DEPLOYMENT-028
+databaseChangeLog:
+  - changeSet:
+      id: rbot:012-telegram-polling-lease
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/012-telegram-polling-lease.sql
+            relativeToChangelogFile: true
+            splitStatements: true

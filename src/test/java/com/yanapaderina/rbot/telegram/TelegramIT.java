@@ -19,8 +19,10 @@ import com.jayway.jsonpath.JsonPath;
 import com.yanapaderina.rbot.IntegrationStores;
 import com.yanapaderina.rbot.telegram.internal.app.BotGateway;
 import com.yanapaderina.rbot.telegram.internal.app.InitDataSigning;
+import com.yanapaderina.rbot.telegram.internal.data.PollingLeaseDao;
 import jakarta.servlet.http.Cookie;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -38,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0002, ADR-0005
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-OPS-018, ADR-0002, ADR-0005
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -65,6 +67,9 @@ class TelegramIT extends IntegrationStores {
 
   @Autowired
   private JdbcClient jdbc;
+
+  @Autowired
+  private PollingLeaseDao lease;
 
   @MockitoBean
   private BotGateway bot;
@@ -185,6 +190,20 @@ class TelegramIT extends IntegrationStores {
     webhook(start(7002, ""));
     verify(bot).sendMessage(eq(7002L), org.mockito.ArgumentMatchers.startsWith("Здравствуйте! Запись к психологу открывается по приглашению"),
       anyList());
+  }
+
+  @Test
+  void laterInstanceTakesPollingLease() {
+    Instant now = clock.instant();
+    Instant stale = now.minusSeconds(75);
+    jdbc.sql("DELETE FROM telegram_polling_lease").update();
+    assertThat(lease.claim("old", now.minusSeconds(3600), now, stale)).isTrue();
+    assertThat(lease.claim("new", now.minusSeconds(60), now, stale)).isTrue();
+    assertThat(lease.claim("old", now.minusSeconds(3600), now.plusSeconds(1), stale)).isFalse();
+    assertThat(lease.claim("new", now.minusSeconds(60), now.plusSeconds(1), stale)).isTrue();
+    assertThat(lease.claim("old", now.minusSeconds(3600), now.plusSeconds(200), now.plusSeconds(125))).isTrue();
+    assertThat(lease.release("old")).isTrue();
+    assertThat(lease.claim("other", now.minusSeconds(7200), now.plusSeconds(201), now.plusSeconds(126))).isTrue();
   }
 
   @SuppressWarnings("unchecked")
