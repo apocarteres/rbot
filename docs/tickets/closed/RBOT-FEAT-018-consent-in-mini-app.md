@@ -5,7 +5,7 @@ status: done
 scope: backend, frontend, data, personal-data, telegram
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-12
 related: MVP-03, ADR-0002, ADR-0005, RBOT-FEAT-009, RBOT-FEAT-017
 ---
 
