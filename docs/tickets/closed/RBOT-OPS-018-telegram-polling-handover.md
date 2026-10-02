@@ -5,7 +5,7 @@ status: done
 scope: backend, telegram, deployment
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-13
 related: RBOT-FEAT-010, RBOT-FEAT-018
 ---
 
