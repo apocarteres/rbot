@@ -6,7 +6,11 @@ const KEY = 'rbot.telegram.init-data';
 const HEADER = 'X-Telegram-Init-Data';
 
 function launchData(): string {
-  const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('tgWebAppData') ?? '';
+  const launched = new URLSearchParams(location.hash.replace(/^#/, '')).get('tgWebAppData') ?? '';
+  const fromHash = launched.includes('hash=') ? launched : '';
+  if (launched) {
+    history.replaceState(history.state, '', location.pathname + location.search);
+  }
   try {
     if (fromHash) {
       sessionStorage.setItem(KEY, fromHash);
@@ -25,7 +29,7 @@ const INVITE_KEY = 'rbot.telegram.invite';
 function launchInvite(): string {
   const fromQuery = new URLSearchParams(location.search).get('invite') ?? '';
   if (fromQuery) {
-    history.replaceState(history.state, '', location.pathname + location.hash);
+    history.replaceState(history.state, '', location.pathname);
   }
   try {
     if (fromQuery) {

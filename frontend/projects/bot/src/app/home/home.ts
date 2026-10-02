@@ -39,7 +39,13 @@ import { CancelDialog } from './cancel-dialog';
           <span class="muted small">Без согласия запись к этому психологу недоступна. Если не согласны, просто закройте приложение.</span>
         </div>
       </section>
-    } @else if (client()) {
+    } @else if (stranger()) {
+      <section class="card" aria-labelledby="welcome-title">
+        <h2 id="welcome-title">Здравствуйте!</h2>
+        <p>Здесь клиенты записываются к психологу, переносят и отменяют сессии.</p>
+        <p class="muted">Запись открывается по приглашению. Попросите у психолога ссылку-приглашение и откройте её в Telegram.</p>
+      </section>
+    } @else if (client() && loaded()) {
       <section class="card">
         <h2>Ваши записи</h2>
         @for (one of sessions(); track one.id) {
@@ -54,16 +60,14 @@ import { CancelDialog } from './cancel-dialog';
             </span>
           </div>
         } @empty {
-          @if (loaded()) {
-            <p class="muted">Записей пока нет.</p>
-          }
+          <p class="muted">Записей пока нет.</p>
         }
         @if (sessions().length > 0) {
           <p class="muted small">{{ note() }}</p>
         }
       </section>
       <a class="button book" routerLink="/book">Записаться</a>
-    } @else {
+    } @else if (!client()) {
       <section class="card">
         <p>Это приложение для клиентов. Кабинет психолога открывается на admin.yanapaderina.com.</p>
       </section>
@@ -92,6 +96,7 @@ export class Home implements OnInit {
   protected readonly loaded = signal(false);
   protected readonly cancelling = signal<ClientSession | null>(null);
   protected readonly consent = signal<Consent | null>(null);
+  protected readonly stranger = signal(false);
   private invited = '';
   protected readonly telegram = insideTelegram();
   protected readonly client = computed(() => this.telegram || (this.auth.account()?.roles.includes('CLIENT') ?? false));
@@ -151,7 +156,11 @@ export class Home implements OnInit {
       if (this.telegram && (await this.consentDue())) {
         return;
       }
-      const [practices, sessions] = await Promise.all([this.api.practices(), this.api.sessions()]);
+      const [practices, sessions] = await Promise.all([this.api.practices(), this.api.sessions()]).catch((failure: unknown) => {
+        this.stranger.set(failure instanceof ApiFailure && failure.problem.code === 'client-not-linked');
+        throw failure;
+      });
+      this.stranger.set(false);
       this.many.set(practices.length > 1);
       if (practices.length > 0) {
         this.zone.set((await this.api.offer(practices[0].id)).zone ?? DEFAULT_ZONE);
