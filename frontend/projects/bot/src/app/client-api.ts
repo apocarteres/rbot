@@ -44,11 +44,34 @@ export interface ClientSession {
   readonly price: number;
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017
+export interface Consent {
+  readonly practice: string;
+  readonly practiceName: string;
+  readonly version: number;
+  readonly text: string;
+}
+
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018
 @Injectable({ providedIn: 'root' })
 export class ClientApi {
   private readonly http = inject(HttpClient);
   private readonly base = insideTelegram() ? '/api/miniapp' : '/api/client';
+
+  invitation(token: string): Promise<Consent> {
+    return firstValueFrom(this.http.post<Consent>(`${this.base}/invitation`, { token }));
+  }
+
+  acceptInvitation(token: string, version: number): Promise<unknown> {
+    return firstValueFrom(this.http.post(`${this.base}/invitation/accept`, { token, version }));
+  }
+
+  consents(): Promise<readonly Consent[]> {
+    return firstValueFrom(this.http.get<readonly Consent[]>(`${this.base}/consents`));
+  }
+
+  consent(practice: string, version: number): Promise<unknown> {
+    return firstValueFrom(this.http.post(`${this.base}/consents`, { practice, version }));
+  }
 
   practices(): Promise<readonly Practice[]> {
     return firstValueFrom(this.http.get<readonly Practice[]>(`${this.base}/practices`));

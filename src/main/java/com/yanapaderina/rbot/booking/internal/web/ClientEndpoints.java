@@ -3,13 +3,14 @@ package com.yanapaderina.rbot.booking.internal.web;
 import com.yanapaderina.rbot.booking.internal.app.BookingRefused;
 import com.yanapaderina.rbot.booking.internal.app.ClientBooking;
 import com.yanapaderina.rbot.booking.internal.app.ClientSession;
+import com.yanapaderina.rbot.clients.ConsentRequest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, ADR-0003
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0003
 @Component
 class ClientEndpoints {
 
@@ -52,6 +53,12 @@ class ClientEndpoints {
 
   ClientViews.Session cancel(ClientScope scope, UUID id) {
     return named(booking.cancel(scope.clients(), id));
+  }
+
+  List<ClientViews.Consent> consents(List<ConsentRequest> requests) {
+    Map<UUID, String> names = booking.names(requests.stream().map(ConsentRequest::practitioner).distinct().toList());
+    return requests.stream().map(one -> new ClientViews.Consent(one.practitioner(), name(names, one.practitioner()), one.text().version(),
+      one.text().body())).toList();
   }
 
   private ClientViews.Session named(ClientSession session) {

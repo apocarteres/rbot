@@ -1,0 +1,11 @@
+# RBOT-FEAT-018, MVP-03, ADR-0005, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:011-consent-texts
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/011-consent-texts.sql
+            relativeToChangelogFile: true
+            splitStatements: true

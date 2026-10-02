@@ -2,17 +2,18 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
-import { ClientsApi, ClientView } from './clients-api';
+import { ClientsApi, ClientView, ConsentView } from './clients-api';
+import { ConsentDialog } from './consent-dialog';
 import { InviteDialog } from './invite-dialog';
 
 const DATE = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' });
 
 type Inviting = { readonly client: ClientView | null } | null;
 
-// MVP-03, RBOT-FEAT-009, ADR-0002
+// MVP-03, RBOT-FEAT-009, RBOT-FEAT-018, ADR-0002, ADR-0005
 @Component({
   selector: 'app-clients',
-  imports: [InviteDialog, FailureDialog],
+  imports: [InviteDialog, ConsentDialog, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 16px; }
@@ -24,6 +25,11 @@ type Inviting = { readonly client: ClientView | null } | null;
     .on { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
     .wait { background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger); }
     .mail { color: var(--muted); font-size: 0.85rem; }
+    .consent { margin-top: 16px; }
+    .consent-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+    .consent-head h2 { margin: 0; margin-right: auto; }
+    .consent-text { white-space: pre-line; overflow-wrap: anywhere; line-height: 1.45; max-height: 240px; overflow: auto; }
+    .small { font-size: 0.85rem; }
   `,
   template: `
     <div class="head">
@@ -47,6 +53,19 @@ type Inviting = { readonly client: ClientView | null } | null;
         @if (loaded()) { <p class="muted">Клиентов пока нет. Пригласите первого — он получит ссылку на бота в Telegram.</p> }
       }
     </section>
+    @if (consent(); as text) {
+      <section class="card consent" aria-labelledby="consent-title">
+        <div class="consent-head">
+          <h2 id="consent-title">Согласие на обработку персональных данных</h2>
+          <button type="button" class="quiet" (click)="editing.set(true)">Изменить</button>
+        </div>
+        <p class="muted small">{{ consentNote(text) }}</p>
+        <p class="consent-text">{{ text.body }}</p>
+      </section>
+    }
+    @if (editing() && consent(); as text) {
+      <app-consent-dialog [consent]="text" (closed)="editing.set(false)" (saved)="consentSaved($event)" />
+    }
     @if (inviting(); as open) {
       <app-invite-dialog [client]="open.client" (closed)="inviting.set(null)" (done)="changed()" />
     }
@@ -63,6 +82,8 @@ export class ClientsPage implements OnInit {
   protected readonly clients = signal<readonly ClientView[]>([]);
   protected readonly loaded = signal(false);
   protected readonly inviting = signal<Inviting>(null);
+  protected readonly consent = signal<ConsentView | null>(null);
+  protected readonly editing = signal(false);
 
   ngOnInit(): void {
     void this.load();
@@ -75,6 +96,18 @@ export class ClientsPage implements OnInit {
     return `приглашён · до ${DATE.format(Date.parse(client.inviteExpiresAt))}`;
   }
 
+  protected consentNote(consent: ConsentView): string {
+    if (consent.version === null || consent.savedAt === null) {
+      return 'Черновик: клиент прочтёт его в приложении, когда примет приглашение. Замените его текстом, согласованным с юристом.';
+    }
+    return `Версия ${consent.version} от ${DATE.format(Date.parse(consent.savedAt))}. Клиент читает этот текст в приложении, когда принимает приглашение.`;
+  }
+
+  protected consentSaved(consent: ConsentView): void {
+    this.consent.set(consent);
+    this.editing.set(false);
+  }
+
   protected async changed(): Promise<void> {
     this.inviting.set(null);
     await this.load();
@@ -82,7 +115,9 @@ export class ClientsPage implements OnInit {
 
   private async load(): Promise<void> {
     await this.attempt.run(async () => {
-      this.clients.set(await this.api.list());
+      const [clients, consent] = await Promise.all([this.api.list(), this.api.consent()]);
+      this.clients.set(clients);
+      this.consent.set(consent);
       this.loaded.set(true);
     });
   }

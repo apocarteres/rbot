@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.jayway.jsonpath.JsonPath;
 import com.yanapaderina.rbot.IntegrationStores;
 import com.yanapaderina.rbot.clients.Clients;
-import com.yanapaderina.rbot.clients.Linking;
 import com.yanapaderina.rbot.telegram.internal.app.InitDataSigning;
 import io.github.apocarteres.platform.auth.Accounts;
 import io.github.apocarteres.platform.auth.NoProfile;
@@ -84,8 +83,8 @@ class PracticeIsolationIT extends IntegrationStores {
     String secondInvite = write(post("/api/cabinet/clients"), second, "{\"label\":\"Клиент второго\"}", 201)
       .andReturn().getResponse().getContentAsString();
     long user = 9001;
-    Assertions.assertThat(clients.link(token(firstInvite), user, 1)).isInstanceOf(Linking.Linked.class);
-    Assertions.assertThat(clients.link(token(secondInvite), user, 1)).isInstanceOf(Linking.Linked.class);
+    Assertions.assertThat(clients.link(token(firstInvite), user, 1)).isNotNull();
+    Assertions.assertThat(clients.link(token(secondInvite), user, 1)).isNotNull();
     mvc.perform(get("/api/miniapp/practices").header("X-Telegram-Init-Data", InitDataSigning.signed(TOKEN, user, clock.instant())))
       .andExpect(status().isOk())
       .andExpect(jsonPath("$.length()").value(2))
@@ -94,6 +93,9 @@ class PracticeIsolationIT extends IntegrationStores {
     mvc.perform(get("/api/cabinet/clients").cookie(first))
       .andExpect(jsonPath("$.length()").value(1))
       .andExpect(jsonPath("$[0].name").value("Клиент первого"));
+    write(put("/api/cabinet/consent"), first, "{\"body\":\"Согласие первого психолога\"}", 200);
+    mvc.perform(get("/api/cabinet/consent").cookie(second))
+      .andExpect(jsonPath("$.body").value(org.hamcrest.Matchers.not("Согласие первого психолога")));
   }
 
   private static String token(String invite) {

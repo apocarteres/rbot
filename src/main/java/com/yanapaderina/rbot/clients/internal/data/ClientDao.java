@@ -24,12 +24,10 @@ public class ClientDao {
 
   private final JdbcClient jdbc;
   private final SqlCatalog sql;
-  private final SqlCatalog consents;
 
   ClientDao(JdbcClient jdbc, SqlStatements statements) {
     this.jdbc = jdbc;
     this.sql = statements.catalog("client");
-    this.consents = statements.catalog("consent");
   }
 
   public Optional<UUID> findByAccount(UUID practitioner, UUID accountId) {
@@ -78,10 +76,5 @@ public class ClientDao {
 
   public boolean linkTelegram(UUID id, long telegramUserId) {
     return jdbc.sql(sql.get("link-telegram")).param("id", id).param("telegramUserId", telegramUserId).update() == 1;
-  }
-
-  public boolean insertConsent(UUID id, UUID clientId, int version, String channel, Instant at) {
-    return jdbc.sql(consents.get("insert")).param("id", id).param("clientId", clientId).param("version", version)
-      .param("channel", channel).param("acceptedAt", StoredInstant.offsetOf(at)).update() == 1;
   }
 }

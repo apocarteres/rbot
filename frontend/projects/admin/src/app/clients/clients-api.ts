@@ -18,7 +18,13 @@ export interface InviteView {
   readonly expiresAt: string;
 }
 
-// MVP-03, RBOT-FEAT-009
+export interface ConsentView {
+  readonly version: number | null;
+  readonly body: string;
+  readonly savedAt: string | null;
+}
+
+// MVP-03, RBOT-FEAT-009, RBOT-FEAT-018
 @Injectable({ providedIn: 'root' })
 export class ClientsApi {
   private readonly http = inject(HttpClient);
@@ -34,5 +40,13 @@ export class ClientsApi {
 
   reinvite(id: string): Promise<InviteView> {
     return firstValueFrom(this.http.post<InviteView>(`${this.base}/${id}/invite`, {}));
+  }
+
+  consent(): Promise<ConsentView> {
+    return firstValueFrom(this.http.get<ConsentView>('/api/cabinet/consent'));
+  }
+
+  saveConsent(body: string): Promise<ConsentView> {
+    return firstValueFrom(this.http.put<ConsentView>('/api/cabinet/consent', { body }));
   }
 }

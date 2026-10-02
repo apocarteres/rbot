@@ -7,13 +7,14 @@ import com.yanapaderina.rbot.schedule.SessionFormat;
 import com.yanapaderina.rbot.schedule.SessionType;
 import com.yanapaderina.rbot.schedule.TimeRange;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, REQ-CODE-DESIGN-005
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, REQ-CODE-DESIGN-005
 final class ClientViews {
 
   private ClientViews() {
@@ -60,5 +61,17 @@ final class ClientViews {
   }
 
   record MoveRequest(@NotNull Instant start) {
+  }
+
+  record Consent(UUID practice, String practiceName, int version, String text) {
+  }
+
+  record InviteRequest(@NotNull @Size(max = 64) String token) {
+  }
+
+  record AcceptInvite(@NotNull @Size(max = 64) String token, int version) {
+  }
+
+  record AcceptConsent(@NotNull UUID practice, int version) {
   }
 }

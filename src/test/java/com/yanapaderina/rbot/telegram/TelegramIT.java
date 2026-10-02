@@ -38,7 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0002
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0002, ADR-0005
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -46,6 +46,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
   "rbot.telegram.bot-token=" + TelegramIT.TOKEN,
   "rbot.telegram.bot-username=test_booking_bot",
   "rbot.telegram.webhook-secret=" + TelegramIT.SECRET,
+  "rbot.telegram.app-url=https://bot.example.test/",
   "rbot.telegram.polling=false"
 })
 @AutoConfigureMockMvc
@@ -98,11 +99,18 @@ class TelegramIT extends IntegrationStores {
     webhook(start(user, token));
     ArgumentCaptor<java.util.List<BotGateway.Button>> buttons = buttons();
     verify(bot).sendMessage(eq(user), anyString(), buttons.capture());
-    assertThat(buttons.getValue().getFirst().callbackData()).isEqualTo("c:" + token);
+    assertThat(buttons.getValue().getFirst().webAppUrl()).isEqualTo("https://bot.example.test/?invite=" + token);
 
-    clearInvocations(bot);
-    webhook(consent(user, token));
-    verify(bot).sendMessage(eq(user), eq("Готово. Записывайтесь, переносите и отменяйте сессии в приложении."), anyList());
+    String tokenBody = "{\"token\":\"" + token + "\"}";
+    miniApp(post("/api/miniapp/invitation"), miniApp, tokenBody, 200)
+      .andExpect(jsonPath("$.version").value(1))
+      .andExpect(jsonPath("$.practiceName").value("Психолог"))
+      .andExpect(jsonPath("$.text").value(org.hamcrest.Matchers.startsWith("Я соглашаюсь")));
+    miniApp(post("/api/miniapp/invitation/accept"), miniApp, "{\"token\":\"" + token + "\",\"version\":2}", 409)
+      .andExpect(jsonPath("$.code").value("consent-outdated"));
+    miniApp(post("/api/miniapp/invitation/accept"), miniApp, "{\"token\":\"" + token + "\",\"version\":1}", 204);
+    miniApp(post("/api/miniapp/invitation/accept"), miniApp, "{\"token\":\"" + token + "\",\"version\":1}", 404)
+      .andExpect(jsonPath("$.code").value("invite-rejected"));
     clearInvocations(bot);
     webhook(consent(user, token));
     verify(bot).sendMessage(eq(user), eq("Ссылка-приглашение не действует: она уже использована или устарела. Попросите у психолога новую."),
@@ -131,6 +139,45 @@ class TelegramIT extends IntegrationStores {
     clearInvocations(bot);
     write(post("/api/cabinet/sessions/" + JsonPath.read(sessions, "$[0].id") + "/cancel"), psychologist, "", 200);
     verify(bot).sendMessage(eq(user), org.mockito.ArgumentMatchers.startsWith("Психолог отменил вашу сессию «Психотерапия очно»"), anyList());
+
+    mvc.perform(get("/api/cabinet/consent").cookie(psychologist))
+      .andExpect(jsonPath("$.version").value(1))
+      .andExpect(jsonPath("$.savedAt").isNotEmpty());
+    write(put("/api/cabinet/consent"), psychologist, "{\"body\":\"  \"}", 400)
+      .andExpect(jsonPath("$.code").value("consent-text-rejected"));
+    write(put("/api/cabinet/consent"), psychologist, "{\"body\":\"Новый текст согласия\"}", 200)
+      .andExpect(jsonPath("$.version").value(2));
+    mvc.perform(get("/api/miniapp/practices").header("X-Telegram-Init-Data", miniApp))
+      .andExpect(jsonPath("$.code").value("client-not-linked"));
+    mvc.perform(get("/api/miniapp/consents").header("X-Telegram-Init-Data", miniApp))
+      .andExpect(jsonPath("$.length()").value(1))
+      .andExpect(jsonPath("$[0].version").value(2))
+      .andExpect(jsonPath("$[0].text").value("Новый текст согласия"));
+    miniApp(post("/api/miniapp/consents"), miniApp, "{\"practice\":\"" + practice + "\",\"version\":1}", 409);
+    miniApp(post("/api/miniapp/consents"), miniApp, "{\"practice\":\"" + practice + "\",\"version\":2}", 204);
+    mvc.perform(get("/api/miniapp/consents").header("X-Telegram-Init-Data", miniApp))
+      .andExpect(jsonPath("$.length()").value(0));
+    mvc.perform(get("/api/miniapp/practices").header("X-Telegram-Init-Data", miniApp))
+      .andExpect(jsonPath("$.length()").value(1));
+  }
+
+  @Test
+  void legacyConsentButtonOpensApp() throws Exception {
+    String invite = write(post("/api/cabinet/clients"), psychologist(), "{\"label\":\"Борис К.\"}", 201)
+      .andReturn().getResponse().getContentAsString();
+    String link = JsonPath.read(invite, "$.link");
+    String token = link.substring(link.indexOf("start=") + 6);
+    webhook(consent(7004, token));
+    ArgumentCaptor<java.util.List<BotGateway.Button>> buttons = buttons();
+    verify(bot).sendMessage(eq(7004L), anyString(), buttons.capture());
+    assertThat(buttons.getValue().getFirst().webAppUrl()).isEqualTo("https://bot.example.test/?invite=" + token);
+    assertThat(jdbc.sql("SELECT count(*) FROM client WHERE telegram_user_id = 7004").query(Long.class).single()).isZero();
+  }
+
+  @Test
+  void spentInviteIsNotOffered() throws Exception {
+    webhook(start(7003, "unknown-token"));
+    verify(bot).sendMessage(eq(7003L), org.mockito.ArgumentMatchers.startsWith("Ссылка-приглашение не действует"), anyList());
   }
 
   @Test
@@ -159,6 +206,11 @@ class TelegramIT extends IntegrationStores {
     mvc.perform(post("/api/tg/webhook").header("X-Telegram-Bot-Api-Secret-Token", SECRET).contentType(MediaType.APPLICATION_JSON)
         .content(body))
       .andExpect(status().isOk());
+  }
+
+  private ResultActions miniApp(MockHttpServletRequestBuilder request, String initData, String body, int expected) throws Exception {
+    return mvc.perform(request.header("X-Telegram-Init-Data", initData).contentType(MediaType.APPLICATION_JSON).content(body))
+      .andExpect(status().is(expected));
   }
 
   private Cookie[] psychologist() throws Exception {

@@ -2,7 +2,9 @@ package com.yanapaderina.rbot.booking.internal.web;
 
 import com.yanapaderina.rbot.booking.internal.app.BookingRefused;
 import com.yanapaderina.rbot.clients.ClientCard;
+import com.yanapaderina.rbot.clients.ClientRefused;
 import com.yanapaderina.rbot.clients.Clients;
+import com.yanapaderina.rbot.clients.ConsentRequest;
 import io.github.apocarteres.platform.auth.CurrentIdentity;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-08, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0002, ADR-0003, REQ-AUTH-039
+// MVP-03, MVP-08, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0002, ADR-0005, ADR-0003, REQ-AUTH-039
 @RestController
 @RequestMapping("/api/miniapp")
 class MiniAppController {
@@ -32,6 +34,31 @@ class MiniAppController {
   MiniAppController(ClientEndpoints endpoints, Clients clients) {
     this.endpoints = endpoints;
     this.clients = clients;
+  }
+
+  @PostMapping("/invitation")
+  ClientViews.Consent invitation(@Valid @RequestBody ClientViews.InviteRequest request) {
+    user();
+    ConsentRequest invitation = clients.invitation(request.token())
+      .orElseThrow(() -> new ClientRefused(ClientRefused.INVITE_REJECTED, "Приглашение не действует"));
+    return endpoints.consents(List.of(invitation)).getFirst();
+  }
+
+  @PostMapping("/invitation/accept")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void acceptInvitation(@Valid @RequestBody ClientViews.AcceptInvite request) {
+    clients.link(request.token(), user(), request.version());
+  }
+
+  @GetMapping("/consents")
+  List<ClientViews.Consent> consents() {
+    return endpoints.consents(clients.consentsDue(user()));
+  }
+
+  @PostMapping("/consents")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void consent(@Valid @RequestBody ClientViews.AcceptConsent request) {
+    clients.consent(user(), request.practice(), request.version());
   }
 
   @GetMapping("/practices")
@@ -72,10 +99,15 @@ class MiniAppController {
     return endpoints.cancel(scope(), id);
   }
 
-  private ClientScope scope() {
-    long user = CurrentIdentity.get().map(identity -> Long.parseLong(identity.id()))
+  private static long user() {
+    return CurrentIdentity.get().map(identity -> Long.parseLong(identity.id()))
       .orElseThrow(() -> new BookingRefused(BookingRefused.NOT_LINKED, "Telegram не привязан к клиенту"));
-    List<ClientCard> cards = clients.byTelegram(user);
+  }
+
+  private ClientScope scope() {
+    long user = user();
+    Set<UUID> due = clients.consentsDue(user).stream().map(ConsentRequest::practitioner).collect(Collectors.toSet());
+    List<ClientCard> cards = clients.byTelegram(user).stream().filter(card -> !due.contains(card.practitioner())).toList();
     if (cards.isEmpty()) {
       throw new BookingRefused(BookingRefused.NOT_LINKED, "Telegram не привязан к клиенту");
     }
