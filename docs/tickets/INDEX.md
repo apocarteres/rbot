@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 16. Включены самостоятельные задачи и этапы планов функций.
+Всего: 17. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -33,4 +33,5 @@ authority: navigation
 | [Проверка Telegram на рабочей среде](RBOT-OPS-017-verify-telegram-on-production.md) | P1 | Запланирована | Не назначен | deployment, operations, telegram |
 | [Напоминания, закрытие сессий и очистка просроченного](features/mvp/10-reminders-and-session-closing.md) | P2 | Запланирована | Не назначен | backend, telegram |
 | [Вопросы психологу по домашнему заданию](features/mvp/11-homework-questions.md) | P2 | Запланирована | Не назначен | backend, frontend, telegram, personal-data |
+| [Колокольчик со звуком в кабинете психолога](RBOT-FEAT-020-cabinet-bell-with-sound.md) | P2 | Запланирована | Не назначен | backend, frontend, notifications |
 | [Клиент из Telegram не проходит через цепочку безопасности ядра](RBOT-SEC-001-telegram-client-outside-core-auth-chain.md) | P2 | Запланирована | Не назначен | security, backend, platform |
