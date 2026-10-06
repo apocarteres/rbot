@@ -40,7 +40,7 @@ authority: navigation
 | [Согласие на обработку данных — в приложении, текст — у психолога](RBOT-FEAT-018-consent-in-mini-app.md) | P1 | Выполнена | [RELEASE-2026-10-12](../../releases/RELEASE-2026-10-12.md) | backend, frontend, data, personal-data, telegram |
 | [Без имени для клиентов приглашать нельзя](RBOT-FEAT-019-practice-name-required.md) | P1 | Выполнена | [RELEASE-2026-10-14](../../releases/RELEASE-2026-10-14.md) | backend, frontend |
 | [Время для записи открывает психолог](RBOT-FEAT-021-manually-opened-times.md) | P1 | Выполнена | [RELEASE-2026-10-15](../../releases/RELEASE-2026-10-15.md) | backend, frontend, data |
-| [Виджет времени без бесконечных запросов](RBOT-FEAT-024-openings-request-loop.md) | P1 | Выполнена | Не назначен | frontend |
+| [Виджет времени без бесконечных запросов](RBOT-FEAT-024-openings-request-loop.md) | P1 | Выполнена | [RELEASE-2026-10-20](../../releases/RELEASE-2026-10-20.md) | frontend |
 | [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
 | [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
 | [Сборка потребителя идёт на Java 25, как и сборка ядра](RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
@@ -60,7 +60,7 @@ authority: navigation
 | [Наблюдение за rbot: метрики, журналы, дашборд и оповещения на metrics](RBOT-OPS-020-monitoring-on-metrics.md) | P1 | Выполнена | [RELEASE-2026-10-16](../../releases/RELEASE-2026-10-16.md) | backend, deployment, operations, telegram, personal-data |
 | [Метрики rbot — через обратный проброс туннеля, без публичного пути](RBOT-OPS-021-metrics-through-tunnel.md) | P1 | Выполнена | [RELEASE-2026-10-17](../../releases/RELEASE-2026-10-17.md) | deployment, operations |
 | [Локальный путь метрик: Host, который принимает Tomcat](RBOT-OPS-022-metrics-host-header.md) | P1 | Выполнена | [RELEASE-2026-10-18](../../releases/RELEASE-2026-10-18.md) | deployment, operations |
-| [Задание Prometheus для rbot — отдельным файлом](RBOT-OPS-024-scrape-config-file.md) | P1 | Выполнена | Не назначен | operations |
+| [Задание Prometheus для rbot — отдельным файлом](RBOT-OPS-024-scrape-config-file.md) | P1 | Выполнена | [RELEASE-2026-10-20](../../releases/RELEASE-2026-10-20.md) | operations |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
 | [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
