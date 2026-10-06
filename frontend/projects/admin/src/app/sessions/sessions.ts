@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal, untracked } from '@angular/core';
 import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, mondayOf, plusDays } from '../../../../../shared/dates';
@@ -25,7 +25,7 @@ interface Confirming {
 
 type Editing = { readonly session: CabinetSession | null } | null;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-020, ADR-0003, REQ-CODE-DESIGN-007
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-020, RBOT-FEAT-024, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-sessions',
   imports: [BookDialog, ConfirmDialog, FailureDialog],
@@ -143,7 +143,7 @@ export class SessionsPage implements OnInit {
       if (this.loaded() && at !== this.shown) {
         this.shown = at;
         this.monday.set(this.weekOf(at));
-        void this.attempt.run(() => this.load());
+        untracked(() => void this.attempt.run(() => this.load()));
       }
     });
   }

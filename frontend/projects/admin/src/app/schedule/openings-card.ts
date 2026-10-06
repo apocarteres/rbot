@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, mondayOf, plusDays } from '../../../../../shared/dates';
@@ -13,7 +13,7 @@ interface OpeningDay {
   readonly items: readonly Opening[];
 }
 
-// RBOT-FEAT-021, RBOT-FEAT-023, MVP-02, ADR-0003, REQ-CODE-DESIGN-007
+// RBOT-FEAT-021, RBOT-FEAT-023, RBOT-FEAT-024, MVP-02, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-openings-card',
   imports: [FailureDialog],
@@ -135,7 +135,7 @@ export class OpeningsCard {
       this.version();
       this.monday();
       if (this.ready()) {
-        void this.load();
+        untracked(() => void this.load());
       }
     });
   }
