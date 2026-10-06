@@ -5,7 +5,7 @@ status: done
 scope: deployment, operations
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-18
 related: RBOT-OPS-021, RBOT-OPS-020
 ---
 

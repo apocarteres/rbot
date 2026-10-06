@@ -58,7 +58,7 @@ authority: navigation
 | [Туннель к прокси Telegram — на второй адрес metrics](RBOT-OPS-019-telegram-tunnel-second-address.md) | P1 | Выполнена | [RELEASE-2026-10-16](../../releases/RELEASE-2026-10-16.md) | deployment, operations, telegram |
 | [Наблюдение за rbot: метрики, журналы, дашборд и оповещения на metrics](RBOT-OPS-020-monitoring-on-metrics.md) | P1 | Выполнена | [RELEASE-2026-10-16](../../releases/RELEASE-2026-10-16.md) | backend, deployment, operations, telegram, personal-data |
 | [Метрики rbot — через обратный проброс туннеля, без публичного пути](RBOT-OPS-021-metrics-through-tunnel.md) | P1 | Выполнена | [RELEASE-2026-10-17](../../releases/RELEASE-2026-10-17.md) | deployment, operations |
-| [Локальный путь метрик: Host, который принимает Tomcat](RBOT-OPS-022-metrics-host-header.md) | P1 | Выполнена | Не назначен | deployment, operations |
+| [Локальный путь метрик: Host, который принимает Tomcat](RBOT-OPS-022-metrics-host-header.md) | P1 | Выполнена | [RELEASE-2026-10-18](../../releases/RELEASE-2026-10-18.md) | deployment, operations |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
 | [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
