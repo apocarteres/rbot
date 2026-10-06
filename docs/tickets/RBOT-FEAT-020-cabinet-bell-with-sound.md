@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-020
 type: ticket
-status: backlog
+status: in_progress
 scope: backend, frontend, notifications
 authority: supporting
 priority: P2
@@ -60,3 +60,4 @@ questions: resolved
 
 - 2026-10-03: задача заведена по образцу clanlog (CL-ARC-080, CL-QUAL-226, CL-QUAL-239, CL-QUAL-251).
 - 2026-10-03: ответы владельца на вопросы 1–3 записаны.
+- 2026-10-06: `platform-notifications` (переход ядра `platform-notifications:001-notification`) и `@apocarteres/notifications`. `SessionNotice` получил `actor`: `ClientBooking` публикует `CLIENT`, кабинет — `PSYCHOLOGIST`; Telegram сообщает клиенту только о действиях психолога. Модуль `bell`: `SessionBell` создаёт `session.booked|rescheduled|cancelled` с параметрами `client` (идентификатор), `type`, `start`, `previous` и ссылкой `/sessions?at=<начало>`, чистит просроченное раз в сутки; звук — `bell_preference` (переход `rbot:014-bell-preferences`), `/api/cabinet/bell`. Имя клиента в тексте — из «Клиентов» по идентификатору: ПДн в уведомлении нет (REQ-NOTIFICATIONS-003). Кабинет: колокольчик в шапке у роли психолога, панель последних 10 непрочитанных, «Прочитать все», «Все уведомления» (`/notifications`), «Звук» и «Проверить звук»; «Записи» открываются на неделе из `?at=`.

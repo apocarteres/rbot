@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthSession } from '@apocarteres/auth';
+import { NotificationBellComponent } from '../bell/notification-bell';
 
-// MVP-01, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017
+// MVP-01, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-020
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     header {
@@ -34,6 +35,9 @@ import { AuthSession } from '@apocarteres/auth';
         }
       </nav>
       <span class="who">
+        @if (session.has('PSYCHOLOGIST')) {
+          <app-notification-bell />
+        }
         <span class="muted">{{ session.account()?.email }}</span>
         <button type="button" class="quiet" (click)="logout()">Выйти</button>
       </span>

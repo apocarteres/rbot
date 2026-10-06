@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-021, ADR-0003
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-020, RBOT-FEAT-021, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=booking-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -112,6 +112,44 @@ class ClientBookingIT extends IntegrationStores {
     openings(psychologist, day).andExpect(jsonPath("$[0].state").value("BUSY"));
     write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[\"2020-01-01T10:00:00Z\"],\"close\":[]}", 400)
       .andExpect(jsonPath("$.code").value("opening-rejected"));
+  }
+
+  @Test
+  void clientChangesRingPsychologistBell() throws Exception {
+    Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
+    Cookie[] fourth = login("fourth@example.test", PASSWORD);
+    write(post("/api/notifications/read-all"), psychologist, "", 204);
+    LocalDate day = today().plusDays(5);
+    String start = at(day, "11:00").toString();
+    String booked = write(post("/api/client/sessions"), fourth,
+      "{\"practice\":\"" + practiceId() + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}", 201)
+      .andReturn().getResponse().getContentAsString();
+    mvc.perform(get("/api/notifications").cookie(psychologist))
+      .andExpect(jsonPath("$.unread").value(1))
+      .andExpect(jsonPath("$.items[0].kind").value("session.booked"))
+      .andExpect(jsonPath("$.items[0].params.type").value("Психотерапия очно"))
+      .andExpect(jsonPath("$.items[0].params.start").value(start))
+      .andExpect(jsonPath("$.items[0].link").value("/sessions?at=" + start));
+    String moved = at(day, "12:00").toString();
+    write(post("/api/client/sessions/" + JsonPath.read(booked, "$.id") + "/reschedule"), fourth, "{\"start\":\"" + moved + "\"}", 200);
+    mvc.perform(get("/api/notifications").cookie(psychologist))
+      .andExpect(jsonPath("$.unread").value(2))
+      .andExpect(jsonPath("$.items[0].kind").value("session.rescheduled"))
+      .andExpect(jsonPath("$.items[0].params.previous").value(start));
+    String bookedByPsychologist = write(post("/api/cabinet/sessions"), psychologist,
+      "{\"clientId\":\"" + clients.ofAccount(java.util.UUID.fromString(practiceId()),
+        accounts.findByEmail("fourth@example.test").orElseThrow().id()).orElseThrow() + "\",\"typeId\":\"" + therapy
+        + "\",\"start\":\"" + at(day, "10:00") + "\"}", 201).andReturn().getResponse().getContentAsString();
+    mvc.perform(get("/api/notifications/unread").cookie(psychologist)).andExpect(jsonPath("$.count").value(2));
+    write(post("/api/client/sessions/" + JsonPath.read(bookedByPsychologist, "$.id") + "/cancel"), fourth, "", 200);
+    mvc.perform(get("/api/notifications").cookie(psychologist))
+      .andExpect(jsonPath("$.unread").value(3))
+      .andExpect(jsonPath("$.items[0].kind").value("session.cancelled"));
+
+    mvc.perform(get("/api/cabinet/bell").cookie(psychologist)).andExpect(jsonPath("$.sound").value(false));
+    write(put("/api/cabinet/bell"), psychologist, "{\"sound\":true}", 200).andExpect(jsonPath("$.sound").value(true));
+    mvc.perform(get("/api/cabinet/bell").cookie(psychologist)).andExpect(jsonPath("$.sound").value(true));
+    mvc.perform(get("/api/cabinet/bell").cookie(fourth)).andExpect(status().isForbidden());
   }
 
   private ResultActions openings(Cookie[] psychologist, LocalDate day) throws Exception {

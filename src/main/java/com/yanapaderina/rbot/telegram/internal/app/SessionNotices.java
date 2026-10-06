@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-// MVP-04, MVP-05, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0001, REQ-AUTH-040
+// MVP-04, MVP-05, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0001, REQ-AUTH-040, RBOT-FEAT-020
 @Component
 class SessionNotices {
 
@@ -36,6 +36,9 @@ class SessionNotices {
 
   @TransactionalEventListener
   void onNotice(SessionNotice notice) {
+    if (notice.actor() != SessionNotice.Actor.PSYCHOLOGIST) {
+      return;
+    }
     try {
       clients.telegramOf(notice.client()).ifPresent(chat -> bot.sendMessage(chat, text(notice, availability.zone(notice.practitioner())), app()));
     } catch (RuntimeException failed) {

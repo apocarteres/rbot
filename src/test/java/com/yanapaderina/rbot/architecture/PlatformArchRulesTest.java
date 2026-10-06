@@ -19,6 +19,7 @@ class PlatformArchRulesTest {
 
   static final Map<String, Set<String>> MODULE_DEPENDENCIES = Map.of(
     "access", Set.of(),
+    "bell", Set.of("booking"),
     "accounts", Set.of("access"),
     "booking", Set.of("access", "clients", "schedule"),
     "clients", Set.of(),

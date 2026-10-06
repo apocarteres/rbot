@@ -78,7 +78,7 @@ public class CabinetBooking {
     future(start);
     SessionRow row = ledger.book(practitioner, card.id(), type, start, practitioner);
     events.publishEvent(new SessionNotice(practitioner, row.client(), SessionNotice.Change.BOOKED, row.start(), row.end(), Optional.empty(),
-      type.title()));
+      type.title(), SessionNotice.Actor.PSYCHOLOGIST));
     return view(row, type, name(Optional.of(card)));
   }
 
@@ -89,7 +89,7 @@ public class CabinetBooking {
     future(start);
     SessionRow moved = ledger.reschedule(row, type, start, practitioner);
     events.publishEvent(new SessionNotice(practitioner, row.client(), SessionNotice.Change.RESCHEDULED, moved.start(), moved.end(),
-      Optional.of(row.start()), type.title()));
+      Optional.of(row.start()), type.title(), SessionNotice.Actor.PSYCHOLOGIST));
     return view(moved, type, name(clients.card(row.client())));
   }
 
@@ -99,7 +99,7 @@ public class CabinetBooking {
     SessionType type = types(practitioner).get(row.type());
     SessionRow closed = ledger.close(row, SessionStatus.CANCELLED, practitioner);
     events.publishEvent(new SessionNotice(practitioner, row.client(), SessionNotice.Change.CANCELLED, row.start(), row.end(), Optional.empty(),
-      type == null ? "" : type.title()));
+      type == null ? "" : type.title(), SessionNotice.Actor.PSYCHOLOGIST));
     return view(closed, type, name(clients.card(row.client())));
   }
 

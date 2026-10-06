@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal } from '@angular/core';
 import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, mondayOf, plusDays } from '../../../../../shared/dates';
@@ -25,7 +25,7 @@ interface Confirming {
 
 type Editing = { readonly session: CabinetSession | null } | null;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, ADR-0003, REQ-CODE-DESIGN-007
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-020, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-sessions',
   imports: [BookDialog, ConfirmDialog, FailureDialog],
@@ -93,6 +93,8 @@ type Editing = { readonly session: CabinetSession | null } | null;
   `,
 })
 export class SessionsPage implements OnInit {
+  readonly at = input<string | undefined>(undefined);
+  private shown: string | undefined;
   private readonly api = inject(SessionsApi);
   private readonly schedule = inject(ScheduleApi);
   private readonly people = inject(ClientsApi);
@@ -129,9 +131,26 @@ export class SessionsPage implements OnInit {
       this.zone.set(settings.zone);
       this.types.set(types);
       this.clients.set(clients);
-      this.monday.set(mondayOf(this.today()));
+      this.shown = this.at();
+      this.monday.set(this.weekOf(this.shown));
       await this.load();
     });
+  }
+
+  constructor() {
+    effect(() => {
+      const at = this.at();
+      if (this.loaded() && at !== this.shown) {
+        this.shown = at;
+        this.monday.set(this.weekOf(at));
+        void this.attempt.run(() => this.load());
+      }
+    });
+  }
+
+  private weekOf(at: string | undefined): string {
+    const instant = at ? Date.parse(at) : Number.NaN;
+    return mondayOf(Number.isNaN(instant) ? this.today() : isoDate(instant, this.zone()));
   }
 
   protected shift(days: number): void {

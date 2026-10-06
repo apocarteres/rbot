@@ -1,0 +1,11 @@
+# RBOT-FEAT-020, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:014-bell-preferences
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/014-bell-preferences.sql
+            relativeToChangelogFile: true
+            splitStatements: true

@@ -22,6 +22,7 @@
     "@apocarteres/auth": "file:../.platform/target/local-packages/apocarteres-auth-14.0.0.tgz",
     "@apocarteres/http": "file:../.platform/target/local-packages/apocarteres-http-14.0.0.tgz",
     "@apocarteres/modal": "file:../.platform/target/local-packages/apocarteres-modal-14.0.0.tgz",
+    "@apocarteres/notifications": "file:../.platform/target/local-packages/apocarteres-notifications-14.0.0.tgz",
     "@apocarteres/routing": "file:../.platform/target/local-packages/apocarteres-routing-14.0.0.tgz",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

@@ -1,9 +1,11 @@
-# RBOT-OPS-011, MVP-02, RBOT-FEAT-009, REQ-DEPLOYMENT-028, REQ-DATA-ACCESS-007
+# RBOT-OPS-011, MVP-02, RBOT-FEAT-009, RBOT-FEAT-020, REQ-DEPLOYMENT-028, REQ-DATA-ACCESS-007
 databaseChangeLog:
   - include:
       file: classpath:platform/changelog/platform-auth.yaml
   - include:
       file: classpath:platform/changelog/platform-job-lock.yaml
+  - include:
+      file: classpath:platform/changelog/platform-notifications.yaml
   - includeAll:
       path: project/
       relativeToChangelogFile: true

@@ -1,5 +1,6 @@
 package com.yanapaderina.rbot.booking.internal.app;
 
+import com.yanapaderina.rbot.booking.SessionNotice;
 import com.yanapaderina.rbot.booking.internal.data.SessionDao;
 import com.yanapaderina.rbot.booking.internal.data.SessionRow;
 import com.yanapaderina.rbot.schedule.Availability;
@@ -17,22 +18,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004, RBOT-FEAT-020
 @Service
 public class ClientBooking {
 
   private final Availability availability;
   private final SessionDao sessions;
   private final SessionLedger ledger;
+  private final ApplicationEventPublisher events;
   private final Clock clock;
 
-  ClientBooking(Availability availability, SessionDao sessions, SessionLedger ledger, Clock clock) {
+  ClientBooking(Availability availability, SessionDao sessions, SessionLedger ledger, ApplicationEventPublisher events, Clock clock) {
     this.availability = availability;
     this.sessions = sessions;
     this.ledger = ledger;
+    this.events = events;
     this.clock = clock;
   }
 
@@ -67,7 +71,9 @@ public class ClientBooking {
     BookingTerms terms = open(practitioner);
     SessionType type = offered(practitioner, typeId);
     requireFree(practitioner, terms, typeId, start);
-    return session(ledger.book(practitioner, client, type, start, client), Map.of(typeId, type));
+    SessionRow row = ledger.book(practitioner, client, type, start, client);
+    told(row, SessionNotice.Change.BOOKED, Optional.empty(), type.title());
+    return session(row, Map.of(typeId, type));
   }
 
   @Transactional
@@ -77,14 +83,24 @@ public class ClientBooking {
     changeable(row, terms.lead());
     SessionType type = offered(row.practitioner(), row.type());
     requireFree(row.practitioner(), terms, type.id(), start);
-    return session(ledger.reschedule(row, type, start, row.client()), Map.of(type.id(), type));
+    SessionRow moved = ledger.reschedule(row, type, start, row.client());
+    told(moved, SessionNotice.Change.RESCHEDULED, Optional.of(row.start()), type.title());
+    return session(moved, Map.of(type.id(), type));
   }
 
   @Transactional
   public ClientSession cancel(Set<UUID> clients, UUID sessionId) {
     SessionRow row = mine(clients, sessionId);
     changeable(row, availability.terms(row.practitioner()).map(BookingTerms::lead).orElse(Duration.ZERO));
-    return session(ledger.close(row, SessionStatus.CANCELLED, row.client()), everyType(row.practitioner()));
+    Map<UUID, SessionType> types = everyType(row.practitioner());
+    SessionRow closed = ledger.close(row, SessionStatus.CANCELLED, row.client());
+    told(closed, SessionNotice.Change.CANCELLED, Optional.empty(), types.containsKey(row.type()) ? types.get(row.type()).title() : "");
+    return session(closed, types);
+  }
+
+  private void told(SessionRow row, SessionNotice.Change change, Optional<Instant> previous, String title) {
+    events.publishEvent(new SessionNotice(row.practitioner(), row.client(), change, row.start(), row.end(), previous, title,
+      SessionNotice.Actor.CLIENT));
   }
 
   private SessionRow mine(Set<UUID> clients, UUID sessionId) {
