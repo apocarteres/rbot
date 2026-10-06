@@ -118,7 +118,9 @@ class CabinetSessionsIT extends IntegrationStores {
 
     Instant soon = clock.instant().plusSeconds(2).truncatedTo(ChronoUnit.SECONDS).plusSeconds(1);
     String started = book(psychologist, clientId(), soon, 201).andReturn().getResponse().getContentAsString();
-    Thread.sleep(Math.max(0, soon.toEpochMilli() - clock.instant().toEpochMilli() + 200));
+    while (clock.instant().isBefore(soon.plusMillis(200))) {
+      Thread.sleep(50);
+    }
     write(post("/api/cabinet/sessions/" + JsonPath.read(started, "$.id") + "/no-show"), psychologist, "", 200)
       .andExpect(jsonPath("$.status").value("NO_SHOW"));
   }
