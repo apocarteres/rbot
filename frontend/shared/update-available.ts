@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AppUpdate } from '@apocarteres/app-update';
 
-// REQ-CLIENT-UPDATE-001, REQ-CLIENT-UPDATE-003
+// REQ-CLIENT-UPDATE-001, REQ-CLIENT-UPDATE-003, RBOT-FEAT-022
 @Component({
   selector: 'app-update-available',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,7 +16,7 @@ import { AppUpdate } from '@apocarteres/app-update';
   `,
   template: `
     <div class="banner" role="status">
-      <span>Вышла новая версия. Обновите страницу, когда закончите текущее действие.</span>
+      <span>Вышла новая версия. Пожалуйста, обновите страницу.</span>
       <button type="button" (click)="update.reload()">Обновить</button>
     </div>
   `,

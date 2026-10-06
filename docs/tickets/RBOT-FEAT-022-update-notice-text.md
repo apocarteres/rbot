@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-022
 type: ticket
-status: backlog
+status: in_progress
 scope: frontend
 authority: supporting
 priority: P3
@@ -34,3 +34,4 @@ related: RBOT-ARC-005
 ## Ход работы
 
 - 2026-10-06: задача заведена.
+- 2026-10-06: текст в `frontend/shared/update-available.ts` заменён.
