@@ -1,13 +1,18 @@
 package com.yanapaderina.rbot.telegram.internal.app;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.http.HttpClient;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.MediaType;
@@ -17,7 +22,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import tools.jackson.databind.JsonNode;
 
-// MVP-04, RBOT-FEAT-009, ADR-0001, REQ-AUTH-040, REQ-CONFIG
+// MVP-04, RBOT-FEAT-009, ADR-0001, REQ-AUTH-040, REQ-CONFIG, RBOT-OPS-020
 @Component
 class RestBotGateway implements BotGateway {
 
@@ -25,9 +30,17 @@ class RestBotGateway implements BotGateway {
 
   private final TelegramSettings settings;
   private final RestClient rest;
+  private final MeterRegistry meters;
+  private final Clock clock;
+  private final AtomicLong polled;
 
-  RestBotGateway(TelegramSettings settings) {
+  RestBotGateway(TelegramSettings settings, MeterRegistry meters, Clock clock) {
     this.settings = settings;
+    this.meters = meters;
+    this.clock = clock;
+    this.polled = new AtomicLong(clock.instant().getEpochSecond());
+    Gauge.builder("rbot.telegram.poll.success.timestamp", polled, AtomicLong::get).baseUnit("seconds")
+      .description("Последний успешный getUpdates; до первого — запуск экземпляра").register(meters);
     HttpClient.Builder http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5));
     if (!settings.proxy().isEmpty()) {
       int split = settings.proxy().lastIndexOf(':');
@@ -68,8 +81,11 @@ class RestBotGateway implements BotGateway {
       if (answer != null) {
         answer.path("result").forEach(updates::add);
       }
+      polled.set(clock.instant().getEpochSecond());
+      outcome("getUpdates", true);
       return updates;
     } catch (RestClientException failed) {
+      outcome("getUpdates", false);
       LOG.warn("Telegram getUpdates отказал: " + failed.getClass().getSimpleName());
       return List.of();
     }
@@ -83,9 +99,16 @@ class RestBotGateway implements BotGateway {
     try {
       rest.post().uri("/bot{token}/{method}", settings.botToken(), method).contentType(MediaType.APPLICATION_JSON).body(body)
         .retrieve().toBodilessEntity();
+      outcome(method, true);
     } catch (RestClientException failed) {
+      outcome(method, false);
       LOG.warn("Telegram " + method + " отказал: " + failed.getClass().getSimpleName());
     }
+  }
+
+  private void outcome(String method, boolean success) {
+    Counter.builder("rbot.telegram.requests").description("Обращения к Bot API по методу и исходу").tag("method", method)
+      .tag("outcome", success ? "success" : "failure").register(meters).increment();
   }
 
   private static Map<String, Object> markup(Button button) {

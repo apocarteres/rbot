@@ -71,6 +71,23 @@
         "install": "/etc/systemd/system/rbot-telegram-tunnel.service",
         "verify": "systemd-analyze verify {}",
         "enable": true
+      },
+      "unit-logs-tunnel": {
+        "artifact": "deploy/systemd/rbot-logs-tunnel.service",
+        "install": "/etc/systemd/system/rbot-logs-tunnel.service",
+        "verify": "systemd-analyze verify {}",
+        "enable": true
+      },
+      "logs-pipeline": {
+        "artifact": "deploy/alloy/rbot.alloy",
+        "install": "/etc/alloy/config.alloy",
+        "verify": "alloy fmt {}"
+      },
+      "alert-rules": {
+        "artifact": "monitoring/prometheus/rbot-alerts.yml"
+      },
+      "dashboard": {
+        "artifact": "monitoring/grafana/dashboards/rbot-service.json"
       }
     },
     "withoutDowntime": {

@@ -31,7 +31,7 @@ authority: navigation
 | [Готовность к работе: хостинг в РФ, резервные копии, документы 152-ФЗ](features/mvp/13-production-readiness.md) | P1 | Запланирована | Не назначен | operations, personal-data, legal |
 | [Анкеты: шаблон, приём и раздел в кабинете](features/mvp/14-intake-forms.md) | P1 | Запланирована | Не назначен | backend, frontend, data, personal-data |
 | [Проверка Telegram на рабочей среде](RBOT-OPS-017-verify-telegram-on-production.md) | P1 | Запланирована | Не назначен | deployment, operations, telegram |
-| [Наблюдение за rbot: метрики, журналы, дашборд и оповещения на metrics](RBOT-OPS-020-monitoring-on-metrics.md) | P1 | Запланирована | Не назначен | backend, deployment, operations, telegram, personal-data |
+| [Наблюдение за rbot: метрики, журналы, дашборд и оповещения на metrics](RBOT-OPS-020-monitoring-on-metrics.md) | P1 | В работе | Не назначен | backend, deployment, operations, telegram, personal-data |
 | [Напоминания, закрытие сессий и очистка просроченного](features/mvp/10-reminders-and-session-closing.md) | P2 | Запланирована | Не назначен | backend, telegram |
 | [Вопросы психологу по домашнему заданию](features/mvp/11-homework-questions.md) | P2 | Запланирована | Не назначен | backend, frontend, telegram, personal-data |
 | [Колокольчик со звуком в кабинете психолога](RBOT-FEAT-020-cabinet-bell-with-sound.md) | P2 | Запланирована | Не назначен | backend, frontend, notifications |

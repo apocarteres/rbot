@@ -1,0 +1,12 @@
+# RBOT-OPS-020: папка rbot в Grafana на metrics
+apiVersion: 1
+providers:
+  - name: rbot
+    orgId: 1
+    folder: rbot
+    type: file
+    disableDeletion: false
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /opt/grafana-12.3.2/conf/provisioning/dashboards/rbot

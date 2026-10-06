@@ -1,0 +1,49 @@
+// RBOT-OPS-020, ADR-0005: журналы служб rbot → Loki на metrics через туннель rbot-logs-tunnel.
+// metrics вне РФ: почта и длинные числа (идентификаторы Telegram) маскируются до отправки.
+
+loki.relabel "rbot_units" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    regex         = "rbot(@[0-9]+|-telegram-tunnel|-logs-tunnel|-backup)\\.service"
+    action        = "keep"
+  }
+
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit"
+  }
+
+  rule {
+    source_labels = ["__journal_priority_keyword"]
+    target_label  = "level"
+  }
+}
+
+loki.source.journal "rbot" {
+  max_age       = "12h"
+  relabel_rules = loki.relabel.rbot_units.rules
+  labels        = {project = "rbot", host = "fileio", job = "rbot"}
+  forward_to    = [loki.process.rbot.receiver]
+}
+
+loki.process "rbot" {
+  stage.replace {
+    expression = "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})"
+    replace    = "<почта>"
+  }
+
+  stage.replace {
+    expression = "\\b([0-9]{7,})\\b"
+    replace    = "<число>"
+  }
+
+  forward_to = [loki.write.metrics.receiver]
+}
+
+loki.write "metrics" {
+  endpoint {
+    url = "http://127.0.0.1:13100/loki/api/v1/push"
+  }
+}

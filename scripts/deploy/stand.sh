@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# RBOT-OPS-004, RBOT-OPS-007, REQ-DEPLOYMENT-004, REQ-DEPLOYMENT-006, REQ-DEPLOYMENT-016, REQ-DEPLOYMENT-018
+# RBOT-OPS-004, RBOT-OPS-007, RBOT-OPS-020, REQ-DEPLOYMENT-004, REQ-DEPLOYMENT-006, REQ-DEPLOYMENT-016, REQ-DEPLOYMENT-018
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/deploy/environments.sh"
@@ -37,7 +37,7 @@ for component in "${wanted[@]}"; do
     web-stand)
       services+=(frontend)
       ;;
-    web-site|web-headers|unit-backend|unit-backup|timer-backup|unit-telegram-tunnel)
+    web-site|web-headers|unit-backend|unit-backup|timer-backup|unit-telegram-tunnel|unit-logs-tunnel|logs-pipeline|alert-rules|dashboard)
       ;;
     *)
       printf 'составляющей %s у стенда нет: backend, frontend-admin, frontend-bot, web-stand\n' "$component" >&2

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# MVP-04, RBOT-FEAT-009, RBOT-OPS-019, ADR-0001
+# MVP-04, RBOT-FEAT-009, RBOT-OPS-019, RBOT-OPS-020, ADR-0001
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HOST="${RBOT_PROD_HOST:-root@fileio.ru}"
@@ -37,7 +37,7 @@ systemctl enable --now tinyproxy > /dev/null 2>&1
 systemctl restart tinyproxy
 id rbot-tunnel > /dev/null 2>&1 || useradd --system --create-home --home-dir /var/lib/rbot-tunnel --shell /usr/sbin/nologin rbot-tunnel
 install -d -o rbot-tunnel -g rbot-tunnel -m 0700 /var/lib/rbot-tunnel/.ssh
-printf 'restrict,port-forwarding,permitopen="127.0.0.1:18888" %s\n' "$public" > /var/lib/rbot-tunnel/.ssh/authorized_keys
+printf 'restrict,port-forwarding,permitopen="127.0.0.1:18888",permitopen="127.0.0.1:3100" %s\n' "$public" > /var/lib/rbot-tunnel/.ssh/authorized_keys
 chown rbot-tunnel:rbot-tunnel /var/lib/rbot-tunnel/.ssh/authorized_keys
 chmod 0600 /var/lib/rbot-tunnel/.ssh/authorized_keys
 REMOTE

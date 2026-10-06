@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.yanapaderina.rbot.telegram.internal.data.PollingLeaseDao;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -29,7 +30,7 @@ class UpdatePollingTest {
   private final UpdateHandler handler = mock(UpdateHandler.class);
   private final PollingLeaseDao lease = mock(PollingLeaseDao.class);
   private final UpdatePolling polling = new UpdatePolling(SETTINGS, bot, handler, lease,
-    Clock.fixed(Instant.parse("2026-10-02T06:00:00Z"), ZoneOffset.UTC));
+    Clock.fixed(Instant.parse("2026-10-02T06:00:00Z"), ZoneOffset.UTC), new SimpleMeterRegistry());
 
   @Test
   @DisplayName("Без аренды экземпляр Telegram не опрашивает")

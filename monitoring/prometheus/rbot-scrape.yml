@@ -1,0 +1,17 @@
+# RBOT-OPS-020: задание опроса rbot; provision-monitoring.sh вписывает его в prometheus.yml на metrics
+  - job_name: "rbot-backend"
+    scheme: https
+    metrics_path: "/metrics/rbot"
+    scrape_interval: 30s
+    scrape_timeout: 20s
+    basic_auth:
+      username: "prometheus"
+      password_file: "/etc/prometheus/rbot-metrics.password"
+    tls_config:
+      server_name: "admin.yanapaderina.com"
+    static_configs:
+      - targets: ["37.230.112.169:443"]
+        labels:
+          instance: "admin.yanapaderina.com:443"
+          project: "rbot"
+          environment: "production"

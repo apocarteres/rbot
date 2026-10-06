@@ -178,6 +178,12 @@ for app in admin bot; do
 done
 log "Telegram: туннель и webhook"
 systemctl restart rbot-telegram-tunnel.service > /dev/null 2>&1 || true
+# RBOT-OPS-020
+if wanted logs-pipeline && systemctl cat alloy.service > /dev/null 2>&1; then
+  log "журналы: туннель к Loki и Alloy"
+  systemctl restart rbot-logs-tunnel.service > /dev/null 2>&1 || true
+  systemctl restart alloy.service
+fi
 "$ROOT_DIR/scripts/ops/telegram-setup.sh" || log "ОТКАЗ регистрации webhook Telegram: раскат установлен, бот без webhook"
 log "копии данных"
 if ! conventions backups --check; then

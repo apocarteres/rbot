@@ -1,0 +1,39 @@
+# RBOT-OPS-020, RBOT-OPS-019
+groups:
+  - name: rbot-availability
+    rules:
+      - alert: RbotBackendDown
+        expr: up{job="rbot-backend"} == 0 or absent(up{job="rbot-backend"})
+        for: 5m
+        labels:
+          severity: critical
+          project: rbot
+        annotations:
+          summary: "rbot: сервер не отвечает опросу метрик 5 минут"
+      - alert: RbotHttpErrors
+        expr: >
+          sum(rate(http_server_requests_seconds_count{job="rbot-backend",status=~"5.."}[10m]))
+          / sum(rate(http_server_requests_seconds_count{job="rbot-backend"}[10m])) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          project: rbot
+        annotations:
+          summary: "rbot: больше 5% ответов сервера — ошибки 5xx"
+  - name: rbot-telegram
+    rules:
+      - alert: RbotTelegramSilent
+        expr: time() - max(rbot_telegram_poll_success_timestamp_seconds{job="rbot-backend"}) > 300
+        for: 1m
+        labels:
+          severity: critical
+          project: rbot
+        annotations:
+          summary: "rbot: бот не получает сообщения — успешного опроса Telegram не было 5 минут (туннель, прокси на metrics, токен)"
+      - alert: RbotTelegramSendFailures
+        expr: sum(increase(rbot_telegram_requests_total{job="rbot-backend",method!="getUpdates",outcome="failure"}[15m])) > 0
+        labels:
+          severity: warning
+          project: rbot
+        annotations:
+          summary: "rbot: за 15 минут не ушли сообщения бота клиентам"

@@ -1,0 +1,58 @@
+# RBOT-OPS-020: promtool test rules rbot-alerts.test.yml
+rule_files:
+  - rbot-alerts.yml
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{job="rbot-backend"}'
+        values: "1 1 0 0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: RbotBackendDown
+        exp_alerts: []
+      - eval_time: 8m
+        alertname: RbotBackendDown
+        exp_alerts:
+          - exp_labels: {severity: critical, project: rbot, job: rbot-backend}
+            exp_annotations: {summary: "rbot: сервер не отвечает опросу метрик 5 минут"}
+  - interval: 1m
+    input_series:
+      - series: 'rbot_telegram_poll_success_timestamp_seconds{job="rbot-backend"}'
+        values: "0+60x5 300x10"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: RbotTelegramSilent
+        exp_alerts: []
+      - eval_time: 12m
+        alertname: RbotTelegramSilent
+        exp_alerts:
+          - exp_labels: {severity: critical, project: rbot}
+            exp_annotations: {summary: "rbot: бот не получает сообщения — успешного опроса Telegram не было 5 минут (туннель, прокси на metrics, токен)"}
+  - interval: 1m
+    input_series:
+      - series: 'rbot_telegram_requests_total{job="rbot-backend",method="sendMessage",outcome="failure"}'
+        values: "0 0 0 1 1"
+      - series: 'rbot_telegram_requests_total{job="rbot-backend",method="getUpdates",outcome="failure"}'
+        values: "0 5 10 15 20"
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: RbotTelegramSendFailures
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: RbotTelegramSendFailures
+        exp_alerts:
+          - exp_labels: {severity: warning, project: rbot}
+            exp_annotations: {summary: "rbot: за 15 минут не ушли сообщения бота клиентам"}
+  - interval: 1m
+    input_series:
+      - series: 'http_server_requests_seconds_count{job="rbot-backend",status="200"}'
+        values: "0+90x30"
+      - series: 'http_server_requests_seconds_count{job="rbot-backend",status="500"}'
+        values: "0+10x30"
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: RbotHttpErrors
+        exp_alerts:
+          - exp_labels: {severity: warning, project: rbot}
+            exp_annotations: {summary: "rbot: больше 5% ответов сервера — ошибки 5xx"}

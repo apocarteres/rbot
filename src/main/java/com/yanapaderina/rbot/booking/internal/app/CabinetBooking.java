@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004
+// MVP-05, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004, RBOT-OPS-020
 @Service
 public class CabinetBooking {
 
@@ -36,16 +36,18 @@ public class CabinetBooking {
   private final SessionDao sessions;
   private final SessionLedger ledger;
   private final ApplicationEventPublisher events;
+  private final SessionMeters meters;
   private final Clock clock;
 
   CabinetBooking(Availability availability, Clients clients, Accounts accounts, SessionDao sessions, SessionLedger ledger,
-    ApplicationEventPublisher events, Clock clock) {
+    ApplicationEventPublisher events, SessionMeters meters, Clock clock) {
     this.availability = availability;
     this.clients = clients;
     this.accounts = accounts;
     this.sessions = sessions;
     this.ledger = ledger;
     this.events = events;
+    this.meters = meters;
     this.clock = clock;
   }
 
@@ -107,6 +109,7 @@ public class CabinetBooking {
     if (!sessions.markNoShow(sessionId, clock.instant())) {
       throw new BookingRefused(BookingRefused.NOT_STARTED, "Сессия ещё не началась");
     }
+    meters.changed("no_show", false);
     return view(row.withStatus(SessionStatus.NO_SHOW.name(), row.cancelledBy()), types(practitioner).get(row.type()), name(clients.card(row.client())));
   }
 

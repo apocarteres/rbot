@@ -29,9 +29,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -40,7 +43,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-FEAT-021, RBOT-OPS-018, ADR-0002, ADR-0005
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-FEAT-021, RBOT-OPS-018, RBOT-OPS-020, ADR-0002, ADR-0005
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -194,6 +197,30 @@ class TelegramIT extends IntegrationStores {
     webhook(start(7002, ""));
     verify(bot).sendMessage(eq(7002L), org.mockito.ArgumentMatchers.startsWith("Здравствуйте! Запись к психологу открывается по приглашению"),
       anyList());
+  }
+
+  @Test
+  @ExtendWith(OutputCaptureExtension.class)
+  void telegramUserStaysOutOfLogsAndMetrics(CapturedOutput output) throws Exception {
+    Cookie[] psychologist = psychologist();
+    named(psychologist);
+    String invite = write(post("/api/cabinet/clients"), psychologist, "{\"label\":\"Вера Лаптева\"}", 201)
+      .andReturn().getResponse().getContentAsString();
+    String link = JsonPath.read(invite, "$.link");
+    String token = link.substring(link.indexOf("start=") + 6);
+    long user = 7_654_321_987L;
+    String miniApp = InitDataSigning.signed(TOKEN, user, clock.instant());
+    webhook(start(user, token));
+    int version = JsonPath.read(miniApp(post("/api/miniapp/invitation"), miniApp, "{\"token\":\"" + token + "\"}", 200)
+      .andReturn().getResponse().getContentAsString(), "$.version");
+    miniApp(post("/api/miniapp/invitation/accept"), miniApp, "{\"token\":\"" + token + "\",\"version\":" + version + "}", 204);
+    mvc.perform(get("/api/miniapp/practices").header("X-Telegram-Init-Data", miniApp)).andExpect(status().isOk());
+
+    String metrics = mvc.perform(get("/actuator/prometheus")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    assertThat(metrics).contains("rbot_telegram_polling_lease_held{application=\"rbot\"")
+      .contains("http_server_requests_seconds_count{application=\"rbot\"")
+      .doesNotContain(String.valueOf(user)).doesNotContain("Лаптева").doesNotContain(token);
+    assertThat(output.getAll()).doesNotContain(String.valueOf(user)).doesNotContain("Лаптева").doesNotContain(token);
   }
 
   @Test
