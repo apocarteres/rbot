@@ -1,7 +1,7 @@
 ---
 id: RBOT-OPS-020
 type: ticket
-status: in_progress
+status: done
 scope: backend, deployment, operations, telegram, personal-data
 authority: supporting
 priority: P1
@@ -78,3 +78,4 @@ questions: resolved
 ## Ход работы
 
 - 2026-10-06: задача заведена по осмотру `metrics` и образцу fileio (`REQ-MON`).
+- 2026-10-06: Micrometer `/actuator/prometheus` (`application="rbot"`), метрики `rbot_telegram_poll_success_timestamp_seconds`, `rbot_telegram_requests_total`, `rbot_telegram_polling_lease_held`, `rbot_sessions_changes_total`; nginx `/metrics/rbot`; правила с `promtool test rules`; дашборд `rbot-service`; Alloy и туннель `rbot-logs-tunnel`; `mise run provision-monitoring` проведена. Alloy на рабочую машину — пакетом с `metrics`: apt.grafana.com из РФ отвечает 403. `TelegramIT`: идентификатор Telegram, подпись клиента и токен приглашения не попадают ни в журнал, ни в метрики. Интеграционных тестов 34. Резервное копирование в оповещения не вошло: копия не отдаёт метрику, нужна отдельная задача.
