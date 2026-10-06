@@ -55,8 +55,8 @@ authority: navigation
 | [Сборочный контейнер: наборы и интеграционные тесты в Docker](RBOT-OPS-015-build-runner.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | tooling, testing |
 | [Проверка рабочей среды после раската выпуска 2026.10.1](RBOT-OPS-016-verify-production-after-release-2026-10-1.md) | P1 | Выполнена | [RELEASE-2026-10-3](../../releases/RELEASE-2026-10-3.md) | deployment, operations |
 | [Опрос Telegram переходит к новому экземпляру сразу после раската](RBOT-OPS-018-telegram-polling-handover.md) | P1 | Выполнена | [RELEASE-2026-10-13](../../releases/RELEASE-2026-10-13.md) | backend, telegram, deployment |
-| [Туннель к прокси Telegram — на второй адрес metrics](RBOT-OPS-019-telegram-tunnel-second-address.md) | P1 | Выполнена | Не назначен | deployment, operations, telegram |
-| [Наблюдение за rbot: метрики, журналы, дашборд и оповещения на metrics](RBOT-OPS-020-monitoring-on-metrics.md) | P1 | Выполнена | Не назначен | backend, deployment, operations, telegram, personal-data |
+| [Туннель к прокси Telegram — на второй адрес metrics](RBOT-OPS-019-telegram-tunnel-second-address.md) | P1 | Выполнена | [RELEASE-2026-10-16](../../releases/RELEASE-2026-10-16.md) | deployment, operations, telegram |
+| [Наблюдение за rbot: метрики, журналы, дашборд и оповещения на metrics](RBOT-OPS-020-monitoring-on-metrics.md) | P1 | Выполнена | [RELEASE-2026-10-16](../../releases/RELEASE-2026-10-16.md) | backend, deployment, operations, telegram, personal-data |
 | [Проверки собраны в наборы check и verify со шлагбаумом перед отправкой](RBOT-QUAL-001-adopt-local-quality-gates.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, tooling |
 | [Проверка проводки входит в набор check](RBOT-QUAL-003-adopt-wiring-check.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, tooling |
 | [Своя аутентификация проекта заменена аутентификацией ядра](RBOT-SEC-003-adopt-core-auth.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, frontend, security |
