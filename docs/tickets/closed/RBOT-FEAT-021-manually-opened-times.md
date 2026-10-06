@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-021
 type: ticket
-status: in_progress
+status: done
 scope: backend, frontend, data
 authority: supporting
 priority: P1
