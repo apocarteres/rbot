@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-025
 type: ticket
-status: in_progress
+status: done
 scope: frontend
 authority: supporting
 priority: P2
@@ -35,3 +35,4 @@ related: RBOT-FEAT-017, RBOT-FEAT-019
 ## Ход работы
 
 - 2026-10-06: строка под заголовком в `home.ts` из `practices`.
+- QA 2026-10-06: Mini App, клиент «Тестового психолога» — «Ваш психолог: Тестовый психолог» под заголовком.

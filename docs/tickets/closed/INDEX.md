@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 63. Включены самостоятельные задачи и этапы планов функций.
+Всего: 64. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -75,6 +75,7 @@ authority: navigation
 | [Длительность типа в предпросмотре и пересоздание клиента стенда](RBOT-FEAT-014-preview-session-length.md) | P2 | Выполнена | [RELEASE-2026-10-8](../../releases/RELEASE-2026-10-8.md) | frontend, deployment |
 | [Кнопка бота «Личный кабинет»](RBOT-FEAT-015-bot-cabinet-button.md) | P2 | Выполнена | [RELEASE-2026-10-9](../../releases/RELEASE-2026-10-9.md) | telegram |
 | [Колокольчик со звуком в кабинете психолога](RBOT-FEAT-020-cabinet-bell-with-sound.md) | P2 | Выполнена | [RELEASE-2026-10-19](../../releases/RELEASE-2026-10-19.md) | backend, frontend, notifications |
+| [Имя психолога на главном экране приложения клиента](RBOT-FEAT-025-psychologist-name-on-home.md) | P2 | Выполнена | Не назначен | frontend |
 | [Переходы базы — Liquibase, таблицы ядра — журналами ядра](RBOT-OPS-011-liquibase-migrations.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | persistence, deployment |
 | [Размер сборки клиента держит проверка](RBOT-QUAL-004-adopt-bundle-budgets.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, build |
 | [Секреты шифруются средством платформы](RBOT-SEC-002-adopt-secret-cipher.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, security |
