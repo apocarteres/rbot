@@ -179,9 +179,14 @@ done
 log "Telegram: туннель и webhook"
 systemctl restart rbot-telegram-tunnel.service > /dev/null 2>&1 || true
 # RBOT-OPS-020
+if systemctl cat rbot-logs-tunnel.service > /dev/null 2>&1; then
+  systemctl disable --now rbot-logs-tunnel.service > /dev/null 2>&1 || true
+  rm -f /etc/systemd/system/rbot-logs-tunnel.service
+  systemctl daemon-reload
+fi
+log "наблюдение: туннель на metrics и Alloy"
+systemctl restart rbot-monitoring-tunnel.service > /dev/null 2>&1 || true
 if wanted logs-pipeline && systemctl cat alloy.service > /dev/null 2>&1; then
-  log "журналы: туннель к Loki и Alloy"
-  systemctl restart rbot-logs-tunnel.service > /dev/null 2>&1 || true
   systemctl restart alloy.service
 fi
 "$ROOT_DIR/scripts/ops/telegram-setup.sh" || log "ОТКАЗ регистрации webhook Telegram: раскат установлен, бот без webhook"

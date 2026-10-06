@@ -39,9 +39,22 @@ dir="$1"
 config="$dir/prometheus.yml"
 backup="$config.bak-rbot-$(date -u +%Y%m%dT%H%M%SZ)"
 cp -a "$config" "$backup"
-if ! grep -q 'job_name: "rbot-backend"' "$config"; then
-  printf '%s' "$2" | base64 -d >> "$config"
-fi
+python3 - "$config" <<'PY'
+import sys
+path = sys.argv[1]
+lines = open(path).read().split("\n")
+out, skip = [], False
+for line in lines:
+    if line.startswith("# RBOT-OPS-020: задание опроса rbot"):
+        skip = True
+        continue
+    if skip and (line.startswith("  - job_name:") and "rbot-backend" not in line or (line and not line.startswith(" ") and not line.startswith("#"))):
+        skip = False
+    if not skip:
+        out.append(line)
+open(path, "w").write("\n".join(out).rstrip("\n") + "\n")
+PY
+printf '%s' "$2" | base64 -d >> "$config"
 if ! grep -q 'rules/rbot-\*.yml' "$config"; then
   sed -i '/^rule_files:/a\  - "rules/rbot-*.yml"  # RBOT-OPS-020' "$config"
 fi
@@ -67,13 +80,15 @@ fi
 rm -f "$staged"
 REMOTE
 
-log "туннелю rbot-tunnel на $METRICS — доступ к Loki 127.0.0.1:3100"
+log "туннелю rbot-tunnel на $METRICS — Loki 127.0.0.1:3100 и обратный проброс метрик 127.0.0.1:19100"
 ssh -o BatchMode=yes "$METRICS" bash -s <<'REMOTE'
 set -euo pipefail
 keys=/var/lib/rbot-tunnel/.ssh/authorized_keys
 grep -q 'permitopen="127.0.0.1:3100"' "$keys" \
   || sed -i 's/permitopen="127.0.0.1:18888"/permitopen="127.0.0.1:18888",permitopen="127.0.0.1:3100"/' "$keys"
-grep -q 'permitopen="127.0.0.1:3100"' "$keys"
+grep -q 'permitlisten="127.0.0.1:19100"' "$keys" \
+  || sed -i 's/permitopen="127.0.0.1:3100"/permitopen="127.0.0.1:3100",permitlisten="127.0.0.1:19100"/' "$keys"
+grep -q 'permitlisten="127.0.0.1:19100"' "$keys"
 REMOTE
 
 log "Alloy на $HOST: пакет с $METRICS (apt.grafana.com из РФ отвечает 403)"

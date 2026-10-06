@@ -1,17 +1,15 @@
-# RBOT-OPS-020: задание опроса rbot; provision-monitoring.sh вписывает его в prometheus.yml на metrics
+# RBOT-OPS-020: задание опроса rbot; provision-monitoring.sh вписывает его в prometheus.yml на metrics.
+# 127.0.0.1:19100 — обратный проброс туннеля rbot-monitoring-tunnel к локальному nginx рабочей машины.
   - job_name: "rbot-backend"
-    scheme: https
     metrics_path: "/metrics/rbot"
     scrape_interval: 30s
     scrape_timeout: 20s
     basic_auth:
       username: "prometheus"
       password_file: "/etc/prometheus/rbot-metrics.password"
-    tls_config:
-      server_name: "admin.yanapaderina.com"
     static_configs:
-      - targets: ["37.230.112.169:443"]
+      - targets: ["127.0.0.1:19100"]
         labels:
-          instance: "admin.yanapaderina.com:443"
+          instance: "admin.yanapaderina.com"
           project: "rbot"
           environment: "production"

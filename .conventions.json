@@ -72,9 +72,9 @@
         "verify": "systemd-analyze verify {}",
         "enable": true
       },
-      "unit-logs-tunnel": {
-        "artifact": "deploy/systemd/rbot-logs-tunnel.service",
-        "install": "/etc/systemd/system/rbot-logs-tunnel.service",
+      "unit-monitoring-tunnel": {
+        "artifact": "deploy/systemd/rbot-monitoring-tunnel.service",
+        "install": "/etc/systemd/system/rbot-monitoring-tunnel.service",
         "verify": "systemd-analyze verify {}",
         "enable": true
       },

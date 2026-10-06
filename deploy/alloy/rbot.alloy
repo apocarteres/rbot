@@ -1,4 +1,4 @@
-// RBOT-OPS-020, ADR-0005: журналы служб rbot → Loki на metrics через туннель rbot-logs-tunnel.
+// RBOT-OPS-020, ADR-0005: журналы служб rbot → Loki на metrics через туннель rbot-monitoring-tunnel.
 // metrics вне РФ: почта и длинные числа (идентификаторы Telegram) маскируются до отправки.
 
 loki.relabel "rbot_units" {
@@ -6,7 +6,7 @@ loki.relabel "rbot_units" {
 
   rule {
     source_labels = ["__journal__systemd_unit"]
-    regex         = "rbot(@[0-9]+|-telegram-tunnel|-logs-tunnel|-backup)\\.service"
+    regex         = "rbot(@[0-9]+|-telegram-tunnel|-monitoring-tunnel|-backup)\\.service"
     action        = "keep"
   }
 
