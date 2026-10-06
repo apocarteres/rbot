@@ -5,7 +5,7 @@ status: done
 scope: frontend
 authority: supporting
 priority: P3
-release: unassigned
+release: RELEASE-2026-10-19
 related: RBOT-FEAT-021
 ---
 

@@ -5,7 +5,7 @@ status: done
 scope: backend, frontend, notifications
 authority: supporting
 priority: P2
-release: unassigned
+release: RELEASE-2026-10-19
 related: RBOT-FEAT-005, RBOT-FEAT-017, RBOT-FEAT-018
 questions: resolved
 ---
