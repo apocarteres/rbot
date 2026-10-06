@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-024
 type: ticket
-status: in_progress
+status: done
 scope: frontend
 authority: supporting
 priority: P1
@@ -34,3 +34,4 @@ related: RBOT-FEAT-021, RBOT-FEAT-020
 ## Ход работы
 
 - 2026-10-06: загрузка в обоих эффектах обёрнута в `untracked`.
+- QA 2026-10-06: «Расписание» — один `GET openings`; «следующая неделя» — ещё один; два щелчка по времени — два `PUT`, без новых загрузок; «Записи» по `?at=` — один `GET sessions`, неделя 12–18 октября.

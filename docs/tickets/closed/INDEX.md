@@ -14,7 +14,7 @@ authority: navigation
 
 Правила ведения задач — `REQ-TICKETS` в поставке пакета правил.
 
-Всего: 62. Включены самостоятельные задачи и этапы планов функций.
+Всего: 63. Включены самостоятельные задачи и этапы планов функций.
 
 | Задача | Приоритет | Статус | Выпуск | Области |
 |---|---|---|---|---|
@@ -40,6 +40,7 @@ authority: navigation
 | [Согласие на обработку данных — в приложении, текст — у психолога](RBOT-FEAT-018-consent-in-mini-app.md) | P1 | Выполнена | [RELEASE-2026-10-12](../../releases/RELEASE-2026-10-12.md) | backend, frontend, data, personal-data, telegram |
 | [Без имени для клиентов приглашать нельзя](RBOT-FEAT-019-practice-name-required.md) | P1 | Выполнена | [RELEASE-2026-10-14](../../releases/RELEASE-2026-10-14.md) | backend, frontend |
 | [Время для записи открывает психолог](RBOT-FEAT-021-manually-opened-times.md) | P1 | Выполнена | [RELEASE-2026-10-15](../../releases/RELEASE-2026-10-15.md) | backend, frontend, data |
+| [Виджет времени без бесконечных запросов](RBOT-FEAT-024-openings-request-loop.md) | P1 | Выполнена | Не назначен | frontend |
 | [Цикл выпуска закрывается одной командой и помечает проверенный коммит](RBOT-OPS-001-adopt-release-cycle.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | release, build, deployment |
 | [Расписку о проверках пишет наблюдавший прогон, а не ручной вызов](RBOT-OPS-002-adopt-observed-receipt.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | quality, build, release |
 | [Сборка потребителя идёт на Java 25, как и сборка ядра](RBOT-OPS-003-adopt-java-25.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | build, tooling |
