@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# RBOT-OPS-020: разовая подготовка наблюдения — пароль метрик, задание Prometheus, папка Grafana, Alloy и доступ туннеля к Loki.
+# RBOT-OPS-020, RBOT-OPS-024: разовая подготовка наблюдения — пароль метрик, задание Prometheus, папка Grafana, Alloy и доступ туннеля к Loki.
 # Правила оповещений, дашборд и конфиг Alloy доставляет раскат (scripts/deploy/production.sh, host-release.sh).
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -32,13 +32,17 @@ log "пароль метрик → $METRICS (трубой ssh, без вывод
 ssh -o BatchMode=yes "$HOST" 'cat /etc/rbot/metrics.password' \
   | ssh -o BatchMode=yes "$METRICS" 'umask 077 && cat > /etc/prometheus/rbot-metrics.password.new && chown root:prometheus /etc/prometheus/rbot-metrics.password.new && chmod 0640 /etc/prometheus/rbot-metrics.password.new && mv /etc/prometheus/rbot-metrics.password.new /etc/prometheus/rbot-metrics.password'
 
-log "задание rbot-backend и правила rbot-*.yml в Prometheus на $METRICS"
+log "задание rbot-backend отдельным файлом scrape/rbot.yml и правила rbot-*.yml в Prometheus на $METRICS"
 ssh -o BatchMode=yes "$METRICS" bash -s -- "$PROMETHEUS_DIR" "$(base64 < "$ROOT_DIR/monitoring/prometheus/rbot-scrape.yml")" <<'REMOTE'
 set -euo pipefail
 dir="$1"
 config="$dir/prometheus.yml"
 backup="$config.bak-rbot-$(date -u +%Y%m%dT%H%M%SZ)"
 cp -a "$config" "$backup"
+install -d -o prometheus -g prometheus -m 0755 "$dir/scrape"
+printf '%s' "$2" | base64 -d > "$dir/scrape/rbot.yml.new"
+chown prometheus:prometheus "$dir/scrape/rbot.yml.new"
+mv "$dir/scrape/rbot.yml.new" "$dir/scrape/rbot.yml"
 python3 - "$config" <<'PY'
 import sys
 path = sys.argv[1]
@@ -52,9 +56,14 @@ for line in lines:
         skip = False
     if not skip:
         out.append(line)
-open(path, "w").write("\n".join(out).rstrip("\n") + "\n")
+text = "\n".join(out).rstrip("\n") + "\n"
+if '"scrape/rbot.yml"' not in text:
+    if "\nscrape_config_files:\n" in text:
+        text = text.replace("\nscrape_config_files:\n", '\nscrape_config_files:\n  - "scrape/rbot.yml"  # RBOT-OPS-024\n', 1)
+    else:
+        text = text.replace("\nscrape_configs:", '\n# RBOT-OPS-024: задания проектов отдельными файлами — правки prometheus.yml их не задевают\nscrape_config_files:\n  - "scrape/rbot.yml"\n\nscrape_configs:', 1)
+open(path, "w").write(text)
 PY
-printf '%s' "$2" | base64 -d >> "$config"
 if ! grep -q 'rules/rbot-\*.yml' "$config"; then
   sed -i '/^rule_files:/a\  - "rules/rbot-*.yml"  # RBOT-OPS-020' "$config"
 fi
