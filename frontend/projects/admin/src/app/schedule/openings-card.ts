@@ -13,7 +13,7 @@ interface OpeningDay {
   readonly items: readonly Opening[];
 }
 
-// RBOT-FEAT-021, MVP-02, ADR-0003, REQ-CODE-DESIGN-007
+// RBOT-FEAT-021, RBOT-FEAT-023, MVP-02, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-openings-card',
   imports: [FailureDialog],
@@ -25,7 +25,7 @@ interface OpeningDay {
     .nav { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
     .nav button { padding: 2px 10px; }
     .bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 8px 0; }
-    .bulk .count { flex-basis: 100%; }
+    .bulk .actions { display: flex; gap: 16px; margin-left: auto; }
     .day { padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
     .day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
     .times { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -58,8 +58,10 @@ interface OpeningDay {
         <p class="muted small">Клиент видит только открытое время. Нажмите на время, чтобы открыть или закрыть его.</p>
         <div class="bulk">
           <span class="muted small count">Открыто {{ opened() }} из {{ total() }}</span>
-          <button type="button" class="link" (click)="setAll(true)">Открыть всё на неделе</button>
-          <button type="button" class="link" (click)="setAll(false)">Закрыть всё</button>
+          <span class="actions">
+            <button type="button" class="link" (click)="setAll(true)">Открыть всё</button>
+            <button type="button" class="link" (click)="setAll(false)">Закрыть всё</button>
+          </span>
         </div>
         @for (day of days(); track day.date) {
           <div class="day">

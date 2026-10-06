@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-023
 type: ticket
-status: backlog
+status: in_progress
 scope: frontend
 authority: supporting
 priority: P3
@@ -35,3 +35,4 @@ related: RBOT-FEAT-021
 ## Ход работы
 
 - 2026-10-06: задача заведена.
+- 2026-10-06: «Открыть всё» и «Закрыть всё» — группа `.actions` с `margin-left: auto`: справа и при переносе строки.
