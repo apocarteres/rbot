@@ -9,7 +9,7 @@ import { DEFAULT_ZONE, details, when, zoneNote } from '../format';
 import { insideTelegram, inviteSettled, pendingInvite } from '../telegram';
 import { CancelDialog } from './cancel-dialog';
 
-// MVP-01, MVP-03, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0005
+// MVP-01, MVP-03, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-025, ADR-0005
 @Component({
   selector: 'app-home',
   imports: [RouterLink, CancelDialog, FailureDialog],
@@ -23,12 +23,17 @@ import { CancelDialog } from './cancel-dialog';
     .quiet-link { font-size: 0.95rem; }
     .book { display: block; text-align: center; margin: 16px 0; }
     .small { font-size: 0.85rem; }
+    .psychologist { margin: -8px 0 16px; color: var(--muted); }
+    .psychologist strong { color: var(--text); }
     .consent-text { white-space: pre-line; overflow-wrap: anywhere; line-height: 1.45; }
     .consent-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
     footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; font-size: 0.9rem; }
   `,
   template: `
     <h1>Запись к психологу</h1>
+    @if (!consent() && psychologists().length > 0) {
+      <p class="psychologist">{{ psychologists().length > 1 ? 'Ваши психологи' : 'Ваш психолог' }}: <strong>{{ psychologists().join(', ') }}</strong></p>
+    }
     @if (consent(); as one) {
       <section class="card" aria-labelledby="consent-title">
         <h2 id="consent-title">Согласие на обработку персональных данных</h2>
@@ -102,6 +107,7 @@ export class Home implements OnInit {
   protected readonly client = computed(() => this.telegram || (this.auth.account()?.roles.includes('CLIENT') ?? false));
   protected readonly zone = signal(DEFAULT_ZONE);
   protected readonly many = signal(false);
+  protected readonly psychologists = signal<readonly string[]>([]);
   protected readonly note = computed(() => zoneNote(this.zone()));
 
   ngOnInit(): void {
@@ -162,6 +168,7 @@ export class Home implements OnInit {
       });
       this.stranger.set(false);
       this.many.set(practices.length > 1);
+      this.psychologists.set(practices.map((one) => one.name));
       if (practices.length > 0) {
         this.zone.set((await this.api.offer(practices[0].id)).zone ?? DEFAULT_ZONE);
       }
