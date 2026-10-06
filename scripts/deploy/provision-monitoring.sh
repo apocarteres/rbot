@@ -76,17 +76,11 @@ grep -q 'permitopen="127.0.0.1:3100"' "$keys" \
 grep -q 'permitopen="127.0.0.1:3100"' "$keys"
 REMOTE
 
-log "Alloy на $HOST"
-ssh -o BatchMode=yes "$HOST" bash -s <<'REMOTE'
-set -euo pipefail
-if ! command -v alloy > /dev/null; then
-  install -d -m 0755 /etc/apt/keyrings
-  [ -s /etc/apt/keyrings/grafana.asc ] || curl -fsSL https://apt.grafana.com/gpg.key -o /etc/apt/keyrings/grafana.asc
-  echo "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main" > /etc/apt/sources.list.d/grafana.list
-  apt-get update -qq
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq alloy > /dev/null
+log "Alloy на $HOST: пакет с $METRICS (apt.grafana.com из РФ отвечает 403)"
+if ! ssh -o BatchMode=yes "$HOST" 'command -v alloy > /dev/null'; then
+  deb="$(ssh -o BatchMode=yes "$METRICS" 'cd /tmp && apt-get download -q alloy > /dev/null 2>&1 && ls -1t /tmp/alloy_*.deb | head -n 1')"
+  ssh -o BatchMode=yes "$METRICS" "cat '$deb'" | ssh -o BatchMode=yes "$HOST" 'cat > /tmp/rbot-alloy.deb && DEBIAN_FRONTEND=noninteractive dpkg -i /tmp/rbot-alloy.deb > /dev/null && rm -f /tmp/rbot-alloy.deb'
+  ssh -o BatchMode=yes "$METRICS" "rm -f '$deb'"
 fi
-usermod -aG systemd-journal alloy
-systemctl enable alloy > /dev/null 2>&1
-REMOTE
+ssh -o BatchMode=yes "$HOST" 'usermod -aG systemd-journal alloy && systemctl enable alloy > /dev/null 2>&1'
 log "готово: конфиг Alloy, туннель журналов, правила и дашборд доставит раскат"
