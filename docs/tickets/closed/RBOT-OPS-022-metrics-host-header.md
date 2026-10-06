@@ -34,3 +34,4 @@ related: RBOT-OPS-021, RBOT-OPS-020
 ## Ход работы
 
 - 2026-10-06: строка добавлена в `deploy/nginx/rbot.conf`.
+- 2026-10-06: раскат 2026.10.18 (`--only web-site`): `up{job="rbot-backend"} == 1`; на `metrics` есть `rbot_telegram_poll_success_timestamp_seconds` (38 с назад), `rbot_telegram_polling_lease_held == 1`, `rbot_telegram_requests_total`. Снаружи `/metrics/rbot` — страница кабинета, метрик нет.
