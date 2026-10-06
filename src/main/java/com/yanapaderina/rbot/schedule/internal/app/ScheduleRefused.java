@@ -4,7 +4,7 @@ import io.github.apocarteres.platform.web.errors.CodedFailure;
 import io.github.apocarteres.platform.web.errors.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, REQ-API-011
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-008, REQ-API-011, RBOT-FEAT-021
 public final class ScheduleRefused extends RuntimeException implements CodedFailure {
 
   private static final long serialVersionUID = 1L;
@@ -17,6 +17,7 @@ public final class ScheduleRefused extends RuntimeException implements CodedFail
   public static final ErrorCode SETTINGS = ErrorCode.of("settings-rejected", HttpStatus.BAD_REQUEST);
   public static final ErrorCode INCOMPLETE = ErrorCode.of("settings-incomplete", HttpStatus.CONFLICT);
   public static final ErrorCode TYPE = ErrorCode.of("session-type-rejected", HttpStatus.BAD_REQUEST);
+  public static final ErrorCode OPENING = ErrorCode.of("opening-rejected", HttpStatus.BAD_REQUEST);
   public static final ErrorCode TYPE_MISSING = ErrorCode.of("session-type-missing", HttpStatus.NOT_FOUND);
 
   private final transient ErrorCode code;

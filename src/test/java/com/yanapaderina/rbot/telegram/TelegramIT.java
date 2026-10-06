@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-OPS-018, ADR-0002, ADR-0005
+// MVP-03, MVP-04, MVP-08, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-FEAT-021, RBOT-OPS-018, ADR-0002, ADR-0005
 @SpringBootTest(properties = {
   "platform.auth.admin.email=telegram-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -130,6 +130,7 @@ class TelegramIT extends IntegrationStores {
     LocalDate day = clock.instant().atZone(MOSCOW).toLocalDate().plusDays(1);
     write(put("/api/cabinet/schedule/week/" + day.getDayOfWeek().getValue()), psychologist,
       "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
+    openAll(psychologist, day, day);
     String start = ZonedDateTime.of(day, LocalTime.parse("11:00"), MOSCOW).toInstant().toString();
     mvc.perform(post("/api/miniapp/sessions").header("X-Telegram-Init-Data", miniApp).contentType(MediaType.APPLICATION_JSON)
         .content("{\"practice\":\"" + practice + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}"))
@@ -228,6 +229,14 @@ class TelegramIT extends IntegrationStores {
     mvc.perform(post("/api/tg/webhook").header("X-Telegram-Bot-Api-Secret-Token", SECRET).contentType(MediaType.APPLICATION_JSON)
         .content(body))
       .andExpect(status().isOk());
+  }
+
+  private void openAll(Cookie[] psychologist, LocalDate from, LocalDate to) throws Exception {
+    String body = mvc.perform(get("/api/cabinet/schedule/openings").cookie(psychologist).param("from", from.toString())
+      .param("to", to.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    java.util.List<String> closed = JsonPath.read(body, "$[?(@.state == 'CLOSED')].start");
+    String starts = closed.stream().map(start -> "\"" + start + "\"").collect(java.util.stream.Collectors.joining(","));
+    write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[" + starts + "],\"close\":[]}", 204);
   }
 
   private void named(Cookie[] psychologist) throws Exception {

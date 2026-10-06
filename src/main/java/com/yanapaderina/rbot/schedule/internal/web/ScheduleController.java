@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-02, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003
+// MVP-02, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-021, ADR-0003
 @RestController
 @RequestMapping("/api/cabinet/schedule")
 class ScheduleController {
@@ -108,7 +108,19 @@ class ScheduleController {
   @GetMapping("/slots")
   List<Views.Slot> slots(@RequestParam UUID type, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-    return slots.free(me(), type, from, to).stream().map(Views.Slot::of).toList();
+    return slots.proposed(me(), type, from, to).stream().map(Views.Slot::of).toList();
+  }
+
+  @GetMapping("/openings")
+  List<Views.Opening> openings(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+    return slots.openings(me(), from, to).stream().map(Views.Opening::of).toList();
+  }
+
+  @PutMapping("/openings")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  void changeOpenings(@Valid @RequestBody Views.OpeningsRequest request) {
+    slots.changeOpenings(me(), request.open(), request.close());
   }
 
   private static UUID me() {

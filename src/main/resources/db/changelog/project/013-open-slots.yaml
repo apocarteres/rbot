@@ -1,0 +1,11 @@
+# RBOT-FEAT-021, ADR-0003, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:013-open-slots
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/013-open-slots.sql
+            relativeToChangelogFile: true
+            splitStatements: true

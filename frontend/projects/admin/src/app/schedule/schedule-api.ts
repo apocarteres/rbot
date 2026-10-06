@@ -41,12 +41,19 @@ export interface SessionType {
   readonly active: boolean;
 }
 
+export type OpeningState = 'OPEN' | 'CLOSED' | 'BUSY';
+
+export interface Opening {
+  readonly start: string;
+  readonly state: OpeningState;
+}
+
 export interface Slot {
   readonly start: string;
   readonly end: string;
 }
 
-// MVP-02, RBOT-FEAT-016
+// MVP-02, RBOT-FEAT-016, RBOT-FEAT-021
 @Injectable({ providedIn: 'root' })
 export class ScheduleApi {
   private readonly http = inject(HttpClient);
@@ -99,6 +106,14 @@ export class ScheduleApi {
 
   deleteType(id: string): Promise<void> {
     return firstValueFrom(this.http.delete<void>(`${this.base}/types/${id}`));
+  }
+
+  openings(from: string, to: string): Promise<readonly Opening[]> {
+    return firstValueFrom(this.http.get<readonly Opening[]>(`${this.base}/openings`, { params: { from, to } }));
+  }
+
+  changeOpenings(open: readonly string[], close: readonly string[]): Promise<unknown> {
+    return firstValueFrom(this.http.put(`${this.base}/openings`, { open, close }));
   }
 
   slots(type: string, from: string, to: string): Promise<readonly Slot[]> {

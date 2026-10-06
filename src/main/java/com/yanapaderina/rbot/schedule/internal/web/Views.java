@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-017, REQ-CODE-DESIGN-005
+// MVP-02, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-021, REQ-CODE-DESIGN-005
 final class Views {
 
   private Views() {
@@ -112,5 +112,15 @@ final class Views {
     static Slot of(TimeRange range) {
       return new Slot(range.start(), range.end());
     }
+  }
+
+  record Opening(Instant start, String state) {
+
+    static Opening of(com.yanapaderina.rbot.schedule.internal.app.Opening opening) {
+      return new Opening(opening.start(), opening.state().name());
+    }
+  }
+
+  record OpeningsRequest(@NotNull List<@NotNull Instant> open, @NotNull List<@NotNull Instant> close) {
   }
 }

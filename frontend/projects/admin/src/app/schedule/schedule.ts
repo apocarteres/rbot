@@ -5,7 +5,7 @@ import { map } from 'rxjs';
 import { Attempt } from '../../../../../shared/attempt';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { DaysCard } from './days-card';
-import { PreviewCard } from './preview-card';
+import { OpeningsCard } from './openings-card';
 import { ScheduleApi, SessionType, Settings, Weekday } from './schedule-api';
 import { SettingsCard } from './settings-card';
 import { TypesCard } from './types-card';
@@ -20,10 +20,10 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
   { id: 'settings', title: 'Правила записи' },
 ];
 
-// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004, RBOT-FEAT-016
+// MVP-02, RBOT-FEAT-003, RBOT-FEAT-004, RBOT-FEAT-016, RBOT-FEAT-021
 @Component({
   selector: 'app-schedule',
-  imports: [SettingsCard, WeekCard, DaysCard, TypesCard, PreviewCard, FailureDialog],
+  imports: [SettingsCard, WeekCard, DaysCard, TypesCard, OpeningsCard, FailureDialog],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; margin-bottom: 16px; }
@@ -72,7 +72,7 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
             }
           </div>
         </section>
-        <app-preview-card [settings]="current" [types]="activeTypes()" [version]="version()" />
+        <app-openings-card [settings]="current" [types]="activeTypes()" [version]="version()" />
       </div>
     }
     @if (attempt.failure()) {

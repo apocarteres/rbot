@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-021, ADR-0003
 @SpringBootTest(properties = {
   "platform.auth.admin.email=booking-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -85,6 +85,38 @@ class ClientBookingIT extends IntegrationStores {
     for (int weekday = 1; weekday <= 7; weekday++) {
       write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
     }
+    openAll(psychologist, today().plusDays(1), today().plusDays(7));
+  }
+
+  @Test
+  void onlyOpenedTimeIsOffered() throws Exception {
+    Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
+    Cookie[] third = login("third@example.test", PASSWORD);
+    LocalDate day = today().plusDays(9);
+    String start = at(day, "10:00").toString();
+    openings(psychologist, day)
+      .andExpect(jsonPath("$.length()").value(3))
+      .andExpect(jsonPath("$[0].state").value("CLOSED"));
+    slots(third, day).andExpect(jsonPath("$.length()").value(0));
+    String request = "{\"practice\":\"" + practiceId() + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}";
+    write(post("/api/client/sessions"), third, request, 409).andExpect(jsonPath("$.code").value("slot-taken"));
+
+    write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[\"" + start + "\"],\"close\":[]}", 204);
+    openings(psychologist, day).andExpect(jsonPath("$[0].state").value("OPEN")).andExpect(jsonPath("$[1].state").value("CLOSED"));
+    slots(third, day).andExpect(jsonPath("$.length()").value(1));
+    write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[],\"close\":[\"" + start + "\"]}", 204);
+    slots(third, day).andExpect(jsonPath("$.length()").value(0));
+
+    write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[\"" + start + "\"],\"close\":[]}", 204);
+    write(post("/api/client/sessions"), third, request, 201);
+    openings(psychologist, day).andExpect(jsonPath("$[0].state").value("BUSY"));
+    write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[\"2020-01-01T10:00:00Z\"],\"close\":[]}", 400)
+      .andExpect(jsonPath("$.code").value("opening-rejected"));
+  }
+
+  private ResultActions openings(Cookie[] psychologist, LocalDate day) throws Exception {
+    return mvc.perform(get("/api/cabinet/schedule/openings").cookie(psychologist).param("from", day.toString()).param("to", day.toString()))
+      .andExpect(status().isOk());
   }
 
   @Test
@@ -201,6 +233,14 @@ class ClientBookingIT extends IntegrationStores {
     mvc.perform(get("/api/client/offer").param("practice", practiceId()).cookie(login("booking-psychologist@example.test", "psychologist-password-1")))
       .andExpect(status().isForbidden());
     mvc.perform(get("/api/cabinet/schedule/settings").cookie(login("third@example.test", PASSWORD))).andExpect(status().isForbidden());
+  }
+
+  private void openAll(Cookie[] psychologist, LocalDate from, LocalDate to) throws Exception {
+    String body = mvc.perform(get("/api/cabinet/schedule/openings").cookie(psychologist).param("from", from.toString())
+      .param("to", to.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    java.util.List<String> closed = JsonPath.read(body, "$[?(@.state == 'CLOSED')].start");
+    String starts = closed.stream().map(start -> "\"" + start + "\"").collect(java.util.stream.Collectors.joining(","));
+    write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[" + starts + "],\"close\":[]}", 204);
   }
 
   private LocalDate today() {

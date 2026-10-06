@@ -1,6 +1,6 @@
 import { ApiFailure } from '@apocarteres/http';
 
-// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-018, RBOT-FEAT-019, REQ-API-003
+// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-FEAT-021, REQ-API-003
 export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'credentials-rejected': 'Неверная почта или пароль.',
   'account-blocked': 'Учётная запись заблокирована. Обратитесь к администратору.',
@@ -20,6 +20,7 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'settings-rejected': 'Значение правила записи вне допустимых границ.',
   'settings-incomplete': 'Заполните правила записи на вкладке «Правила записи».',
   'session-type-rejected': 'Проверьте название, длительность и цену.',
+  'opening-rejected': 'Это время уже нельзя открыть: оно прошло или вне горизонта записи. Обновите страницу.',
   'session-type-missing': 'Тип сессии не найден.',
   'booking-closed': 'Запись пока закрыта. Попробуйте позже.',
   'session-type-unavailable': 'Этот тип сессии сейчас недоступен для записи.',
