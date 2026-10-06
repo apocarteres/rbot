@@ -1,7 +1,7 @@
 ---
 id: RBOT-FEAT-023
 type: ticket
-status: in_progress
+status: done
 scope: frontend
 authority: supporting
 priority: P3
@@ -36,3 +36,4 @@ related: RBOT-FEAT-021
 
 - 2026-10-06: задача заведена.
 - 2026-10-06: «Открыть всё» и «Закрыть всё» — группа `.actions` с `margin-left: auto`: справа и при переносе строки.
+- QA 2026-10-06: «Открыто 0 из 0» слева, «Открыть всё» и «Закрыть всё» справа в одной строке.
