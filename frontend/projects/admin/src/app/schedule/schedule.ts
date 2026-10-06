@@ -28,9 +28,6 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
   styles: `
     .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; margin-bottom: 16px; }
     .head h1 { margin: 0; }
-    .state { font-size: 0.85rem; border-radius: 6px; padding: 2px 10px; }
-    .open { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
-    .closed { background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger); }
     .summary { font-size: 0.85rem; color: var(--muted); }
     .link { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; font-size: 0.85rem; }
     .layout { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; }
@@ -45,10 +42,8 @@ const TABS: readonly { readonly id: Tab; readonly title: string }[] = [
       <div class="head">
         <h1>Расписание</h1>
         @if (current.complete) {
-          <span class="state open">Запись открыта</span>
           <span class="summary">{{ summary() }}</span>
         } @else {
-          <span class="state closed">Запись закрыта</span>
           <button type="button" class="link" (click)="open('settings')">Заполните правила записи</button>
         }
       </div>
