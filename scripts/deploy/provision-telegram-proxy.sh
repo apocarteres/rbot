@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# MVP-04, RBOT-FEAT-009, ADR-0001
+# MVP-04, RBOT-FEAT-009, RBOT-OPS-019, ADR-0001
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HOST="${RBOT_PROD_HOST:-root@fileio.ru}"
 PROXY="${RBOT_TELEGRAM_PROXY_ADMIN:-root@metrics}"
-PROXY_ADDRESS="${RBOT_TELEGRAM_PROXY_ADDRESS:-65.108.55.171}"
+PROXY_ADDRESS="${RBOT_TELEGRAM_PROXY_ADDRESS:-65.109.246.127}"
 BOT="${RBOT_TELEGRAM_BOT_USERNAME:-psy_receptionist_bot}"
 KEY=/etc/rbot/telegram_proxy_ed25519
 
