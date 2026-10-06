@@ -24,14 +24,14 @@ interface OpeningDay {
     .head h2 { margin: 0; margin-right: auto; }
     .nav { display: flex; align-items: center; gap: 4px; font-size: 0.9rem; white-space: nowrap; }
     .nav button { padding: 2px 10px; }
-    .bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 8px 0; }
-    .bulk .count { margin-right: auto; }
+    .bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; margin: 8px 0; }
+    .bulk .count { flex-basis: 100%; }
     .day { padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
     .day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
     .times { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .time { border: 1px dashed var(--line); border-radius: 6px; padding: 2px 8px; background: none; color: var(--muted);
       font: inherit; font-variant-numeric: tabular-nums; cursor: pointer; }
-    .time.open { border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--text); }
+    .time.open { border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--text); font-weight: 600; }
     .time.busy { border-style: solid; background: color-mix(in srgb, var(--muted) 12%, transparent); cursor: default; text-decoration: line-through; }
     .link { background: none; border: 0; padding: 0; color: var(--accent); font-size: 0.85rem; cursor: pointer; }
     .small { font-size: 0.8rem; }
