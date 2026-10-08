@@ -78,9 +78,9 @@ authority: navigation
 | [Кнопка бота «Личный кабинет»](RBOT-FEAT-015-bot-cabinet-button.md) | P2 | Выполнена | [RELEASE-2026-10-9](../../releases/RELEASE-2026-10-9.md) | telegram |
 | [Колокольчик со звуком в кабинете психолога](RBOT-FEAT-020-cabinet-bell-with-sound.md) | P2 | Выполнена | [RELEASE-2026-10-19](../../releases/RELEASE-2026-10-19.md) | backend, frontend, notifications |
 | [Имя психолога на главном экране приложения клиента](RBOT-FEAT-025-psychologist-name-on-home.md) | P2 | Выполнена | [RELEASE-2026-10-21](../../releases/RELEASE-2026-10-21.md) | frontend |
-| [Легенда виджета времени без конкретного времени](RBOT-FEAT-027-openings-legend-swatches.md) | P2 | Выполнена | Не назначен | frontend |
+| [Легенда виджета времени без конкретного времени](RBOT-FEAT-027-openings-legend-swatches.md) | P2 | Выполнена | [RELEASE-2026-10-23](../../releases/RELEASE-2026-10-23.md) | frontend |
 | [Переходы базы — Liquibase, таблицы ядра — журналами ядра](RBOT-OPS-011-liquibase-migrations.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | persistence, deployment |
-| [Контекст Docker стенда QA — `qa`](RBOT-OPS-025-qa-docker-context.md) | P2 | Выполнена | Не назначен | deployment, operations |
+| [Контекст Docker стенда QA — `qa`](RBOT-OPS-025-qa-docker-context.md) | P2 | Выполнена | [RELEASE-2026-10-23](../../releases/RELEASE-2026-10-23.md) | deployment, operations |
 | [Размер сборки клиента держит проверка](RBOT-QUAL-004-adopt-bundle-budgets.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend, build |
 | [Секреты шифруются средством платформы](RBOT-SEC-002-adopt-secret-cipher.md) | P2 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, security |
 | [Текст о новой версии: «Пожалуйста, обновите страницу»](RBOT-FEAT-022-update-notice-text.md) | P3 | Выполнена | [RELEASE-2026-10-19](../../releases/RELEASE-2026-10-19.md) | frontend |
