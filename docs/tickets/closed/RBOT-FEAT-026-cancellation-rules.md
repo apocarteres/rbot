@@ -5,7 +5,7 @@ status: done
 scope: backend, frontend, data
 authority: supporting
 priority: P1
-release: unassigned
+release: RELEASE-2026-10-22
 related: MVP-06, MVP-08, ADR-0004, RBOT-FEAT-002, RBOT-FEAT-017
 ---
 
