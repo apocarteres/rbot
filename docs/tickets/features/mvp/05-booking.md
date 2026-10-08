@@ -1,7 +1,7 @@
 ---
 id: MVP-05
 type: ticket
-status: in_progress
+status: done
 scope: backend, frontend, data
 authority: supporting
 priority: P1
@@ -53,3 +53,4 @@ questions: resolved
 ## Ход работы
 
 - 2026-10-01: запись и отмена клиентом — [RBOT-FEAT-002](../../closed/RBOT-FEAT-002-client-booking-wizard.md); раздел «Записи», запись психологом, перенос, отмена психологом и неявка — [RBOT-FEAT-005](../../closed/RBOT-FEAT-005-cabinet-sessions-and-reschedule.md). Остаются события после фиксации и колокольчик (вместе с MVP-01).
+- 2026-10-08: сверка. События — `SessionNotice` (`BOOKED`, `RESCHEDULED`, `CANCELLED`) после фиксации транзакции; колокольчик о записи, отмене и переносе клиентом — [RBOT-FEAT-020](../../closed/RBOT-FEAT-020-cabinet-bell-with-sound.md). Ограничение `session_no_overlap` — в пределах практики ([RBOT-FEAT-017](../../closed/RBOT-FEAT-017-practice-per-psychologist.md)). Критерии: 10 одновременных записей — `ClientBookingIT.tenSimultaneousBookingsOfOneSlotGiveOneSession`; перенос на занятое время и отмена — `CabinetSessionsIT`, `ClientBookingIT`; переход из неактивной записи — `session-not-active`. Отличия от «Требуется», принятые в RBOT-FEAT-005: календарь — неделя списком по дням, перенос — окном, а не перетаскиванием; `confirm` и `decline` не нужны, раз запись сразу `BOOKED`; `complete` — в MVP-10; `policy_version` пуст до MVP-06.

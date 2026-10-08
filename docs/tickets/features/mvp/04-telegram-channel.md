@@ -1,7 +1,7 @@
 ---
 id: MVP-04
 type: ticket
-status: backlog
+status: in_progress
 scope: backend, security, telegram
 authority: supporting
 priority: P1
@@ -40,3 +40,7 @@ related: ADR-0001, ADR-0002, RBOT-SEC-001
 - Повтор того же `update_id` не создаёт второго действия.
 - Непривязанный пользователь не видит меню действующего клиента и получает только сценарий нового клиента.
 - Интеграционный тест с заглушкой Bot API (WireMock): привязка по токену от `/start` до сообщения «Готово».
+
+## Ход работы
+
+- 2026-10-08: сверка с закрытыми задачами. Сделано: точка webhook с проверкой секрета, запоминание `update_id`, `/start <token>` → согласие → привязка, сообщения после фиксации транзакции, тексты в ресурсах, кнопка меню чата открывает Mini App — [RBOT-FEAT-009](../../closed/RBOT-FEAT-009-telegram-client.md); обновления опросом вместо webhook — [RBOT-FEAT-010](../../closed/RBOT-FEAT-010-telegram-polling.md), передача опроса новому экземпляру — [RBOT-OPS-018](../../closed/RBOT-OPS-018-telegram-polling-handover.md); кнопка «Личный кабинет» — [RBOT-FEAT-015](../../closed/RBOT-FEAT-015-bot-cabinet-button.md). Не сделано: меню действующего клиента «Мои сессии», «Записаться», «Вопрос психологу», «Правила отмены» (п. 4); сценарий `/start` без приглашения (п. 3) — вне текущего объёма по решению владельца 2026-10-01; повтор при `429` с `retry_after` (п. 5). Порт ядра для клиента из Telegram — [RBOT-SEC-001](../../RBOT-SEC-001-telegram-client-outside-core-auth-chain.md).

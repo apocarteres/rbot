@@ -1,7 +1,7 @@
 ---
 id: MVP-08
 type: ticket
-status: backlog
+status: in_progress
 scope: frontend, backend, security, telegram
 authority: supporting
 priority: P1
@@ -40,3 +40,7 @@ Mini App согласован владельцем. Проверка `initData` 
 - Слот, занятый между показом и подтверждением, даёт понятный отказ и обновлённый список.
 - Анкета в базе нечитаема без ключа шифрования.
 - Ручная проверка в Telegram на iOS, Android и Desktop: тема, кнопка «Назад», закрытие после записи.
+
+## Ход работы
+
+- 2026-10-08: сверка с закрытыми задачами. Сделано: проверка подписи `initData` (`InitDataTest`, отказ 401 — `TelegramIT`) — [RBOT-FEAT-009](../../closed/RBOT-FEAT-009-telegram-client.md); мастер «тип → день → время → проверка» и перенос — [RBOT-FEAT-002](../../closed/RBOT-FEAT-002-client-booking-wizard.md); согласие в приложении и приветствие для непривязанного — [RBOT-FEAT-018](../../closed/RBOT-FEAT-018-consent-in-mini-app.md); время открывает психолог — [RBOT-FEAT-021](../../closed/RBOT-FEAT-021-manually-opened-times.md); имя психолога на главной — [RBOT-FEAT-025](../../closed/RBOT-FEAT-025-psychologist-name-on-home.md). Не сделано: сценарий нового клиента с анкетой (п. 4, ждёт MVP-14 и вне текущего объёма), принятие политики отмен (п. 5, ждёт MVP-06), предупреждение `evaluate` при переносе (п. 3, ждёт MVP-06), тема из `themeParams` (п. 2), ручная проверка на iOS, Android и Desktop.
