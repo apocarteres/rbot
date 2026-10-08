@@ -20,7 +20,7 @@ authority: navigation
 |---|---|---|---|---|
 | [Настройка среды едет развёртыванием: составляющая, место, разбор и проверки поведения](RBOT-OPS-007-adopt-environment-configuration.md) | P0 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | deployment, operations |
 | [Расписание психолога и свободные слоты](../features/mvp/02-work-schedule.md) | P1 | Выполнена | [RELEASE-2026-10-1](../../releases/RELEASE-2026-10-1.md) | backend, frontend, data |
-| [Запись, перенос, отмена и календарь кабинета](../features/mvp/05-booking.md) | P1 | Выполнена | Не назначен | backend, frontend, data |
+| [Запись, перенос, отмена и календарь кабинета](../features/mvp/05-booking.md) | P1 | Выполнена | [RELEASE-2026-10-22](../../releases/RELEASE-2026-10-22.md) | backend, frontend, data |
 | [Java-код разделён на модули, граф связей ациклический](RBOT-ARC-001-adopt-java-modules.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | backend, java, architecture |
 | [Каждое модальное окно явно решает, что делать по Escape](RBOT-ARC-002-adopt-modal-escape.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
 | [Окно с удалённым действием закрывается после успеха, каждая кнопка окна объявляет своё действие](RBOT-ARC-003-adopt-modal-actions.md) | P1 | Выполнена | [RELEASE-2026-09-1](../../releases/RELEASE-2026-09-1.md) | frontend |
