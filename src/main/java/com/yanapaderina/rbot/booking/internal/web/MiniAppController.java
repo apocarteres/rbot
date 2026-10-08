@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-03, MVP-08, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0002, ADR-0005, ADR-0003, REQ-AUTH-039
+// MVP-03, MVP-08, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-026, ADR-0002, ADR-0005, ADR-0003, REQ-AUTH-039
 @RestController
 @RequestMapping("/api/miniapp")
 class MiniAppController {
@@ -92,6 +92,11 @@ class MiniAppController {
   @PostMapping("/sessions/{id}/reschedule")
   ClientViews.Session reschedule(@PathVariable UUID id, @Valid @RequestBody ClientViews.MoveRequest request) {
     return endpoints.reschedule(scope(), id, request);
+  }
+
+  @GetMapping("/sessions/{id}/cancellation")
+  ClientViews.Cancellation cancellation(@PathVariable UUID id) {
+    return endpoints.cancellation(scope(), id);
   }
 
   @PostMapping("/sessions/{id}/cancel")

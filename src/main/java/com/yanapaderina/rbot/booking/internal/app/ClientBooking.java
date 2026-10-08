@@ -3,12 +3,14 @@ package com.yanapaderina.rbot.booking.internal.app;
 import com.yanapaderina.rbot.booking.SessionNotice;
 import com.yanapaderina.rbot.booking.internal.data.SessionDao;
 import com.yanapaderina.rbot.booking.internal.data.SessionRow;
+import com.yanapaderina.rbot.policy.CancellationDecision;
+import com.yanapaderina.rbot.policy.CancellationRule;
+import com.yanapaderina.rbot.policy.CancellationRules;
 import com.yanapaderina.rbot.schedule.Availability;
 import com.yanapaderina.rbot.schedule.BookingTerms;
 import com.yanapaderina.rbot.schedule.SessionType;
 import com.yanapaderina.rbot.schedule.TimeRange;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -22,7 +24,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004, RBOT-FEAT-020
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-016, RBOT-FEAT-017, ADR-0003, REQ-DATA-ACCESS-003, REQ-CODE-DESIGN-004, RBOT-FEAT-020, RBOT-FEAT-026, ADR-0004
 @Service
 public class ClientBooking {
 
@@ -30,13 +32,16 @@ public class ClientBooking {
   private final SessionDao sessions;
   private final SessionLedger ledger;
   private final ApplicationEventPublisher events;
+  private final CancellationRules rules;
   private final Clock clock;
 
-  ClientBooking(Availability availability, SessionDao sessions, SessionLedger ledger, ApplicationEventPublisher events, Clock clock) {
+  ClientBooking(Availability availability, SessionDao sessions, SessionLedger ledger, ApplicationEventPublisher events,
+    CancellationRules rules, Clock clock) {
     this.availability = availability;
     this.sessions = sessions;
     this.ledger = ledger;
     this.events = events;
+    this.rules = rules;
     this.clock = clock;
   }
 
@@ -48,7 +53,8 @@ public class ClientBooking {
   @Transactional(readOnly = true)
   public Optional<ClientOffer> offer(UUID practitioner) {
     return availability.terms(practitioner)
-      .map(terms -> new ClientOffer(terms, availability.types(practitioner).stream().filter(SessionType::active).toList()));
+      .map(terms -> new ClientOffer(terms, availability.types(practitioner).stream().filter(SessionType::active).toList(),
+        rules.rules(practitioner).stream().map(CancellationRule::text).toList()));
   }
 
   @Transactional(readOnly = true)
@@ -76,11 +82,18 @@ public class ClientBooking {
     return session(row, Map.of(typeId, type));
   }
 
+  @Transactional(readOnly = true)
+  public CancellationDecision cancellation(Set<UUID> clients, UUID sessionId) {
+    SessionRow row = mine(clients, sessionId);
+    active(row);
+    return rules.decide(row.practitioner(), row.start());
+  }
+
   @Transactional
   public ClientSession reschedule(Set<UUID> clients, UUID sessionId, Instant start) {
     SessionRow row = mine(clients, sessionId);
     BookingTerms terms = open(row.practitioner());
-    changeable(row, terms.lead());
+    changeable(row);
     SessionType type = offered(row.practitioner(), row.type());
     requireFree(row.practitioner(), terms, type.id(), start);
     SessionRow moved = ledger.reschedule(row, type, start, row.client());
@@ -91,7 +104,7 @@ public class ClientBooking {
   @Transactional
   public ClientSession cancel(Set<UUID> clients, UUID sessionId) {
     SessionRow row = mine(clients, sessionId);
-    changeable(row, availability.terms(row.practitioner()).map(BookingTerms::lead).orElse(Duration.ZERO));
+    changeable(row);
     Map<UUID, SessionType> types = everyType(row.practitioner());
     SessionRow closed = ledger.close(row, SessionStatus.CANCELLED, row.client());
     told(closed, SessionNotice.Change.CANCELLED, Optional.empty(), types.containsKey(row.type()) ? types.get(row.type()).title() : "");
@@ -107,12 +120,17 @@ public class ClientBooking {
     return sessions.find(sessionId).filter(row -> clients.contains(row.client())).orElseThrow(ClientBooking::missing);
   }
 
-  private void changeable(SessionRow row, Duration lead) {
+  private void changeable(SessionRow row) {
+    active(row);
+    CancellationDecision decision = rules.decide(row.practitioner(), row.start());
+    if (!decision.allowed()) {
+      throw new BookingRefused(BookingRefused.CANCEL_FORBIDDEN, decision.text());
+    }
+  }
+
+  private static void active(SessionRow row) {
     if (!SessionStatus.BOOKED.name().equals(row.status())) {
       throw new BookingRefused(BookingRefused.SESSION_INACTIVE, "Сессия не назначена");
-    }
-    if (!CancelDeadline.allows(row.start(), clock.instant(), lead)) {
-      throw new BookingRefused(BookingRefused.TOO_LATE, "До начала меньше " + lead.toMinutes() + " мин");
     }
   }
 

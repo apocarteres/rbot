@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Component;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, RBOT-FEAT-018, ADR-0003
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-026, ADR-0003
 @Component
 class ClientEndpoints {
 
@@ -49,6 +49,10 @@ class ClientEndpoints {
 
   ClientViews.Session reschedule(ClientScope scope, UUID id, ClientViews.MoveRequest request) {
     return named(booking.reschedule(scope.clients(), id, request.start()));
+  }
+
+  ClientViews.Cancellation cancellation(ClientScope scope, UUID id) {
+    return ClientViews.Cancellation.of(booking.cancellation(scope.clients(), id));
   }
 
   ClientViews.Session cancel(ClientScope scope, UUID id) {

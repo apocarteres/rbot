@@ -1,0 +1,11 @@
+# RBOT-FEAT-026, REQ-DEPLOYMENT-026
+databaseChangeLog:
+  - changeSet:
+      id: rbot:015-cancellation-rules
+      author: rbot
+      labels: additive
+      changes:
+        - sqlFile:
+            path: ../sql/015-cancellation-rules.sql
+            relativeToChangelogFile: true
+            splitStatements: true

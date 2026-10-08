@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-// RBOT-ARC-001, RBOT-DATA-001, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, REQ-JAVA-MODULES-001, REQ-JAVA-MODULES-002, REQ-JAVA-MODULES-003, REQ-DATA-ACCESS-001, REQ-DATA-ACCESS-002, REQ-DATA-ACCESS-003, REQ-DATA-ACCESS-005
+// RBOT-ARC-001, RBOT-DATA-001, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-026, REQ-JAVA-MODULES-001, REQ-JAVA-MODULES-002, REQ-JAVA-MODULES-003, REQ-DATA-ACCESS-001, REQ-DATA-ACCESS-002, REQ-DATA-ACCESS-003, REQ-DATA-ACCESS-005
 class PlatformArchRulesTest {
 
   private static final String ROOT = "com.yanapaderina.rbot";
@@ -21,8 +21,9 @@ class PlatformArchRulesTest {
     "access", Set.of(),
     "bell", Set.of("booking"),
     "accounts", Set.of("access"),
-    "booking", Set.of("access", "clients", "schedule"),
+    "booking", Set.of("access", "clients", "policy", "schedule"),
     "clients", Set.of(),
+    "policy", Set.of(),
     "schedule", Set.of(),
     "telegram", Set.of("access", "booking", "clients", "schedule"),
     "web", Set.of());

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, ADR-0003
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-026, ADR-0003
 @RestController
 @RequestMapping("/api/client")
 class ClientBookingController {
@@ -68,6 +68,11 @@ class ClientBookingController {
   @PostMapping("/sessions/{id}/reschedule")
   ClientViews.Session reschedule(@PathVariable UUID id, @Valid @RequestBody ClientViews.MoveRequest request) {
     return endpoints.reschedule(scope(), id, request);
+  }
+
+  @GetMapping("/sessions/{id}/cancellation")
+  ClientViews.Cancellation cancellation(@PathVariable UUID id) {
+    return endpoints.cancellation(scope(), id);
   }
 
   @PostMapping("/sessions/{id}/cancel")

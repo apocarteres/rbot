@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { AuthSession } from '@apocarteres/auth';
 import { NotificationBellComponent } from '../bell/notification-bell';
 
-// MVP-01, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-020
+// MVP-01, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-020, RBOT-FEAT-026
 @Component({
   selector: 'app-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBellComponent],
@@ -29,6 +29,7 @@ import { NotificationBellComponent } from '../bell/notification-bell';
           <a routerLink="/sessions" routerLinkActive="active">Записи</a>
           <a routerLink="/clients" routerLinkActive="active">Клиенты</a>
           <a routerLink="/schedule" routerLinkActive="active">Расписание</a>
+          <a routerLink="/cancellation" routerLinkActive="active">Правила отмены</a>
         }
         @if (session.has('ADMIN')) {
           <a routerLink="/accounts" routerLinkActive="active">Учётные записи</a>

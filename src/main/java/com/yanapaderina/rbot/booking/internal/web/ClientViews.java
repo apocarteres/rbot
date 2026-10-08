@@ -3,6 +3,7 @@ package com.yanapaderina.rbot.booking.internal.web;
 import com.yanapaderina.rbot.booking.internal.app.ClientOffer;
 import com.yanapaderina.rbot.booking.internal.app.ClientSession;
 import com.yanapaderina.rbot.booking.internal.app.SessionStatus;
+import com.yanapaderina.rbot.policy.CancellationDecision;
 import com.yanapaderina.rbot.schedule.SessionFormat;
 import com.yanapaderina.rbot.schedule.SessionType;
 import com.yanapaderina.rbot.schedule.TimeRange;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, REQ-CODE-DESIGN-005
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-026, REQ-CODE-DESIGN-005
 final class ClientViews {
 
   private ClientViews() {
@@ -27,12 +28,19 @@ final class ClientViews {
     }
   }
 
-  record Offer(boolean open, String zone, Integer leadMinutes, Integer horizonDays, List<Type> types) {
+  record Offer(boolean open, String zone, Integer leadMinutes, Integer horizonDays, List<Type> types, List<String> cancellation) {
 
     static Offer of(Optional<ClientOffer> offer) {
       return offer.map(one -> new Offer(true, one.terms().zone().getId(), Math.toIntExact(one.terms().lead().toMinutes()),
-          one.terms().horizonDays(), one.types().stream().map(Type::of).toList()))
-        .orElseGet(() -> new Offer(false, null, null, null, List.of()));
+          one.terms().horizonDays(), one.types().stream().map(Type::of).toList(), one.cancellation()))
+        .orElseGet(() -> new Offer(false, null, null, null, List.of(), List.of()));
+    }
+  }
+
+  record Cancellation(boolean allowed, String text) {
+
+    static Cancellation of(CancellationDecision decision) {
+      return new Cancellation(decision.allowed(), decision.text());
     }
   }
 

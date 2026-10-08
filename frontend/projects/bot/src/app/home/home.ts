@@ -4,12 +4,18 @@ import { AuthSession } from '@apocarteres/auth';
 import { Attempt } from '../../../../../shared/attempt';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
 import { ApiFailure } from '@apocarteres/http';
-import { ClientApi, ClientSession, Consent } from '../client-api';
+import { Cancellation, ClientApi, ClientSession, Consent } from '../client-api';
 import { DEFAULT_ZONE, details, when, zoneNote } from '../format';
 import { insideTelegram, inviteSettled, pendingInvite } from '../telegram';
-import { CancelDialog } from './cancel-dialog';
+import { CancelDialog, Change } from './cancel-dialog';
 
-// MVP-01, MVP-03, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-025, ADR-0005
+interface Asked {
+  readonly session: ClientSession;
+  readonly decision: Cancellation;
+  readonly change: Change;
+}
+
+// MVP-01, MVP-03, MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-025, RBOT-FEAT-026, ADR-0005
 @Component({
   selector: 'app-home',
   imports: [RouterLink, CancelDialog, FailureDialog],
@@ -60,8 +66,8 @@ import { CancelDialog } from './cancel-dialog';
               <span class="muted small">@if (many()) { {{ one.practiceName }} · }{{ one.title }} · {{ details(one) }}</span>
             </div>
             <span class="actions">
-              <a class="quiet-link" routerLink="/book" [queryParams]="{ move: one.id }" [attr.aria-label]="'Перенести: ' + period(one)">Перенести</a>
-              <button type="button" class="quiet" [attr.aria-label]="'Отменить: ' + period(one)" (click)="cancelling.set(one)">Отменить</button>
+              <button type="button" class="quiet" [disabled]="attempt.busy()" [attr.aria-label]="'Перенести: ' + period(one)" (click)="ask(one, 'move')">Перенести</button>
+              <button type="button" class="quiet" [disabled]="attempt.busy()" [attr.aria-label]="'Отменить: ' + period(one)" (click)="ask(one, 'cancel')">Отменить</button>
             </span>
           </div>
         } @empty {
@@ -84,7 +90,8 @@ import { CancelDialog } from './cancel-dialog';
       </footer>
     }
     @if (cancelling(); as one) {
-      <app-cancel-dialog [session]="one" [zone]="zone()" (closed)="cancelling.set(null)" (cancelled)="cancelled()" />
+      <app-cancel-dialog [session]="one.session" [decision]="one.decision" [change]="one.change" [zone]="zone()"
+        (closed)="cancelling.set(null)" (cancelled)="cancelled()" />
     }
     @if (attempt.failure()) {
       <app-failure-dialog [message]="attempt.failure()" (closed)="attempt.dismiss()" />
@@ -99,7 +106,7 @@ export class Home implements OnInit {
   protected readonly attempt = new Attempt();
   protected readonly sessions = signal<readonly ClientSession[]>([]);
   protected readonly loaded = signal(false);
-  protected readonly cancelling = signal<ClientSession | null>(null);
+  protected readonly cancelling = signal<Asked | null>(null);
   protected readonly consent = signal<Consent | null>(null);
   protected readonly stranger = signal(false);
   private invited = '';
@@ -122,6 +129,18 @@ export class Home implements OnInit {
 
   protected details(session: ClientSession): string {
     return details(session.title, session.format, session.price);
+  }
+
+  protected async ask(session: ClientSession, change: Change): Promise<void> {
+    const decision = await this.decide(session);
+    if (!decision) {
+      return;
+    }
+    if (change === 'move' && decision.allowed) {
+      await this.router.navigate(['/book'], { queryParams: { move: session.id } });
+      return;
+    }
+    this.cancelling.set({ session, decision, change });
   }
 
   protected async cancelled(): Promise<void> {
@@ -175,6 +194,14 @@ export class Home implements OnInit {
       this.sessions.set(sessions);
       this.loaded.set(true);
     });
+  }
+
+  private async decide(session: ClientSession): Promise<Cancellation | null> {
+    let decision: Cancellation | null = null;
+    const done = await this.attempt.run(async () => {
+      decision = await this.api.cancellation(session.id);
+    });
+    return done ? decision : null;
   }
 
   private async consentDue(): Promise<boolean> {

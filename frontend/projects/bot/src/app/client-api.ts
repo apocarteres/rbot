@@ -19,6 +19,12 @@ export interface Offer {
   readonly leadMinutes: number | null;
   readonly horizonDays: number | null;
   readonly types: readonly OfferedType[];
+  readonly cancellation: readonly string[];
+}
+
+export interface Cancellation {
+  readonly allowed: boolean;
+  readonly text: string;
 }
 
 export interface Practice {
@@ -51,7 +57,7 @@ export interface Consent {
   readonly text: string;
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-FEAT-018, RBOT-FEAT-026
 @Injectable({ providedIn: 'root' })
 export class ClientApi {
   private readonly http = inject(HttpClient);
@@ -95,6 +101,10 @@ export class ClientApi {
 
   reschedule(id: string, start: string): Promise<ClientSession> {
     return firstValueFrom(this.http.post<ClientSession>(`${this.base}/sessions/${id}/reschedule`, { start }));
+  }
+
+  cancellation(id: string): Promise<Cancellation> {
+    return firstValueFrom(this.http.get<Cancellation>(`${this.base}/sessions/${id}/cancellation`));
   }
 
   cancel(id: string): Promise<ClientSession> {

@@ -4,7 +4,7 @@ import { withUnknownPath } from '@apocarteres/routing';
 import { LoginPage } from '../../../../shared/login-page';
 import { NotFound } from '../../../../shared/not-found';
 
-// MVP-01, MVP-02, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-OPS-005, REQ-AUTH-015, REQ-DEPLOYMENT-018, RBOT-FEAT-020
+// MVP-01, MVP-02, RBOT-FEAT-005, RBOT-FEAT-009, RBOT-FEAT-017, RBOT-OPS-005, REQ-AUTH-015, REQ-DEPLOYMENT-018, RBOT-FEAT-020, RBOT-FEAT-026
 export const routes: Routes = withUnknownPath([
   {
     path: 'login',
@@ -20,6 +20,7 @@ export const routes: Routes = withUnknownPath([
       { path: 'clients', canMatch: [withRole('PSYCHOLOGIST', '/')], loadComponent: () => import('./clients/clients').then((m) => m.ClientsPage) },
       { path: 'sessions', canMatch: [withRole('PSYCHOLOGIST', '/')], loadComponent: () => import('./sessions/sessions').then((m) => m.SessionsPage) },
       { path: 'notifications', canMatch: [withRole('PSYCHOLOGIST', '/')], loadComponent: () => import('./bell/notifications-page').then((m) => m.NotificationsPage) },
+      { path: 'cancellation', canMatch: [withRole('PSYCHOLOGIST', '/')], loadComponent: () => import('./cancellation/rules-page').then((m) => m.RulesPage) },
       { path: 'schedule', canMatch: [withRole('PSYCHOLOGIST', '/')], loadComponent: () => import('./schedule/schedule').then((m) => m.SchedulePage) },
       {
         path: 'accounts',

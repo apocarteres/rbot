@@ -4,21 +4,22 @@ import { Attempt } from '../../../../../shared/attempt';
 import { AppClock } from '../../../../../shared/clock';
 import { clock, dayTitle, isoDate, plusDays } from '../../../../../shared/dates';
 import { FailureDialog } from '../../../../../shared/failure-dialog';
-import { ClientApi, ClientSession, Offer, OfferedType, Practice, Slot } from '../client-api';
+import { Cancellation, ClientApi, ClientSession, Offer, OfferedType, Practice, Slot } from '../client-api';
 import { DEFAULT_ZONE, details, shortDay, when, zoneNote } from '../format';
 
 type Step = 'practice' | 'type' | 'day' | 'time' | 'confirm' | 'done';
 
 const STEPS: readonly Step[] = ['type', 'day', 'time', 'confirm'];
 const MOVE_STEPS: readonly Step[] = ['day', 'time', 'confirm'];
-const CLOSED: Offer = { open: false, zone: null, leadMinutes: null, horizonDays: null, types: [] };
+const CLOSED: Offer = { open: false, zone: null, leadMinutes: null, horizonDays: null, types: [], cancellation: [] };
+const CONTACT = 'Для отмены обратитесь к психологу.';
 
 interface SlotDay {
   readonly date: string;
   readonly slots: readonly Slot[];
 }
 
-// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, ADR-0003, REQ-CODE-DESIGN-007
+// MVP-05, MVP-08, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-017, RBOT-FEAT-026, ADR-0003, ADR-0004, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-booking-wizard',
   imports: [RouterLink, FailureDialog],
@@ -37,6 +38,8 @@ interface SlotDay {
     .small { font-size: 0.85rem; }
     .wide { width: 100%; }
     .done { text-align: center; }
+    .rules { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+    .rules p { margin: 4px 0; white-space: pre-line; overflow-wrap: anywhere; }
   `,
   template: `
     @if (step() !== 'done') {
@@ -106,8 +109,18 @@ interface SlotDay {
                 <p><strong>{{ chosen.title }}</strong></p>
                 <p>{{ period() }}</p>
                 <p class="muted small">{{ details(chosen) }}, оплата психологу</p>
-                <p class="muted small">{{ note() }}. {{ cancelNote() }}</p>
+                <p class="muted small">{{ note() }}</p>
                 @if (moving(); as old) { <p class="muted small">Вместо: {{ when(old) }}</p> }
+                <div class="rules">
+                  @if (moving()) {
+                    <p class="small">{{ moveRule() }}</p>
+                  } @else {
+                    <p class="small"><strong>Правила отмены</strong></p>
+                    @for (rule of cancellation(); track $index) {
+                      <p class="muted small">{{ rule }}</p>
+                    }
+                  }
+                </div>
                 <button type="button" class="wide" [disabled]="attempt.busy()" (click)="book()">{{ moving() ? 'Перенести' : 'Записаться' }}</button>
               </section>
             }
@@ -163,10 +176,12 @@ export class BookingWizard implements OnInit {
     return [...grouped].map(([date, slots]) => ({ date, slots }));
   });
   protected readonly times = computed(() => this.days().find((one) => one.date === this.day())?.slots ?? []);
-  protected readonly cancelNote = computed(() => {
-    const lead = this.offer()?.leadMinutes ?? 0;
-    return lead > 0 ? `Перенести или отменить можно не позже чем за ${hours(lead)} до начала` : 'Перенести или отменить можно до начала';
+  protected readonly decision = signal<Cancellation | null>(null);
+  protected readonly cancellation = computed(() => {
+    const rules = this.offer()?.cancellation ?? [];
+    return rules.length > 0 ? rules : [CONTACT];
   });
+  protected readonly moveRule = computed(() => this.decision()?.text ?? '');
 
   ngOnInit(): void {
     const move = this.route.snapshot.queryParamMap.get('move');
@@ -180,6 +195,7 @@ export class BookingWizard implements OnInit {
         this.offer.set(offer);
         const type = offer.types.find((one) => one.id === old.typeId);
         if (type) {
+          this.decision.set(await this.api.cancellation(old.id));
           this.moving.set(old);
           this.type.set(type);
           await this.loadSlots();
@@ -290,8 +306,4 @@ export class BookingWizard implements OnInit {
     const today = isoDate(this.clock.instant(), this.zone());
     this.slots.set(await this.api.slots(this.practice(), type.id, today, plusDays(today, offer.horizonDays ?? 14)));
   }
-}
-
-function hours(minutes: number): string {
-  return minutes % 60 === 0 ? `${minutes / 60} ч` : `${minutes} мин`;
 }

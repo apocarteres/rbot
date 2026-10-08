@@ -1,6 +1,6 @@
 import { ApiFailure } from '@apocarteres/http';
 
-// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-FEAT-021, REQ-API-003
+// RBOT-API-001, MVP-02, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-018, RBOT-FEAT-019, RBOT-FEAT-021, RBOT-FEAT-026, REQ-API-003
 export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'credentials-rejected': 'Неверная почта или пароль.',
   'account-blocked': 'Учётная запись заблокирована. Обратитесь к администратору.',
@@ -27,7 +27,10 @@ export const FAILURE_TEXTS: Readonly<Record<string, string>> = {
   'slot-taken': 'Это время уже заняли. Выберите другое.',
   'session-missing': 'Запись не найдена.',
   'session-not-active': 'Эта запись уже отменена или прошла.',
-  'cancel-too-late': 'Отменить уже нельзя: до начала меньше минимального срока. Напишите психологу.',
+  'cancel-forbidden': 'По правилам психолога эту запись уже нельзя отменить или перенести. Обратитесь к психологу.',
+  'rule-rejected': 'Порог — от 0 до 8760 часов, текст для клиента — от 1 до 500 знаков.',
+  'rule-hours-taken': 'Правило с таким порогом уже есть. Измените его или выберите другой порог.',
+  'rule-missing': 'Правило не найдено. Обновите страницу.',
   'session-not-started': 'Неявку можно отметить только после начала сессии.',
   'session-start-past': 'Выберите время в будущем.',
   'client-missing': 'Клиент не найден.',

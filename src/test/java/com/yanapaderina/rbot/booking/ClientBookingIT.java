@@ -2,6 +2,7 @@ package com.yanapaderina.rbot.booking;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -40,7 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-020, RBOT-FEAT-021, ADR-0003
+// MVP-05, RBOT-FEAT-002, RBOT-FEAT-005, RBOT-FEAT-016, RBOT-FEAT-017, RBOT-FEAT-020, RBOT-FEAT-021, RBOT-FEAT-026, ADR-0003, ADR-0004
 @SpringBootTest(properties = {
   "platform.auth.admin.email=booking-psychologist@example.test",
   "platform.auth.admin.password=psychologist-password-1",
@@ -86,6 +87,52 @@ class ClientBookingIT extends IntegrationStores {
       write(put("/api/cabinet/schedule/week/" + weekday), psychologist, "{\"intervals\":[{\"start\":\"10:00\",\"end\":\"13:00\",\"types\":[\"" + therapy + "\"]}]}", 200);
     }
     openAll(psychologist, today().plusDays(1), today().plusDays(7));
+    replaceRules(psychologist, "{\"hours\":0,\"allowed\":true,\"text\":\"Отменить можно до начала.\"}");
+  }
+
+  @Test
+  void cancellationFollowsPsychologistRules() throws Exception {
+    Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
+    Cookie[] third = login("third@example.test", PASSWORD);
+    replaceRules(psychologist, "{\"hours\":48,\"allowed\":true,\"text\":\"Можно за 48 часов.\"}",
+      "{\"hours\":0,\"allowed\":false,\"text\":\"Позже — только через психолога.\"}");
+    write(post("/api/cabinet/cancellation-rules"), psychologist, "{\"hours\":48,\"allowed\":false,\"text\":\"Повтор\"}", 409)
+      .andExpect(jsonPath("$.code").value("rule-hours-taken"));
+    write(post("/api/cabinet/cancellation-rules"), psychologist, "{\"hours\":12,\"allowed\":false,\"text\":\"  \"}", 400)
+      .andExpect(jsonPath("$.code").value("rule-rejected"));
+    mvc.perform(get("/api/client/offer").param("practice", practiceId()).cookie(third))
+      .andExpect(jsonPath("$.cancellation.length()").value(2))
+      .andExpect(jsonPath("$.cancellation[0]").value("Можно за 48 часов."));
+
+    String near = book(third, at(today().plusDays(1), "10:00"));
+    String far = book(third, at(today().plusDays(6), "10:00"));
+    mvc.perform(get("/api/client/sessions/" + near + "/cancellation").cookie(third))
+      .andExpect(jsonPath("$.allowed").value(false))
+      .andExpect(jsonPath("$.text").value("Позже — только через психолога."));
+    write(post("/api/client/sessions/" + near + "/cancel"), third, "", 409).andExpect(jsonPath("$.code").value("cancel-forbidden"));
+    write(post("/api/client/sessions/" + near + "/reschedule"), third, "{\"start\":\"" + at(today().plusDays(6), "12:00") + "\"}", 409)
+      .andExpect(jsonPath("$.code").value("cancel-forbidden"));
+    mvc.perform(get("/api/client/sessions/" + far + "/cancellation").cookie(third))
+      .andExpect(jsonPath("$.allowed").value(true))
+      .andExpect(jsonPath("$.text").value("Можно за 48 часов."));
+
+    replaceRules(psychologist);
+    mvc.perform(get("/api/client/sessions/" + far + "/cancellation").cookie(third))
+      .andExpect(jsonPath("$.allowed").value(false))
+      .andExpect(jsonPath("$.text").value("Для отмены обратитесь к психологу."));
+    mvc.perform(get("/api/client/offer").param("practice", practiceId()).cookie(third)).andExpect(jsonPath("$.cancellation.length()").value(0));
+    replaceRules(psychologist, "{\"hours\":0,\"allowed\":true,\"text\":\"Отменить можно до начала.\"}");
+    write(post("/api/client/sessions/" + far + "/cancel"), third, "", 200);
+    write(post("/api/client/sessions/" + near + "/cancel"), third, "", 200);
+
+    if (accounts.findByEmail("rules-psychologist@example.test").isEmpty()) {
+      accounts.create("rules-psychologist@example.test", "psychologist-password-2", Set.of("PSYCHOLOGIST"), true, new NoProfile());
+    }
+    mvc.perform(get("/api/cabinet/cancellation-rules").cookie(login("rules-psychologist@example.test", "psychologist-password-2")))
+      .andExpect(jsonPath("$.length()").value(1))
+      .andExpect(jsonPath("$[0].hours").value(48))
+      .andExpect(jsonPath("$[0].allowed").value(true));
+    mvc.perform(get("/api/cabinet/cancellation-rules").cookie(third)).andExpect(status().isForbidden());
   }
 
   @Test
@@ -193,7 +240,7 @@ class ClientBookingIT extends IntegrationStores {
   }
 
   @Test
-  void clientCannotBookOutsideOfferOrCancelInsideLead() throws Exception {
+  void clientCannotBookOutsideOfferAndLeadDoesNotLimitCancel() throws Exception {
     Cookie[] first = login("third@example.test", PASSWORD);
     Cookie[] psychologist = login("booking-psychologist@example.test", "psychologist-password-1");
     LocalDate day = today().plusDays(2);
@@ -208,8 +255,7 @@ class ClientBookingIT extends IntegrationStores {
         "{\"practice\":\"" + practiceId() + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + at(day, "11:00") + "\"}", 201)
       .andReturn().getResponse().getContentAsString();
     settings(psychologist, 10080);
-    write(post("/api/client/sessions/" + JsonPath.read(booked, "$.id") + "/cancel"), first, "", 409)
-      .andExpect(jsonPath("$.code").value("cancel-too-late"));
+    write(post("/api/client/sessions/" + JsonPath.read(booked, "$.id") + "/cancel"), first, "", 200);
 
     write(put("/api/cabinet/schedule/settings"), psychologist, "{\"zone\":\"Europe/Moscow\"}", 200);
     mvc.perform(get("/api/client/offer").param("practice", practiceId()).cookie(first)).andExpect(jsonPath("$.open").value(false));
@@ -279,6 +325,23 @@ class ClientBookingIT extends IntegrationStores {
     java.util.List<String> closed = JsonPath.read(body, "$[?(@.state == 'CLOSED')].start");
     String starts = closed.stream().map(start -> "\"" + start + "\"").collect(java.util.stream.Collectors.joining(","));
     write(put("/api/cabinet/schedule/openings"), psychologist, "{\"open\":[" + starts + "],\"close\":[]}", 204);
+  }
+
+  private void replaceRules(Cookie[] psychologist, String... rules) throws Exception {
+    String body = mvc.perform(get("/api/cabinet/cancellation-rules").cookie(psychologist)).andExpect(status().isOk())
+      .andReturn().getResponse().getContentAsString();
+    for (String id : JsonPath.<List<String>>read(body, "$[*].id")) {
+      write(delete("/api/cabinet/cancellation-rules/" + id), psychologist, "", 204);
+    }
+    for (String rule : rules) {
+      write(post("/api/cabinet/cancellation-rules"), psychologist, rule, 201);
+    }
+  }
+
+  private String book(Cookie[] client, Instant start) throws Exception {
+    return JsonPath.read(write(post("/api/client/sessions"), client,
+      "{\"practice\":\"" + practiceId() + "\",\"typeId\":\"" + therapy + "\",\"start\":\"" + start + "\"}", 201)
+      .andReturn().getResponse().getContentAsString(), "$.id");
   }
 
   private LocalDate today() {

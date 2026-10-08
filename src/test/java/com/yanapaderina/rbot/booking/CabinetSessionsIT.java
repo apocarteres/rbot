@@ -111,7 +111,7 @@ class CabinetSessionsIT extends IntegrationStores {
   void clientCancellationIsMarkedAndNoShowFollowsStart() throws Exception {
     Cookie[] psychologist = psychologist();
     Cookie[] visitor = login(CLIENT, PASSWORD);
-    LocalDate day = today().plusDays(2);
+    LocalDate day = today().plusDays(3);
     String booked = book(psychologist, clientId(), at(day, "21:00"), 201).andReturn().getResponse().getContentAsString();
     write(post("/api/client/sessions/" + JsonPath.read(booked, "$.id") + "/cancel"), visitor, "", 200);
     week(psychologist, day).andExpect(jsonPath("$[?(@.id == '" + JsonPath.read(booked, "$.id") + "')].cancelledByClient").value(true));
