@@ -16,7 +16,7 @@ type Editable = { -readonly [K in keyof RuleDraft]: RuleDraft[K] };
   styles: `
     .choice { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 12px; border: 0; padding: 0; }
     .choice label { display: flex; gap: 6px; align-items: center; }
-    textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+    textarea { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; line-height: 1.45; }
   `,
   template: `
     <div class="veil" [apcrModalBackdrop]="close">

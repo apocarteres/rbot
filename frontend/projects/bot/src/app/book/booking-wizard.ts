@@ -38,7 +38,7 @@ interface SlotDay {
     .small { font-size: 0.85rem; }
     .wide { width: 100%; }
     .done { text-align: center; }
-    .rules { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+    .rules { border-top: 1px solid var(--line); padding-top: 8px; margin: 8px 0 12px; }
     .rules p { margin: 4px 0; white-space: pre-line; overflow-wrap: anywhere; }
   `,
   template: `
