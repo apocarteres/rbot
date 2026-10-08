@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# RBOT-OPS-004, REQ-DEPLOYMENT-014
+# RBOT-OPS-004, RBOT-OPS-025, REQ-DEPLOYMENT-014
 
 rbot_stand() {
   case "$1" in
     qa)
-      RBOT_STAND_CONTEXT="zavpn-mini"
+      RBOT_STAND_CONTEXT="qa"
       RBOT_STAND_PORT="4206"
       ;;
     *)

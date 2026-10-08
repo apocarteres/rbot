@@ -11,7 +11,7 @@ related: MVP-01
 
 [Инструкции](INDEX.md)
 
-Стенд работает в Docker на `mini` (192.168.88.235), контекст Docker `zavpn-mini`. Имена стенда прописаны в `/etc/hosts`:
+Стенд работает в Docker на `mini` (192.168.88.235), контекст Docker `qa`. Имена стенда прописаны в `/etc/hosts`:
 
 ```
 192.168.88.235 qa.admin.yanapaderina.test
@@ -23,7 +23,7 @@ related: MVP-01
 
 ## Раскат
 
-`mise run deploy -- --env qa` собирает сервер и клиент из рабочего дерева и поднимает `docker-compose.qa.yml`: PostgreSQL, Redis, миграции, сервер с профилем `qa`, nginx с обоими сайтами. Данные базы сохраняются в томе `rbot-qa_postgres` между раскатами. Чистая база: `DOCKER_CONTEXT=zavpn-mini docker compose -f docker-compose.qa.yml down -v`.
+`mise run deploy -- --env qa` собирает сервер и клиент из рабочего дерева и поднимает `docker-compose.qa.yml`: PostgreSQL, Redis, миграции, сервер с профилем `qa`, nginx с обоими сайтами. Данные базы сохраняются в томе `rbot-qa_postgres` между раскатами. Чистая база: `DOCKER_CONTEXT=qa docker compose -f docker-compose.qa.yml down -v`.
 
 ## Тестовые учётные записи
 
