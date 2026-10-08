@@ -13,7 +13,7 @@ interface OpeningDay {
   readonly items: readonly Opening[];
 }
 
-// RBOT-FEAT-021, RBOT-FEAT-023, RBOT-FEAT-024, MVP-02, ADR-0003, REQ-CODE-DESIGN-007
+// RBOT-FEAT-021, RBOT-FEAT-023, RBOT-FEAT-024, RBOT-FEAT-027, MVP-02, ADR-0003, REQ-CODE-DESIGN-007
 @Component({
   selector: 'app-openings-card',
   imports: [FailureDialog],
@@ -36,7 +36,10 @@ interface OpeningDay {
     .link { background: none; border: 0; padding: 0; color: var(--accent); font-size: 0.85rem; cursor: pointer; }
     .small { font-size: 0.8rem; }
     .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 12px 0 0; }
-    .legend .time { cursor: default; font-size: 0.8rem; }
+    .legend > span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend .time { cursor: default; width: 28px; height: 16px; padding: 0; box-sizing: border-box; }
+    .legend .time.busy { background: linear-gradient(var(--muted), var(--muted)) center / 60% 1px no-repeat,
+      color-mix(in srgb, var(--muted) 12%, transparent); }
   `,
   template: `
     <section class="card openings" aria-labelledby="openings-title">
@@ -85,9 +88,9 @@ interface OpeningDay {
           </div>
         }
         <div class="legend muted small">
-          <span><span class="time">10:00</span> закрыто</span>
-          <span><span class="time open">10:00</span> открыто</span>
-          <span><span class="time busy">10:00</span> занято</span>
+          <span><span class="time" aria-hidden="true"></span> закрыто</span>
+          <span><span class="time open" aria-hidden="true"></span> открыто</span>
+          <span><span class="time busy" aria-hidden="true"></span> занято</span>
         </div>
       }
     </section>
